@@ -1,0 +1,1 @@
+export const SET_PREYS = "SET_PREYS";
