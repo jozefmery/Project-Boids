@@ -20,4 +20,21 @@ function Clamp(num, min, max) {
     return Math.min(Math.max(num, min), max);
 }
 
-export { Capitalize, Clamp };
+function DispatchToProps(sliceArray) {
+
+    let converter = {};
+
+    for(let idx in sliceArray) {
+        
+        const item = sliceArray[idx];
+
+        for(let key in item.actions) {
+            
+            converter[key] = item.actions[key];
+        }
+    }
+
+    return converter;
+};
+
+export { Capitalize, Clamp, DispatchToProps };
