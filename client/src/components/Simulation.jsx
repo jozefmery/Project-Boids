@@ -17,10 +17,13 @@ import classNames from "classnames";
 // import redux
 import { connect } from "react-redux";
 
-// import sim actions
+// import redux actions
 import simSlice from "./state/simSlice";
-import languageSlice from "./state/langSlice";
+import langSlice from "./state/langSlice";
 import controlsSlice from "./state/controlsSlice";
+
+// import utilities
+import { DispatchToProps } from "../utils";
  
 class Simulation extends Component {
 
@@ -55,26 +58,28 @@ class Simulation extends Component {
 
     componentDidUpdate() {
 
-        this.updateParent();
+        this.updateCanvasParent();
     }
 
-    updateParent() {
+    updateCanvasParent() {
 
         // set parent classes and id
         this.parent.className = classNames(this.props.parentClasses);
         this.parent.id = this.props.parentID
     }
 
-    setup = (p5Ref, parentRef) => {
+    /* p5 */ setup = (p5Ref, parentRef) => {
 
         // setup references
         this.p5 = p5Ref;
         this.parent = parentRef;
         
+        // setup timing variables
         this.timeStamp = new Date().getTime();
         this.td = 0;
 
-        this.updateParent();
+        // set initial id and classes
+        this.updateCanvasParent();
 
         // create canvas with current parent size
         this.p5.createCanvas(this.p5.windowWidth, this.p5.windowHeight).parent(this.parent);
@@ -82,88 +87,86 @@ class Simulation extends Component {
 
     update() {
 
-        const ms = 300; /* /s */;
-
-        const move = (ms / 1000) * this.td;
-
-        if(this.props.controls.keyMap.w) {  
-
-            this.props.moveCamera({ x: 0 , y: -move });
-
-        } 
-        if(this.props.controls.keyMap.s) {
-
-            this.props.moveCamera({ x: 0 , y: move });
-        }
-
-        if(this.props.controls.keyMap.a) {
-
-            this.props.moveCamera({ x: -move, y: 0 });
-
-        } 
-        if(this.props.controls.keyMap.d) {
-
-            this.props.moveCamera({ x: move, y: 0 });
-        }
     }
 
-    loop = () => {
+    /* p5 */ loop = () => {
 
+        // update timing variable
         this.td = new Date().getTime() - this.timeStamp;
-
         this.timeStamp = new Date().getTime();
 
-        this.update();
 
+        this.update();
         this.draw();
     }
 
     drawBoundingBox() {
 
-        this.p5.noFill();
-        this.p5.stroke(0);
-        this.p5.strokeWeight(3);
+        // --- shorthands 
+        const p5 = this.p5;
+        const area = this.props.sim.state.area;
+        // --- shorthands
+
+        p5.noFill();
+        p5.stroke(0);
+        p5.strokeWeight(3);
         
-        this.p5.rect(0, 0, this.props.sim.state.area.x, this.props.sim.state.area.y)
+        p5.rect(0, 0, area.x, area.y)
     }
 
     drawGridLines(options) {
 
-        this.p5.stroke(200);
+        // --- shorthands 
+        const p5 = this.p5;
+        // --- shorthands
+
+        p5.stroke(200);
 
         for(let i = 0; i * options.intensity < options.boundary; i++) {
 
-            this.p5.strokeWeight(1);
+            p5.strokeWeight(1);
 
-            if(options.highLight && (i % options.highLight === 0)) {
+            if(options.highlight && (i % options.highlight === 0)) {
 
-                this.p5.strokeWeight(2);
+                p5.strokeWeight(2);
             }
 
             let coord = options.coord(i * options.intensity);
-            this.p5.line(coord.x1, coord.y1, coord.x2, coord.y2);
+            p5.line(coord.x1, coord.y1, coord.x2, coord.y2);
         }
     }
 
     drawGrid() {
 
-        if(!this.props.sim.grid.draw) return;
+        // --- shorthands 
+        const grid = this.props.sim.grid;
+        const area = this.props.sim.state.area;
+        // --- shorthands
 
-        this.drawGridLines({ intensity: this.props.sim.grid.intensity, boundary: this.props.sim.state.area.x,
-                             highLight: this.props.sim.grid.highLight,
-                             coord: x => ({x1: x, y1: 0, x2: x, y2: this.props.sim.state.area.y })
+        if(!grid.draw) return;
+
+        this.drawGridLines({ intensity: grid.intensity, boundary: area.x,
+                             highlight: grid.highlight,
+                             coord: x => ({ x1: x, y1: 0, x2: x, y2: area.y })
         });
 
-        this.drawGridLines({ intensity: this.props.sim.grid.intensity, boundary: this.props.sim.state.area.y,
-            highLight: this.props.sim.grid.highLight,
-            coord: y => ({x1: 0, y1: y, x2: this.props.sim.state.area.x, y2: y })
+        this.drawGridLines({ intensity: grid.intensity, boundary: area.y,
+                             highlight: grid.highlight,
+                             coord: y => ({ x1: 0, y1: y, x2: area.x, y2: y })
         });
-        }
+
+    }
 
     applyTransform() {
 
-        this.p5.translate(this.p5.windowWidth / 2 - this.props.sim.state.area.x / 2 - this.props.sim.camera.target.x, 
-                        this.p5.windowHeight / 2 - this.props.sim.state.area.y / 2 - this.props.sim.camera.target.y);
+        // --- shorthands 
+        const p5 = this.p5;
+        const area = this.props.sim.state.area;
+        const cameraTarget = this.props.sim.camera.target;
+        // --- shorthands
+
+        p5.translate(p5.windowWidth / 2 - area.x / 2 - cameraTarget.x, 
+                     p5.windowHeight / 2 - area.y / 2 - cameraTarget.y);
         // this.p5.scale(this.props.sim.camera.scale.current);
     }
 
@@ -193,13 +196,11 @@ class Simulation extends Component {
 
     mouseWheel = event => {
         
-        // console.log(event)
-        // this.props.changeCameraScaleBy( - event._mouseWheelDeltaY / 10000);
     }
 
     /* react */ render() {
 
-        return <Sketch setup={this.setup} draw= {_ => this.loop() } 
+        return <Sketch setup={this.setup} draw={_ => this.loop()} 
                         windowResized={this.windowResized} 
                         keyPressed={this.keyPressed} 
                         keyReleased={this.keyReleased}
@@ -208,6 +209,4 @@ class Simulation extends Component {
     }
 }
 
-export default connect(Simulation.stateToProps, {   setLanguage: languageSlice.actions.setLanguage,
-                                                    moveCamera: simSlice.actions.moveCamera,
-                                                    setKeyPressed: controlsSlice.actions.setKeyPressed })(Simulation);
+export default connect(Simulation.stateToProps, DispatchToProps([simSlice, controlsSlice, langSlice]))(Simulation);
