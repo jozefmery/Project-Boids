@@ -10,7 +10,7 @@
 
 // import dependencies
 import React, { Component } from 'react';
-import { Capitalize } from "../../utils";
+import { Capitalize, DispatchToProps } from "../../utils";
 
 // import redux
 import { connect } from "react-redux";
@@ -53,5 +53,4 @@ class Main extends Component {
 }
 
 // export component connected to redux
-export default connect(Main.stateToProps, { setLanguage: langSlice.actions.setLanguage, 
-                                            setSimPlayState: simSlice.actions.setSimPlayState })(Main);
+export default connect(Main.stateToProps, DispatchToProps([simSlice, langSlice]))(Main);
