@@ -42,7 +42,7 @@ class Main extends Component {
         <div id="ui">
 
             <div id="bottom-controls">
-                <Button content={() => "PLAY"} id="" className="button square" 
+                <Button content={() => "PLAY"} id="" className="button" 
                         tooltip={Capitalize((this.props.sim.state.play) ? this.props.lang["play"] : this.props.lang["pause"])}
                         onClick={this.toggleSimState}
                         />
