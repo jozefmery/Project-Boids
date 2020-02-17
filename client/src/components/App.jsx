@@ -13,20 +13,20 @@ import React, { Component } from "react";
 import { Provider as ReduxStateProvider } from "react-redux";
 
 // import redux store
-import { reduxStateStore } from "../redux/state/ReduxStateStore";
+import { reduxStateStore } from "./state/state";
 
 // import custom components
 import Simulation from "./Simulation";
-import Ui from "./Ui";
+import UI from "./ui/Main";
 
 class App extends Component {
 
 	render() {
 
 		return (
-			<ReduxStateProvider store={ reduxStateStore }>
+			<ReduxStateProvider store={reduxStateStore}>
 				<Simulation parentID="p5-canvas-parent"/> 
-				<Ui /> 
+				<UI /> 
 			</ReduxStateProvider>
 		);
 	}
