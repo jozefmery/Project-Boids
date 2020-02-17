@@ -8,7 +8,7 @@
  * 
  */
 
-// import language data for default language
+// import language data for a default language
 import languages from "../../lang/all";
 
 export default {
@@ -37,7 +37,7 @@ export default {
             scale: {
                 
                 min: 0.5,
-                current: 2.0,
+                current: 1.0,
                 factor: 0.005,
                 max: 1.5
             }
@@ -48,7 +48,7 @@ export default {
     
             draw: true,
             intensity: 25,
-            highLight: 5
+            highlight: 5
         }
     },
 
