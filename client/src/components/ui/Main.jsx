@@ -9,48 +9,25 @@
  */
 
 // import dependencies
-import React, { Component } from 'react';
-import { Capitalize, DispatchToProps } from "../../utils";
-
-// import redux
-import { connect } from "react-redux";
+import React, { Component } from "react";
 
 // import custom components
-import Button from "./Button";
-
-// import redux slices
-import langSlice from "../state/langSlice";
-import simSlice from "../state/simSlice";
+import Controls from "./Controls";
+import TopBar from "./TopBar";
 
 class Main extends Component {
 
-    /// Properties
-
-    static stateToProps = state => ({
-
-        lang: state.lang.data,
-        sim: state.sim
-    });
-   
     /// Methods
-
-    toggleSimState = () => this.props.setSimPlayState(!this.props.sim.state.play);
 
     render() {
 
         return (
-        <div id="ui">
-
-            <div id="bottom-controls">
-                <Button content={() => "PLAY"} id="" className="button" 
-                        tooltip={Capitalize((this.props.sim.state.play) ? this.props.lang["play"] : this.props.lang["pause"])}
-                        onClick={this.toggleSimState}
-                        />
-            </div>
-
-        </div>);
+            <div id="ui">
+                <TopBar />;
+                <Controls />;
+            </div>);
     }
 }
 
-// export component connected to redux
-export default connect(Main.stateToProps, DispatchToProps([simSlice, langSlice]))(Main);
+// export component
+export default Main;
