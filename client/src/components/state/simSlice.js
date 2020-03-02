@@ -23,21 +23,13 @@ export default createSlice({
         // safe to mutate state thanks to redux toolkit
 
         // entities
-        "setPreys": (state, action) => { state.entities.preys = action.payload; },
-        // "addPrey": (state, action) => { state.entities.preys = action.payload; },
-        // "removePrey": (state, action) => { state.entities.preys = action.payload; },
-
-        "setPredators": (state, action) => { state.entities.predators = action.payload; },
-        // "addPredators": (state, action) => { state.entities.predators = action.payload; },
-        // "removePredators": (state, action) => { state.entities.predators = action.payload; },
         
-        "setObjects": (state, action) => { state.entities.objects = action.payload; },
-        // "addObjects": (state, action) => { state.entities.objects = action.payload; },
-        // "removeObjects": (state, action) => { state.entities.objects = action.payload; },
+        // running
+        "setSimRunning": (state, action) => { state.running = action.payload; },
+        "toggleSimRunning": (state, _) => { state.running = !state.running; },
         
-        // state
-        "setSimArea": (state, action) => { state.state.area = action.payload; },
-        "setSimPlayState": (state, action) => { state.state.play = action.payload; },
+        // area
+        "setSimArea": (state, action) => { state.area = action.payload; },
 
         // camera
         "setCameraSettings": (state, action) => { state.camera = action.payload; },
@@ -60,5 +52,4 @@ export default createSlice({
         "setGridIntensity": (state, action) => { state.grid.intensity = action.payload; },
         "setGridHighLight": (state, action) => { state.grid.highLight = action.payload; },        
     }
-
 });
