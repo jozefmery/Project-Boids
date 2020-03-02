@@ -9,14 +9,14 @@
  */
 
 // import react
-import React from 'react';
-import ReactDOM from 'react-dom';
+import React from "react";
+import ReactDOM from "react-dom";
 
 // import styles
-import './css/index.scss';
+import "./css/index.scss";
 
 // import main component
-import App from './components/App';
+import App from "./components/App";
 
 // render main component into main container #root div defined in "public/index.html"
-ReactDOM.render(<App />, document.getElementById('root'));
+ReactDOM.render(<App />, document.getElementById("root"));
