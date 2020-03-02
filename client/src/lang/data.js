@@ -3,8 +3,9 @@
 import en from "./en";
 import sk from "./sk";
 
+// export object with all languages
 export default {
 
-    "en": en,
-    "sk": sk
+    en,
+    sk
 }
