@@ -1,5 +1,5 @@
 /**
- * File: controlSlice.js
+ * File: controlsSlice.js
  * 
  * Author: Jozef Méry <xmeryj00@stud.fit.vutbr.cz>
  * Date: 29.1.2020
@@ -20,7 +20,7 @@ export default createSlice({
 
         // safe to mutate state thanks to redux toolkit
 
-        "setControls": (state, action) => { state = action.payload; },
+        "setControls": (_, action) => action.payload,
         "setKeymap": (state, action) => { state.keyMap = action.payload; },
         "setKeyPressed": (state, action) => { state.keyMap[action.payload.key] = action.payload.pressed; },
     }
