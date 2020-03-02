@@ -13,7 +13,7 @@ import React, { Component } from "react";
 import { Provider as ReduxStateProvider } from "react-redux";
 
 // import redux store
-import { reduxStateStore } from "./state/state";
+import { reduxStateStore } from "./state/stateStore";
 
 // import custom components
 import Simulation from "./Simulation";
