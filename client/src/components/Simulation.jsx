@@ -14,17 +14,20 @@ import Sketch from "react-p5"
 import PropTypes from "prop-types"
 import classNames from "classnames";
 
-// import redux
+// import react-redux
 import { connect } from "react-redux";
 
 // import redux actions
 import simSlice from "./state/simSlice";
-import langSlice from "./state/langSlice";
+import languageSlice from "./state/languageSlice";
 import controlsSlice from "./state/controlsSlice";
 
 // import utilities
 import { DispatchToProps } from "../utils";
  
+// import stylers
+import stylers from "../stylers";
+
 class Simulation extends Component {
 
     /// Properties
@@ -34,25 +37,20 @@ class Simulation extends Component {
         parentClasses: PropTypes.oneOfType([
 
             PropTypes.string,
-            PropTypes.array
+            PropTypes.array,
+            PropTypes.object
         ]),
 
-        parentID: PropTypes.string,
-        sim: PropTypes.object,
-        controls: PropTypes.object
+        parentID: PropTypes.string
     }
 
     static defaultProps = {
 
-        parentClasses: [],
+        parentClasses: "",
         parentID: ""
     }
 
-    static stateToProps = state => ({
-
-        sim: state.sim,
-        controls: state.controls
-    });
+    static stateToProps = ({ sim, controls, theme }) => ({ sim, controls, theme });
 
     //// Methods
 
@@ -85,18 +83,12 @@ class Simulation extends Component {
         this.p5.createCanvas(this.p5.windowWidth, this.p5.windowHeight).parent(this.parent);
     }
 
-    update() {
-
-    }
-
     /* p5 */ loop = () => {
 
         // update timing variable
         this.td = new Date().getTime() - this.timeStamp;
         this.timeStamp = new Date().getTime();
 
-
-        this.update();
         this.draw();
     }
 
@@ -104,12 +96,11 @@ class Simulation extends Component {
 
         // --- shorthands 
         const p5 = this.p5;
-        const area = this.props.sim.state.area;
+        const area = this.props.sim.area;
+        const styler = stylers[this.props.theme];
         // --- shorthands
 
-        p5.noFill();
-        p5.stroke(0);
-        p5.strokeWeight(3);
+        styler.boundingBox(p5);
         
         p5.rect(0, 0, area.x, area.y)
     }
@@ -119,8 +110,6 @@ class Simulation extends Component {
         // --- shorthands 
         const p5 = this.p5;
         // --- shorthands
-
-        p5.stroke(200);
 
         for(let i = 0; i * options.intensity < options.boundary; i++) {
 
@@ -140,10 +129,13 @@ class Simulation extends Component {
 
         // --- shorthands 
         const grid = this.props.sim.grid;
-        const area = this.props.sim.state.area;
+        const area = this.props.sim.area;
+        const styler = stylers[this.props.theme];
         // --- shorthands
 
         if(!grid.draw) return;
+
+        styler.grid(this.p5);
 
         this.drawGridLines({ intensity: grid.intensity, boundary: area.x,
                              highlight: grid.highlight,
@@ -161,7 +153,7 @@ class Simulation extends Component {
 
         // --- shorthands 
         const p5 = this.p5;
-        const area = this.props.sim.state.area;
+        const area = this.props.sim.area;
         const cameraTarget = this.props.sim.camera.target;
         // --- shorthands
 
@@ -170,10 +162,33 @@ class Simulation extends Component {
         // this.p5.scale(this.props.sim.camera.scale.current);
     }
 
+    drawBackground() {
+
+        // --- shorthands 
+        const styler = stylers[this.props.theme];
+        // --- shorthands
+
+        styler.background(this.p5);
+    }
+
+    drawArea() {
+
+        // --- shorthands 
+        const p5 = this.p5;
+        const area = this.props.sim.area;
+        const styler = stylers[this.props.theme];
+        // --- shorthands
+
+        styler.area(p5);
+        
+        p5.rect(0, 0, area.x, area.y)
+    }
+
     draw() {
 
         this.applyTransform();
-        this.p5.background(255);
+        this.drawBackground();
+        this.drawArea();
         this.drawGrid();
         this.drawBoundingBox();
     }
@@ -209,4 +224,4 @@ class Simulation extends Component {
     }
 }
 
-export default connect(Simulation.stateToProps, DispatchToProps([simSlice, controlsSlice, langSlice]))(Simulation);
+export default connect(Simulation.stateToProps, DispatchToProps([simSlice, controlsSlice, languageSlice]))(Simulation);
