@@ -8,9 +8,6 @@
  * 
  */
 
-// import language data for a default language
-import languages from "../../lang/all";
-
 export default {
 
     sim: {
@@ -23,11 +20,14 @@ export default {
             objects: [],
         },
     
-        // state
-        state: {
-    
-            play: false,
-            area: { x: 500, y: 500 },
+        // running
+        running: false,    
+        
+        // area
+        area: {
+
+            x: 500, 
+            y: 500 
         },
         
         // camera
@@ -47,25 +47,17 @@ export default {
         grid: {
     
             draw: true,
-            intensity: 25,
+            intensity: 50,
             highlight: 5
         }
     },
 
     controls: {
-        keyMap: {},
-        // mouse: {
 
-        //     x: 0,
-        //     y: 0,
-        //     dx: 0,
-        //     dy: 0,
-        //     dz: 0
-        // },
+        keyMap: {},
     },
 
-    lang: {
+    language: "en",
 
-        data: languages.en
-    }
+    theme: "light"
 }
