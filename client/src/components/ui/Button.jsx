@@ -11,6 +11,7 @@
 // import dependencies
 import React, { Component } from 'react';
 import PropTypes from "prop-types";
+import classNames from "classnames";
 
 class Button extends Component {
     
@@ -18,7 +19,13 @@ class Button extends Component {
 
     static propTypes = {
 
-        className: PropTypes.string,
+        classNames: PropTypes.oneOfType([
+
+            PropTypes.string,
+            PropTypes.array,
+            PropTypes.object
+        ]),
+        
         id: PropTypes.string,
         onClick: PropTypes.func,
         content: PropTypes.func,
@@ -27,7 +34,11 @@ class Button extends Component {
 
     static defaultProps = {
 
-        content: () => {}
+        classNames: "",
+        id: "",
+        onClick: null,
+        content: null,
+        tooltip: ""
     };
 
     /// Methods
@@ -35,8 +46,8 @@ class Button extends Component {
     render() { 
 
         return (
-            <div className={this.props.className} id={this.props.id} onClick={this.props.onClick} title={this.props.tooltip}>
-            {this.props.content()}
+            <div className={classNames("button", this.props.classNames)} id={this.props.id} onClick={this.props.onClick} title={this.props.tooltip}>
+            {this.props.content ? this.props.content() : null}
             </div>
             );
     }
