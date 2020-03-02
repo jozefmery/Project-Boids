@@ -23,8 +23,8 @@ class Main extends Component {
 
         return (
             <div id="ui">
-                <TopBar />;
-                <Controls />;
+                <TopBar />
+                <Controls />
             </div>);
     }
 }
