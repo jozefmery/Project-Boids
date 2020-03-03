@@ -4,7 +4,7 @@
  * Author: Jozef Méry <xmeryj00@stud.fit.vutbr.cz>
  * Date: 27.1.2020
  * License: none
- * Description:
+ * Description: Defines a simple reusable, customizable button component.
  * 
  */
 

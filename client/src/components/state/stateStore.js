@@ -4,7 +4,8 @@
  * Author: Jozef Méry <xmeryj00@stud.fit.vutbr.cz>
  * Date: 27.1.2020
  * License: none
- * Description: 
+ * Description: Defines the state store by combining reducers from slices and hydrates 
+ *              the state with default values. 
  * 
  */
 

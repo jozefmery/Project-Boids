@@ -4,7 +4,7 @@
  * Author: Jozef Méry <xmeryj00@stud.fit.vutbr.cz>
  * Date: 29.2.2020
  * License: none
- * Description:
+ * Description: Defines a simple reusable, customizable toggle button component.
  * 
  */
 

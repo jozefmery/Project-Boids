@@ -4,7 +4,7 @@
  * Author: Jozef Méry <xmeryj00@stud.fit.vutbr.cz>
  * Date: 29.1.2020
  * License: none
- * Description: 
+ * Description: Defines the shape of the whole application state with default values.
  * 
  */
 

@@ -1,3 +1,13 @@
+/**
+ * File: stylers.js
+ * 
+ * Author: Jozef Méry <xmeryj00@stud.fit.vutbr.cz>
+ * Date: 3.3.2020
+ * License: none
+ * Description: Defines styling functions for various themes used during rendering.
+ * 
+ */
+
 export default {
 
     "dark": {
