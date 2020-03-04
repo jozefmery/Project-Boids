@@ -4,7 +4,7 @@
  * Author: Jozef Méry <xmeryj00@stud.fit.vutbr.cz>
  * Date: 3.3.2020
  * License: none
- * Description: 
+ * Description: Defines event system including an instance, event handler and a function for invoking events.
  * 
  */
 
