@@ -28,6 +28,9 @@ import { DispatchToProps } from "../utils";
 // import stylers
 import stylers from "../stylers";
 
+// import event system
+import { invokeEvent } from "../events";
+
 class Simulation extends Component {
 
     /// Properties
@@ -94,7 +97,7 @@ class Simulation extends Component {
 
     drawBoundingBox() {
 
-        // --- shorthands 
+        // --- shorthands
         const p5 = this.p5;
         const area = this.props.sim.area;
         const styler = stylers[this.props.theme];
@@ -195,22 +198,61 @@ class Simulation extends Component {
 
     windowResized = () => {
 
+        const eventData = { width: this.p5.windowWidth, height: this.p5.windowHeight }; 
+
         // resize canvas when parent div is resized
-        this.p5.resizeCanvas(this.p5.windowWidth, this.p5.windowHeight);
+        this.p5.resizeCanvas(eventData.width, eventData.height);
+        invokeEvent("windowResized", eventData);
     }
 
     keyPressed = () => {
 
-        this.props.setKeyPressed({ key: this.p5.key, pressed: true });
+        const eventData = { key: this.p5.key, pressed: true };
+
+        this.props.setKeyPressed(eventData);
+        invokeEvent("keyChanged", eventData);
     }
 
     keyReleased = () => {
 
-        this.props.setKeyPressed({ key: this.p5.key, pressed: false });
+        const eventData = { key: this.p5.key, pressed: false };
+
+        this.props.setKeyPressed(eventData);
+        invokeEvent("keyChanged", eventData);
     }
 
     mouseWheel = event => {
         
+        // ignore non-standardized value
+        const delta = Math.sign(event._mouseWheelDeltaY);
+        // figure out movement direction
+        const wheelUp = delta === -1;
+
+        invokeEvent("mouseWheel", { wheelUp });
+    }
+
+    mouseMoved = event => {
+ 
+        const eventData = { x: event.mouseX, y: event.mouseY };
+
+        this.props.setMousePosition(eventData);
+        invokeEvent("mouseMoved", eventData)
+    }
+
+    mousePressed = event => {
+
+        const eventData = { button: event.mouseButton, pressed: true };
+
+        this.props.setMouseButtonPressed(eventData);
+        invokeEvent("mouseButtonChanged", eventData);
+    }
+
+    mouseReleased = event => {
+
+        const eventData = { button: event.mouseButton, pressed: false };
+
+        this.props.setMouseButtonPressed(eventData);
+        invokeEvent("mouseButtonChanged", eventData);
     }
 
     /* react */ render() {
@@ -220,6 +262,9 @@ class Simulation extends Component {
                         keyPressed={this.keyPressed} 
                         keyReleased={this.keyReleased}
                         mouseWheel={this.mouseWheel}
+                        mouseMoved={this.mouseMoved}
+                        mousePressed={this.mousePressed}
+                        mouseReleased={this.mouseReleased}
                         />;
     }
 }
