@@ -25,31 +25,31 @@ export default createSlice({
         // entities
         
         // running
-        "setSimRunning": (state, action) => { state.running = action.payload; },
+        "setSimRunning": (state, { payload }) => { state.running = payload; },
         "toggleSimRunning": (state, _) => { state.running = !state.running; },
         
         // area
-        "setSimArea": (state, action) => { state.area = action.payload; },
+        "setSimArea": (state, { payload }) => { state.area = payload; },
 
         // camera
-        "setCameraSettings": (state, action) => { state.camera = action.payload; },
-        "setCameraTarget": (state, action) => { state.camera.target = action.payload; },
-        "moveCamera": (state, action) => {  state.camera.target.x += action.payload.x;
-                                            state.camera.target.y += action.payload.y;
-                                            },
-        "setCameraScaleSettings": (state, action) => { state.camera.scale = action.payload; },
-        "setCameraMinScale": (state, action) => { state.camera.scale.min = action.payload; },                                  
-        "setCameraMaxScale": (state, action) => { state.camera.scale.max = action.payload; },                                  
-        "setCameraCurrentScale": (state, action) => { state.camera.scale.current = Clamp(action.payload, state.camera.scale.min, state.camera.scale.max); },                                  
-        "changeCameraCurrentScale": (state, action) => { state.camera.scale.current = 
-                                                            Clamp(state.camera.scale.current + action.payload, state.camera.scale.min, state.camera.scale.max); 
+        "setCameraSettings": (state, { payload }) => { state.camera = payload; },
+        "setCameraTarget": (state, { payload }) => { state.camera.target = payload; },
+        "moveCamera": (state, { payload }) => {  state.camera.target.x += payload.x;
+                                                 state.camera.target.y += payload.y;
+                                                },
+        "setCameraScaleSettings": (state, { payload }) => { state.camera.scale = payload; },
+        "setCameraMinScale": (state, { payload }) => { state.camera.scale.min = payload; },                                  
+        "setCameraMaxScale": (state, { payload }) => { state.camera.scale.max = payload; },                                  
+        "setCameraCurrentScale": (state, { payload }) => { state.camera.scale.current = Clamp(payload, state.camera.scale.min, state.camera.scale.max); },                                  
+        "changeCameraCurrentScale": (state, { payload }) => { state.camera.scale.current = 
+                                                            Clamp(state.camera.scale.current + payload, state.camera.scale.min, state.camera.scale.max); 
                                                         },                                  
-        "setCameraScaleFactor": (state, action) => { state.camera.scale.factor = action.payload; },
+        "setCameraScaleFactor": (state, { payload }) => { state.camera.scale.factor = payload; },
         
         // grid
-        "setGridSettings": (state, action) => { state.grid = action.payload; },
-        "setGridDraw": (state, action) => { state.grid.draw = action.payload; },
-        "setGridIntensity": (state, action) => { state.grid.intensity = action.payload; },
-        "setGridHighLight": (state, action) => { state.grid.highLight = action.payload; },        
+        "setGridSettings": (state, { payload }) => { state.grid = payload; },
+        "setGridDraw": (state, { payload }) => { state.grid.draw = payload; },
+        "setGridIntensity": (state, { payload }) => { state.grid.intensity = payload; },
+        "setGridHighLight": (state, { payload }) => { state.grid.highLight = payload; },        
     }
 });
