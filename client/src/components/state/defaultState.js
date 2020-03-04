@@ -54,7 +54,16 @@ export default {
 
     controls: {
 
-        keyMap: {},
+        keys: {},
+        mouse: {
+
+            position: {
+
+                x: undefined,
+                y: undefined
+            },
+            buttons: {} 
+        }
     },
 
     language: "en",
