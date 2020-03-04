@@ -10,6 +10,7 @@
 
 export default {
 
+    title: "Simulácia Lovec-Korisť",
     play: "spustiť",
     pause: "zastaviť"
 };

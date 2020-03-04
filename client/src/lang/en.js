@@ -10,7 +10,8 @@
 
 export default {
 
+    title: "Predator-Prey Simulation",
     play: "play",
-    pause: "pause"
+    pause: "pause",
 
  };
