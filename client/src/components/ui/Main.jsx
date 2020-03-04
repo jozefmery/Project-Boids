@@ -11,13 +11,42 @@
 // import dependencies
 import React, { Component } from "react";
 
+// import react-redux
+import { connect } from "react-redux";
+
 // import custom components
 import Controls from "./Controls";
 import TopBar from "./TopBar";
 
+// import language data
+import LanguageData from "../../lang/data";
+
 class Main extends Component {
 
+    /// Properties
+
+    static stateToProps = ({ language }) => ({ language });
+
     /// Methods
+
+    updateAppTitle() {
+
+        // --- shorthands 
+        const languageData = LanguageData[this.props.language];
+        // --- shorthands
+
+        document.title = languageData.title;
+    }
+
+    componentDidMount() {
+
+        this.updateAppTitle();
+    }
+
+    componentDidUpdate() {
+
+        this.updateAppTitle();
+    }
 
     render() {
 
@@ -30,4 +59,4 @@ class Main extends Component {
 }
 
 // export component
-export default Main;
+export default connect(Main.stateToProps, {})(Main);
