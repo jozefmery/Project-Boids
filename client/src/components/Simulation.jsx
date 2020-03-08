@@ -17,19 +17,15 @@ import classNames from "classnames";
 // import react-redux
 import { connect } from "react-redux";
 
-// import redux actions
+// import redux slices
 import simSlice from "./state/simSlice";
 import languageSlice from "./state/languageSlice";
-import controlsSlice from "./state/controlsSlice";
 
 // import utilities
 import { DispatchToProps } from "../utils";
  
 // import stylers
 import stylers from "../stylers";
-
-// import event system
-import { invokeEvent } from "../events";
 
 class Simulation extends Component {
 
@@ -69,6 +65,10 @@ class Simulation extends Component {
         this.parent.id = this.props.parentID
     }
 
+    setupEvents() {
+
+    }
+
     /* p5 */ setup = (p5Ref, parentRef) => {
 
         // setup references
@@ -84,6 +84,8 @@ class Simulation extends Component {
 
         // create canvas with current parent size
         this.p5.createCanvas(this.p5.windowWidth, this.p5.windowHeight).parent(this.parent);
+
+        this.setupEvents();
     }
 
     /* p5 */ loop = () => {
@@ -198,75 +200,14 @@ class Simulation extends Component {
 
     windowResized = () => {
 
-        const eventData = { width: this.p5.windowWidth, height: this.p5.windowHeight }; 
-
         // resize canvas when parent div is resized
-        this.p5.resizeCanvas(eventData.width, eventData.height);
-        invokeEvent("windowResized", eventData);
-    }
-
-    keyPressed = () => {
-
-        const eventData = { key: this.p5.key, pressed: true };
-
-        this.props.setKeyPressed(eventData);
-        invokeEvent("keyChanged", eventData);
-    }
-
-    keyReleased = () => {
-
-        const eventData = { key: this.p5.key, pressed: false };
-
-        this.props.setKeyPressed(eventData);
-        invokeEvent("keyChanged", eventData);
-    }
-
-    mouseWheel = event => {
-        
-        // ignore non-standardized value
-        const delta = Math.sign(event._mouseWheelDeltaY);
-        // figure out movement direction
-        const wheelUp = delta === -1;
-
-        invokeEvent("mouseWheel", { wheelUp });
-    }
-
-    mouseMoved = event => {
- 
-        const eventData = { x: event.mouseX, y: event.mouseY };
-
-        this.props.setMousePosition(eventData);
-        invokeEvent("mouseMoved", eventData)
-    }
-
-    mousePressed = event => {
-
-        const eventData = { button: event.mouseButton, pressed: true };
-
-        this.props.setMouseButtonPressed(eventData);
-        invokeEvent("mouseButtonChanged", eventData);
-    }
-
-    mouseReleased = event => {
-
-        const eventData = { button: event.mouseButton, pressed: false };
-
-        this.props.setMouseButtonPressed(eventData);
-        invokeEvent("mouseButtonChanged", eventData);
+        this.p5.resizeCanvas(this.p5.windowWidth, this.p5.windowHeight);
     }
 
     /* react */ render() {
 
-        return <Sketch setup={this.setup} draw={_ => this.loop()} 
-                        windowResized={this.windowResized} 
-                        keyPressed={this.keyPressed} 
-                        keyReleased={this.keyReleased}
-                        mouseWheel={this.mouseWheel}
-                        mouseMoved={this.mouseMoved}
-                        mousePressed={this.mousePressed}
-                        mouseReleased={this.mouseReleased}
-                        />;
+        return <Sketch setup={this.setup} draw={this.loop} windowResized={this.windowResized} />;
     }
 }
 
-export default connect(Simulation.stateToProps, DispatchToProps([simSlice, controlsSlice, languageSlice]))(Simulation);
+export default connect(Simulation.stateToProps, DispatchToProps([simSlice, languageSlice]))(Simulation);
