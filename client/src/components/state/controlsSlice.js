@@ -29,7 +29,8 @@ export default createSlice({
 
         // mouse
         "setMouseState": (state, { payload }) => { state.mouse = payload; },
-        "setMousePosition": (state, { payload }) => { state.mouse.position = payload },
+        "setMousePosition": (state, { payload }) => { state.mouse.position.x = payload.x;
+                                                      state.mouse.position.y = payload.y; },
         "setMouseButtonPressed": (state, { payload }) => { state.mouse.buttons[payload.button] = payload.pressed }
     }
 });
