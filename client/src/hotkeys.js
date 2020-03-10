@@ -167,7 +167,11 @@ class HotKeyContext {
 
                 pop = false;
                 break;
-            }
+            
+            } else {
+
+                newState[key] = true;
+            } 
         }
 
         if(pop) {
