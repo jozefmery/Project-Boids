@@ -20,6 +20,6 @@ export default createSlice({
 
         // safe to mutate state thanks to redux toolkit
 
-        "setLanguage": (_, { payload }) => payload
+        setLanguage: (_, { payload }) => payload
     }
 });

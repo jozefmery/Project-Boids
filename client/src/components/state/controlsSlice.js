@@ -21,16 +21,16 @@ export default createSlice({
         // safe to mutate state thanks to redux toolkit
 
         // set entire controls state
-        "setControls": (_, { payload }) => payload,
+        setControls: (_, { payload }) => payload,
 
         // keyboard
-        "setKeys": (state, { payload }) => { state.keys = payload; },
-        "setKeyPressed": (state, { payload }) => { state.keys[payload.key] = payload.pressed; },
+        setKeys: (state, { payload }) => { state.keys = payload; },
+        setKeyPressed: (state, { payload }) => { state.keys[payload.key] = payload.pressed; },
 
         // mouse
-        "setMouseState": (state, { payload }) => { state.mouse = payload; },
-        "setMousePosition": (state, { payload }) => { state.mouse.position.x = payload.x;
+        setMouseState: (state, { payload }) => { state.mouse = payload; },
+        setMousePosition: (state, { payload }) => { state.mouse.position.x = payload.x;
                                                       state.mouse.position.y = payload.y; },
-        "setMouseButtonPressed": (state, { payload }) => { state.mouse.buttons[payload.button] = payload.pressed }
+        setMouseButtonPressed: (state, { payload }) => { state.mouse.buttons[payload.button] = payload.pressed }
     }
 });
