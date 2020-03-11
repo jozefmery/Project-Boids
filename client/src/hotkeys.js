@@ -4,7 +4,8 @@
  * Author: Jozef Méry <xmeryj00@stud.fit.vutbr.cz>
  * Date: 6.3.2020
  * License: none
- * Description: 
+ * Description: Defines a hotkey system consisting of context, 
+ *              hotkey definition and different helpers.
  * 
  */
 
@@ -135,7 +136,7 @@ class HotKeyContext {
             const hotkey = this._hotkeys[id];
 
             // check if hotkey is enabled and the event type matches
-            if(!hotkey.isEnabled() || hotkey.eventType() !== dir) continue;
+            if(!hotkey.isEnabled() || hotkey.eventTypes()[dir] === undefined) continue;
 
             // check every option
             for(const idx in hotkey._sequences) {
@@ -254,7 +255,7 @@ const globalHotkeyContext = new HotKeyContext();
 
 class Hotkey {
 
-    constructor(sequences, callback, eventType = HotkeyEvent.KEYDOWN, context = null) {
+    constructor(sequences, callback, eventTypes = { [HotkeyEvent.KEYDOWN]: true }, context = null) {
 
         // generate id
         this._id = uniqid();
@@ -265,7 +266,7 @@ class Hotkey {
         // save all properties
         this._callback = callback;
         this._sequences = normalizeSequences(sequences);
-        this._eventType = eventType;
+        this._eventTypes = eventTypes;
 
         // if no context is provided, default to global
         this._context = context ? context : globalHotkeyContext;
@@ -293,14 +294,14 @@ class Hotkey {
         this._sequences = normalizeSequences(sequences);
     }
 
-    eventType() {
+    eventTypes() {
 
-        return this._eventType;
+        return this._eventTypes;
     }
 
-    setEventType(eventType) {
+    setEventTypes(eventTypes) {
 
-        this._eventType = eventType;
+        this._eventTypes = eventTypes;
     }
 
     remove() {
@@ -322,6 +323,7 @@ export {
     
         Hotkey,
         HotKeyContext, 
+        HotkeyEvent,
         globalHotkeyContext
         
     };
