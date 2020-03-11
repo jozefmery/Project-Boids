@@ -40,6 +40,15 @@ export default {
                 current: 1.0,
                 factor: 0.005,
                 max: 1.5
+            },
+            
+            move: {
+
+                delta: 50,
+                up: false,
+                right: false,
+                down: false,
+                left: false
             }
         },
     
