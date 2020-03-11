@@ -43,6 +43,15 @@ function buttonToString(button) {
     }
 }
 
+function handleEventReturn(preventDefault, event) {
+
+    if(preventDefault) {
+
+        event.preventDefault();
+        event.stopPropagation();
+    }
+}
+
 class Main extends Component {
 
     /// Properties
@@ -68,7 +77,7 @@ class Main extends Component {
         const eventData = { key: event.key, pressed: true };
 
         this.props.setKeyPressed(eventData);
-        invokeEvent("keyChanged", eventData);
+        handleEventReturn(invokeEvent("keyChanged", eventData), event);
     }
 
     onkeyup = event => {
@@ -76,7 +85,7 @@ class Main extends Component {
         const eventData = { key: event.key, pressed: false };
 
         this.props.setKeyPressed(eventData);
-        invokeEvent("keyChanged", eventData);
+        handleEventReturn(invokeEvent("keyChanged", eventData), event);
     }
 
     onwheel = event => {
@@ -86,7 +95,7 @@ class Main extends Component {
         // figure out movement direction
         const wheelUp = delta === -1;
 
-        invokeEvent("mouseWheel", { wheelUp });
+        handleEventReturn(invokeEvent("mouseWheel", { wheelUp }), event);
     }
 
     onmousemove = event => {
@@ -95,7 +104,7 @@ class Main extends Component {
                             dx: event.movementX, dy: event.movementY };
 
         this.props.setMousePosition(eventData);
-        invokeEvent("mouseMoved", eventData);
+        handleEventReturn(invokeEvent("mouseMoved", eventData), event);
     }
 
     onmousedown = event => {
@@ -103,7 +112,7 @@ class Main extends Component {
         const eventData = { button: buttonToString(event.button), pressed: true };
 
         this.props.setMouseButtonPressed(eventData);
-        invokeEvent("mouseButtonChanged", eventData);
+        handleEventReturn(invokeEvent("mouseButtonChanged", eventData), event);
     }
 
     onmouseup = event => {
@@ -111,7 +120,7 @@ class Main extends Component {
         const eventData = { button: buttonToString(event.button), pressed: false };
 
         this.props.setMouseButtonPressed(eventData);
-        invokeEvent("mouseButtonChanged", eventData);
+        handleEventReturn(invokeEvent("mouseButtonChanged", eventData), event);
     }
 
     setupEvents() {

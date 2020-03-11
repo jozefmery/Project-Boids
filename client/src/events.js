@@ -22,7 +22,9 @@ class EventSystem {
     invokeEvent(event, ...callbackArgs) {
 
         // if no handlers exist for given event, exit
-        if(!this.handlers[event]) return;
+        if(!this.handlers[event]) return false;
+
+        let preventDefault = false;
 
         // call each handler for given event handler group
         for(let id in this.handlers[event]) {
@@ -32,9 +34,11 @@ class EventSystem {
             // check if handler is enabled
             if(handler.isEnabled()) {
 
-                handler._callback(...callbackArgs);
+                preventDefault |= handler._callback(...callbackArgs);
             }
         }
+
+        return preventDefault;
     }
 
     registerHandler(handler) {
@@ -67,7 +71,7 @@ const eventSystem = new EventSystem();
 const invokeEvent = (event, ...rest) => {
 
     // invoke given event and pass all other arguments to handler
-    eventSystem.invokeEvent(event, ...rest);
+    return eventSystem.invokeEvent(event, ...rest);
 }
 
 class EventHandler {

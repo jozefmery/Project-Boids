@@ -131,6 +131,8 @@ class HotKeyContext {
 
     _callMatchingHandlers(dir) {
 
+        let preventDefault = false;
+
         for(const id in this._hotkeys) {
 
             const hotkey = this._hotkeys[id];
@@ -144,11 +146,13 @@ class HotKeyContext {
                 if(this._matchSequence(dir, hotkey._sequences[idx])) {
 
                     // call handler and exit
-                    hotkey._callback();
+                    preventDefault |= hotkey._callback();
                     break;
                 }
             }
         }
+
+        return preventDefault;
     }
 
     _mergeOldKeys(dir) {
@@ -215,11 +219,11 @@ class HotKeyContext {
 
         this._mergeOldKeys(dir);
 
-        if(dir === HotkeyEvent.KEYDOWN) console.log(JSON.stringify(this._sequences[dir].buffer));
-
-        this._callMatchingHandlers(dir);
-
+        const preventDefault = this._callMatchingHandlers(dir);
+        
         this._sequences[dir].reset = setTimeout(() => this._resetSequenceBuffer(dir), this._bufferResetTime);
+
+        return preventDefault;
     }
 
     _registerHotkey(hotkey) {
