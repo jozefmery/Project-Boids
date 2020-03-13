@@ -28,32 +28,43 @@ function normalizeKeyName(key) {
     return normalized ? normalized : lowerKey;
 }
 
+function normalizeCombination(combination) {
+
+    return combination.split("+")       // split combination to an array of keys
+        .map(key => key.toLowerCase())  // all keys must be lower case to simplify comparison   
+        .reduce((rest, current) =>      // reduce array of keys to an object
+        ({ ...rest, [current]: true}), {});
+}
+
 /* enum */ class HotkeyEvent {
 
     static KEYDOWN = "KEYDOWN";
     static KEYUP = "KEYUP";
 }
 
+function normalizeSequence(sequence) {
+
+    return sequence.split(" ")                              // split whole sequence to an array of combinations
+        .filter(combination => combination.length)          // discard empty strings e.g.: "a  b" => ["a", "", "b"] => ["a", "b"]
+        .map(combination => normalizeCombination(combination));
+}
+
 function normalizeSequences(sequences) {
 
-    return  sequences.map(sequence =>                       // normalize all sequences
-            sequence.toLowerCase()                          // all sequences must be lower case to simplify comparison
-            .split(" ")                                     // split whole sequence to an array of combinations
-            .filter(combination => combination.length)      // discard empty strings e.g.: "a  b" => ["a", "", "b"] => ["a", "b"]
-            .map(combination => combination.split("+")      // split combination to an array of keys     
-            .reduce((rest, current) =>                      // reduce array of keys to an object
-                ({ ...rest, [current]: true}), {})));                                      
+    return  sequences.map(sequence => normalizeSequence(sequence));   // normalize all sequences                                    
 }  
 
 function combinationsMatch(subset, superset) {
 
+    let match = true;
     let exactMatch = false;
 
     for(const key in subset) {
 
         if(superset[key] === undefined) {
 
-            return false;
+            match = false;
+            break;
         
         } else if(superset[key] === true) {
 
@@ -61,7 +72,10 @@ function combinationsMatch(subset, superset) {
         } 
     }
 
-    return exactMatch;
+    return {
+
+        match, exactMatch: exactMatch && match
+    };
 }
 
 class HotKeyContext {
@@ -101,9 +115,9 @@ class HotKeyContext {
         this._sequences[dir].buffer = [];
     }
 
-    _matchSequence(dir, sequence) {
+    _matchSequence(sequence, buffer, exactMatch) {
 
-        const buffer = this._sequences[dir].buffer;
+        const matchType = exactMatch ? "exactMatch" : "match";
 
         // empty sequence matches everything
         if(sequence.length === 0) return true;
@@ -117,7 +131,7 @@ class HotKeyContext {
         while(bufferIndex >= 0 && sequenceIndex >= 0) {
 
             // check if for combination match
-            if(combinationsMatch(sequence[sequenceIndex], buffer[bufferIndex])) {
+            if(combinationsMatch(sequence[sequenceIndex], buffer[bufferIndex])[matchType]) {
 
                 // if last combination matched, the sequence matched
                 if(sequenceIndex === 0) {
@@ -135,7 +149,7 @@ class HotKeyContext {
         }
     }
 
-    _callMatchingHandlers(dir) {
+    _callMatchingHandlers(dir, buffer, exactMatch = true) {
 
         let preventDefault = false;
 
@@ -149,7 +163,7 @@ class HotKeyContext {
             // check every option
             for(const idx in hotkey._sequences) {
 
-                if(this._matchSequence(dir, hotkey._sequences[idx])) {
+                if(this._matchSequence(hotkey._sequences[idx], buffer, exactMatch)) {
 
                     // call handler and exit
                     preventDefault |= hotkey._callback();
@@ -172,9 +186,10 @@ class HotKeyContext {
         const oldState = buffer[buffer.length - 2];
         const newState = buffer[buffer.length - 1];
 
+        // check if new state contains all keys from old state as old
         for(const key in oldState) {
 
-            if(!(oldState[key] && newState[key] === false)) {
+            if(newState[key] !== false) {
 
                 pop = false;
                 break;
@@ -215,9 +230,9 @@ class HotKeyContext {
 
         this._mergeOldKeys(dir);
 
-        // if(dir === HotkeyEvent.KEYUP) console.log(JSON.stringify(this._sequences[dir].buffer));
+        // if(dir === HotkeyEvent.KEYDOWN) console.log(JSON.stringify(this._sequences[dir].buffer));
 
-        const preventDefault = this._callMatchingHandlers(dir);
+        const preventDefault = this._callMatchingHandlers(dir, this._sequences[dir].buffer, true);
         
         this._sequences[dir].reset = setTimeout(() => this._resetSequenceBuffer(dir), this._bufferResetTime);
 
@@ -234,6 +249,13 @@ class HotKeyContext {
 
         // remove reference
         delete this._hotkeys[hotkey._id];
+    }
+
+    invokeSequence(sequence, event = HotkeyEvent.KEYDOWN) {
+
+        const buffer = normalizeSequence(sequence);
+
+        this._callMatchingHandlers(event, buffer, false);
     }
 
     setKeyPressDiffTime(ms) {
@@ -269,7 +291,7 @@ class Hotkey {
         // save all properties
         this._callback = callback;
         this._sequences = normalizeSequences(sequences);
-        this._eventTypes = eventTypes;
+        this._eventTypes = deepcopy(eventTypes);
 
         // if no context is provided, default to global
         this._context = context ? context : globalHotkeyContext;
@@ -309,7 +331,7 @@ class Hotkey {
 
     setEventTypes(eventTypes) {
 
-        this._eventTypes = eventTypes;
+        this._eventTypes = deepcopy(eventTypes);
     }
 
     remove() {
