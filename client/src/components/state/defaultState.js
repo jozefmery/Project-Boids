@@ -38,13 +38,13 @@ export default {
                 
                 min: 0.5,
                 current: 1.0,
-                factor: 0.005,
+                factor: 0.05,
                 max: 1.5
             },
             
             move: {
 
-                delta: 50,
+                delta: 250,
                 up: false,
                 right: false,
                 down: false,
@@ -65,12 +65,6 @@ export default {
 
         keys: {},
         mouse: {
-
-            position: {
-
-                x: undefined,
-                y: undefined
-            },
             buttons: {} 
         }
     },
