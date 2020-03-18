@@ -27,6 +27,7 @@ export default createSlice({
 
         // safe to mutate state thanks to redux toolkit
 
+        setTheme: (_, { payload: theme }) => theme, 
         toggleTheme: (state, _) => themeInverter[state],
     }
 });
