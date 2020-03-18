@@ -287,7 +287,7 @@ class HotKeyContext {
         // check if context is enabled
         if(!this.isEnabled()) return;
 
-        const event = event.pressed ? HotkeyEvent.KEYDOWN : HotkeyEvent.KEYUP;
+        const eventType = event.pressed ? HotkeyEvent.KEYDOWN : HotkeyEvent.KEYUP;
 
         const key = normalizeKeyName(event.key);
 
@@ -297,22 +297,22 @@ class HotKeyContext {
         this._keyDownBuffer[key] = true;
         
         // save current state
-        this._sequences[event].buffer.push(deepcopy(this._keyDownBuffer));
+        this._sequences[eventType].buffer.push(deepcopy(this._keyDownBuffer));
     
-        if(event === HotkeyEvent.KEYUP) {
+        if(eventType === HotkeyEvent.KEYUP) {
 
             delete this._keyDownBuffer[key];
         }
 
         // clear existing reset buffer timeout
 
-        clearTimeout(this._sequences[event].reset);
+        clearTimeout(this._sequences[eventType].reset);
 
-        this._mergeOldKeys(event);
+        this._mergeOldKeys(eventType);
 
-        const preventDefault = this._callMatchingHandlers(event, this._sequences[event].buffer, true, true);
+        const preventDefault = this._callMatchingHandlers(eventType, this._sequences[eventType].buffer, true, true);
         
-        this._sequences[event].reset = setTimeout(() => this._resetSequenceBuffer(event), this._bufferResetTime);
+        this._sequences[eventType].reset = setTimeout(() => this._resetSequenceBuffer(eventType), this._bufferResetTime);
 
         return preventDefault;
     }
