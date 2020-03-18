@@ -36,12 +36,6 @@ function normalizeCombination(combination) {
         ({ ...rest, [current]: true}), {});
 }
 
-/* enum */ class HotkeyEvent {
-
-    static KEYDOWN = "KEYDOWN";
-    static KEYUP = "KEYUP";
-}
-
 function normalizeSequence(sequence) {
 
     return sequence.split(" ")                              // split whole sequence to an array of combinations
@@ -51,7 +45,7 @@ function normalizeSequence(sequence) {
 
 function normalizeSequences(sequences) {
 
-    return  sequences.map(sequence => normalizeSequence(sequence));   // normalize all sequences                                    
+    return sequences.map(sequence => normalizeSequence(sequence));   // normalize all sequences                                    
 }  
 
 function combinationsMatch(subset, superset) {
@@ -78,6 +72,71 @@ function combinationsMatch(subset, superset) {
     };
 }
 
+/* enum */ class HotkeyEvent {
+
+    static KEYDOWN = "KEYDOWN";
+    static KEYUP = "KEYUP";
+    static BOTH = "BOTH";
+}
+
+class Hotkey {
+
+    constructor(sequences, callback, eventType) {
+
+        // create helper properties
+        this._id = uniqid();
+        this._toggled = false;
+
+        // enable context by default
+        this._enabled = true;
+
+        // save all properties
+        this._callback = callback;
+        this._sequences = normalizeSequences(sequences);
+        this._eventType = eventType;
+    }
+
+    invoke(event = HotkeyEvent.KEYDOWN) {
+
+        this._callback({ event });
+    }
+
+    isEnabled() {
+
+        return this._enabled;
+    }
+
+    setEnabled(enable) {
+
+        this._enabled = enable;
+    }
+
+    setCallback(callback) {
+
+        this._callback = callback;
+    }
+
+    setSequences(sequences) {
+
+        this._sequences = normalizeSequences(sequences);
+    }
+
+    eventType() {
+
+        return this._eventType;
+    }
+
+    setEventType(eventType) {
+
+        this._eventType = eventType;
+    }
+
+    eventMatch(event) {
+
+        return this._eventType === HotkeyEvent.BOTH || this._eventType === event;
+    }
+}
+
 class HotKeyContext {
 
     constructor() {
@@ -87,6 +146,7 @@ class HotKeyContext {
 
         // create keyboard event handler
         this._keyChangedEvent = new EventHandler("keyChanged", this._keyChangedCallback);
+        this._windowBlurEvent = new EventHandler("windowBlurred", this._onBlurCallback);
         
         // create helper members
         this._hotkeys = {};
@@ -110,9 +170,9 @@ class HotKeyContext {
         this._bufferResetTime = 1000; // ms
     }
 
-    _resetSequenceBuffer(dir) {
+    _resetSequenceBuffer(event) {
 
-        this._sequences[dir].buffer = [];
+        this._sequences[event].buffer = [];
     }
 
     _matchSequence(sequence, buffer, exactMatch) {
@@ -149,7 +209,7 @@ class HotKeyContext {
         }
     }
 
-    _callMatchingHandlers(dir, buffer, exactMatch = true) {
+    _callMatchingHandlers(event, sequenceBuffer, exactMatch, toggleHandler) {
 
         let preventDefault = false;
 
@@ -158,15 +218,19 @@ class HotKeyContext {
             const hotkey = this._hotkeys[id];
 
             // check if hotkey is enabled and the event type matches
-            if(!hotkey.isEnabled() || !hotkey.eventTypes()[dir]) continue;
+            if(!hotkey.isEnabled() || !hotkey.eventMatch(event)) continue;
 
             // check every option
             for(const idx in hotkey._sequences) {
 
-                if(this._matchSequence(hotkey._sequences[idx], buffer, exactMatch)) {
+                const sequence = hotkey._sequences[idx];
+
+                if(this._matchSequence(sequence, sequenceBuffer, exactMatch)) {
+
+                    hotkey._toggled = toggleHandler && event === HotkeyEvent.KEYDOWN;
 
                     // call handler and exit
-                    preventDefault |= hotkey._callback();
+                    preventDefault |= hotkey._callback({ event: event });
                     break;
                 }
             }
@@ -175,11 +239,11 @@ class HotKeyContext {
         return preventDefault;
     }
 
-    _mergeOldKeys(dir) {
+    _mergeOldKeys(event) {
         
-        const buffer = this._sequences[dir].buffer;
+        const buffer = this._sequences[event].buffer;
 
-        if(buffer.length < 2 || dir === HotkeyEvent.KEYUP) return;
+        if(buffer.length < 2 || event === HotkeyEvent.KEYUP) return;
             
         let pop = true;
         
@@ -202,12 +266,28 @@ class HotKeyContext {
         }
     }
 
+    _onBlurCallback = () => {
+
+        for(const id in this._hotkeys) {
+
+            const hotkey = this._hotkeys[id];
+
+            if(hotkey._toggled && hotkey.eventMatch(HotkeyEvent.KEYUP)) {
+
+                hotkey._toggled = false;
+                hotkey._callback({ event: HotkeyEvent.KEYUP });
+            }
+        }
+
+        this._keyDownBuffer = {};
+    }
+
     _keyChangedCallback = event => {
 
         // check if context is enabled
         if(!this.isEnabled()) return;
 
-        const dir = event.pressed ? HotkeyEvent.KEYDOWN : HotkeyEvent.KEYUP;
+        const event = event.pressed ? HotkeyEvent.KEYDOWN : HotkeyEvent.KEYUP;
 
         const key = normalizeKeyName(event.key);
 
@@ -217,24 +297,22 @@ class HotKeyContext {
         this._keyDownBuffer[key] = true;
         
         // save current state
-        this._sequences[dir].buffer.push(deepcopy(this._keyDownBuffer));
+        this._sequences[event].buffer.push(deepcopy(this._keyDownBuffer));
     
-        if(dir === HotkeyEvent.KEYUP) {
+        if(event === HotkeyEvent.KEYUP) {
 
             delete this._keyDownBuffer[key];
         }
 
         // clear existing reset buffer timeout
 
-        clearTimeout(this._sequences[dir].reset);
+        clearTimeout(this._sequences[event].reset);
 
-        this._mergeOldKeys(dir);
+        this._mergeOldKeys(event);
 
-        // if(dir === HotkeyEvent.KEYDOWN) console.log(JSON.stringify(this._sequences[dir].buffer));
-
-        const preventDefault = this._callMatchingHandlers(dir, this._sequences[dir].buffer, true);
+        const preventDefault = this._callMatchingHandlers(event, this._sequences[event].buffer, true, true);
         
-        this._sequences[dir].reset = setTimeout(() => this._resetSequenceBuffer(dir), this._bufferResetTime);
+        this._sequences[event].reset = setTimeout(() => this._resetSequenceBuffer(event), this._bufferResetTime);
 
         return preventDefault;
     }
@@ -243,19 +321,37 @@ class HotKeyContext {
 
         // save reference
         this._hotkeys[hotkey._id] = hotkey;
+
+        return hotkey;
     }
 
-    _removeHotkey(hotkey) {
+    createHotkey(sequences, callback, eventType = HotkeyEvent.KEYDOWN) {
+
+        return this._registerHotkey(new Hotkey(sequences, callback, eventType));
+    }
+
+    removeHotkey(hotkey) {
 
         // remove reference
         delete this._hotkeys[hotkey._id];
+    }
+
+    clearHotkeys() {
+
+        this._hotkeys = {};
     }
 
     invokeSequence(sequence, event = HotkeyEvent.KEYDOWN) {
 
         const buffer = normalizeSequence(sequence);
 
-        this._callMatchingHandlers(event, buffer, false);
+        for(let eventType in event) {
+
+            if(event[eventType]) {
+
+                this._callMatchingHandlers(eventType, buffer, false, false);
+            }
+        }
     }
 
     setKeyPressDiffTime(ms) {
@@ -274,72 +370,6 @@ class HotKeyContext {
     }
 }
 
-// create a default, global hotkey context
-const globalHotkeyContext = new HotKeyContext(); 
-globalHotkeyContext.setEnabled(false);
-
-class Hotkey {
-
-    constructor(sequences, callback, eventTypes = { [HotkeyEvent.KEYDOWN]: true }, context = null) {
-
-        // generate id
-        this._id = uniqid();
-
-        // enable context by default
-        this._enabled = true;
-
-        // save all properties
-        this._callback = callback;
-        this._sequences = normalizeSequences(sequences);
-        this._eventTypes = deepcopy(eventTypes);
-
-        // if no context is provided, default to global
-        this._context = context ? context : globalHotkeyContext;
-
-        this._context._registerHotkey(this);
-    }
-
-    invoke() {
-
-        this._callback();
-    }
-
-    isEnabled() {
-
-        return this._enabled;
-    }
-
-    setEnabled(enable) {
-
-        this._enabled = enable;
-    }
-
-    setCallback(callback) {
-
-        this._callback = callback;
-    }
-
-    setSequences(sequences) {
-
-        this._sequences = normalizeSequences(sequences);
-    }
-
-    eventTypes() {
-
-        return this._eventTypes;
-    }
-
-    setEventTypes(eventTypes) {
-
-        this._eventTypes = deepcopy(eventTypes);
-    }
-
-    remove() {
-
-        this._context._removeHotkey(this);
-    }
-}
-
 /* examples:
 
     single keys: ["a"], ["b"],
@@ -349,11 +379,4 @@ class Hotkey {
     complex sequences: ["ctrl ctrl+a", "ctrl+a ctrl+b shift+a a+b", "a+b b b ctrl+c"]
 */
 
-export {
-    
-        Hotkey,
-        HotKeyContext, 
-        HotkeyEvent,
-        globalHotkeyContext
-        
-    };
+export { HotKeyContext, HotkeyEvent };
