@@ -37,12 +37,12 @@ class Controls extends Component {
     render() {
 
         // --- shorthands 
-        const simState = this.props.sim.running;
+        const simRunning = this.props.sim.running;
         const languageData = LanguageData[this.props.language];
         const theme = this.props.theme;
         // --- shorthands
 
-        let text = Capitalize((simState) ? languageData["play"] : languageData["pause"]);
+        let text = Capitalize((simRunning) ? languageData["pause"] : languageData["play"]);
 
         return (
             <div id="bottom-controls" className={classNames(theme, "ui-panel")}>
