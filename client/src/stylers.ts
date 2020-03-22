@@ -1,5 +1,5 @@
 /**
- * File: stylers.js
+ * File: stylers.ts
  * 
  * Author: Jozef Méry <xmeryj00@stud.fit.vutbr.cz>
  * Date: 3.3.2020
@@ -8,21 +8,24 @@
  * 
  */
 
+// import dependecies
+import P5 from "p5";
+
 export default {
 
     "dark": {
 
-        background: p5 => p5.background(70),
+        background: (p5: P5) => p5.background(70),
         
-        area: p5 => {
+        area: (p5: P5) => {
             
             p5.fill(40);
             p5.noStroke();
         },
 
-        grid: p5 => p5.stroke(120),
+        grid: (p5: P5) => p5.stroke(120),
         
-        boundingBox: p5 => {
+        boundingBox: (p5: P5) => {
 
             p5.noFill();
             p5.stroke(59, 85, 128);
@@ -32,17 +35,17 @@ export default {
 
     "light": {
 
-        background: p5 => p5.background(200),
+        background: (p5: P5) => p5.background(200),
 
-        area: p5 => {
+        area: (p5: P5) => {
             
             p5.fill(220);
             p5.noStroke();
         },
 
-        grid: p5 => p5.stroke(150),
+        grid: (p5: P5) => p5.stroke(150),
 
-        boundingBox: p5 => {
+        boundingBox: (p5: P5) => {
 
             p5.noFill();
             p5.stroke(30);
