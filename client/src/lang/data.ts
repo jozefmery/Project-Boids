@@ -1,5 +1,5 @@
 /**
- * File: data.js
+ * File: data.ts
  * 
  * Author: Jozef Méry <xmeryj00@stud.fit.vutbr.cz>
  * Date: 3.3.2020

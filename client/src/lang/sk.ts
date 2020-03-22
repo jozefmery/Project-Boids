@@ -1,5 +1,5 @@
 /**
- * File: sk.js
+ * File: sk.ts
  * 
  * Author: Jozef Méry <xmeryj00@stud.fit.vutbr.cz>
  * Date: 28.1.2020
