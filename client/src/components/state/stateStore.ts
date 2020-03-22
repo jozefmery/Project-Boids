@@ -1,5 +1,5 @@
 /**
- * File: stateStore.js
+ * File: stateStore.ts
  * 
  * Author: Jozef Méry <xmeryj00@stud.fit.vutbr.cz>
  * Date: 27.1.2020
@@ -18,7 +18,6 @@ import defaultState from "./defaultState";
 // import slices
 import simSlice from "./simSlice";
 import languageSlice from "./languageSlice";
-import controlsSlice from "./controlsSlice";
 import themeSlice from "./themeSlice";
 
 const reduxStateStore = configureStore({
@@ -26,7 +25,6 @@ const reduxStateStore = configureStore({
     // merge slices into a root reducer
     reducer: {  sim: simSlice.reducer, 
                 language: languageSlice.reducer,
-                controls: controlsSlice.reducer,
                 theme: themeSlice.reducer },
 
     // enable extension for debugging

@@ -1,5 +1,5 @@
 /**
- * File: themeSlice.js
+ * File: themeSlice.ts
  * 
  * Author: Jozef Méry <xmeryj00@stud.fit.vutbr.cz>
  * Date: 29.2.2020
@@ -11,8 +11,11 @@
 // import redux toolkit
 import { createSlice } from "@reduxjs/toolkit";
 
+// import default state
+import defaultState from "./defaultState";
+
 // helper object for inverting color theme
-const themeInverter = {
+const themeInverter: { [index: string]: string } = {
 
     dark: "light",
     light: "dark"
@@ -21,8 +24,7 @@ const themeInverter = {
 export default createSlice({
 
     name: "theme",
-    initialState: null, // inherit initial state from store
-
+    initialState: defaultState.theme,
     reducers: {
 
         // safe to mutate state thanks to redux toolkit
