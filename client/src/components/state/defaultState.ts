@@ -1,5 +1,5 @@
 /**
- * File: defaultState.js
+ * File: defaultState.ts
  * 
  * Author: Jozef Méry <xmeryj00@stud.fit.vutbr.cz>
  * Date: 29.1.2020
@@ -12,14 +12,6 @@ export default {
 
     sim: {
 
-        // entities
-        entities: {
-    
-            preys: [],
-            predators: [],
-            objects: [],
-        },
-    
         // running
         running: false,    
         
@@ -32,24 +24,15 @@ export default {
         
         // camera
         camera: {
-    
-            target: { x: 0, y: 0 },
+
             scale: {
                 
                 min: 0.5,
-                current: 1.0,
-                factor: 0.05,
-                max: 1.5
+                max: 1.5,
+                delta: 0.05
             },
             
-            move: {
-
-                delta: 250,
-                up: false,
-                right: false,
-                down: false,
-                left: false
-            }
+            moveDelta: 250 
         },
     
         // grid
@@ -61,15 +44,7 @@ export default {
         }
     },
 
-    controls: {
-
-        keys: {},
-        mouse: {
-            buttons: {} 
-        }
-    },
-
     language: "en",
 
-    theme: "light"
+    theme: "dark"
 }
