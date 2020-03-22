@@ -11,7 +11,8 @@
 		"dev": "concurrently \"npm run server\" \"npm run client\"",
 		"install-client": "cd client && npm install && cd ..",
 		"install-server": "npm install",
-		"install-all": "npm run install-server && npm run install-client"
+		"install-all": "npm run install-server && npm run install-client",
+		"test-client": "npm test --prefix client"
 	},
 	"repository": {
 		"type": "git",
@@ -23,7 +24,7 @@
 		"body-parser": "^1.19.0",
 		"concurrently": "^4.1.2",
 		"express": "^4.17.1",
-		"mongoose": "^5.9.4"
+		"mongoose": "^5.9.5"
 	},
 	"devDependencies": {
 		"nodemon": "^1.19.3"
