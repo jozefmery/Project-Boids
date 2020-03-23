@@ -28,18 +28,20 @@ type TopBarProps = Pick<StateShape, "theme"> & typeof themeSlice.actions;
 
 class TopBar extends Component<TopBarProps> {
     
-    /// Properties
+    /// Public static methods
 
-    static stateToProps = ({ theme }: StateShape) => ({ theme });
+    public static stateToProps = ({ theme }: StateShape) => ({ theme });
    
-    /// Methods
+    /// Private methods
 
-    isThemeToggled() {
+    private isThemeToggled() {
 
         return this.props.theme === "dark";
     } 
 
-    render() { 
+    /// Public methods
+
+    public render() { 
 
         return (
             <div id="top-bar" className={classNames(this.props.theme, "ui-panel")}>

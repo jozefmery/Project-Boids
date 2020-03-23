@@ -23,9 +23,9 @@ type ToggleButtonProps = {
 ;
 class Button extends Component<ToggleButtonProps> {
     
-    /// Properties
+    /// Public static members
 
-    static defaultProps = {
+    public static defaultProps = {
 
         classNames: "",
         id: "",
@@ -34,9 +34,9 @@ class Button extends Component<ToggleButtonProps> {
         isToggled: false
     };
 
-    /// Methods
+    /// Public methods
 
-    render() { 
+    public render() { 
 
         return (
             <div className={classNames("toggle-button", this.props.classNames, {"toggled": this.props.isToggled})} 

@@ -28,32 +28,34 @@ type MainProps = Pick<StateShape, "language">;
 
 class Main extends Component<MainProps> {
 
-    /// Properties
+    /// Public static methods
 
-    static stateToProps = ({ language }: StateShape) => ({ language });
+    public static stateToProps = ({ language }: StateShape) => ({ language });
 
-    /// Methods
-
-    updateAppTitle() {
-
+    /// Private methods
+    
+    private updateAppTitle() {
+        
         // --- shorthands 
         const currentLang = languageData[this.props.language];
         // --- shorthands
-
+        
         document.title = currentLang.title;
     }
+    
+    /// Public methods
 
-    componentDidMount() {
-
-        this.updateAppTitle();
-    }
-
-    componentDidUpdate() {
+    public componentDidMount() {
 
         this.updateAppTitle();
     }
 
-    render() {
+    public componentDidUpdate() {
+
+        this.updateAppTitle();
+    }
+
+    public render() {
 
         return (
             <div id="ui">
@@ -64,4 +66,4 @@ class Main extends Component<MainProps> {
 }
 
 // export component
-export default connect(Main.stateToProps, {})(Main);
+export default connect(Main.stateToProps)(Main);

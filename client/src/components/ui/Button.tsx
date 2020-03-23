@@ -23,9 +23,9 @@ type ButtonProps = {
 
 class Button extends Component<ButtonProps> {
     
-    /// Properties
+    /// Public static members
 
-    static defaultProps = {
+    public static defaultProps = {
 
         classNames: "",
         id: "",
@@ -34,9 +34,9 @@ class Button extends Component<ButtonProps> {
         tooltip: ""
     };
 
-    /// Methods
+    /// Public methods
 
-    render() { 
+    public render() { 
 
         return (
             <div className={classNames("button", this.props.classNames)} id={this.props.id} onClick={this.props.onClick} title={this.props.tooltip}>

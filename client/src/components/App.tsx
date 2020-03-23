@@ -21,7 +21,9 @@ import UI from "./ui/Main";
 
 class App extends Component {
 
-	render() {
+	/// Public methods
+
+	public render() {
 
 		return (
 			<ReduxStateProvider store={reduxStateStore}>

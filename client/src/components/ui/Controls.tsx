@@ -28,17 +28,17 @@ import { StateShape } from "../state/defaultState";
 // import language data
 import LanguageData from "../../lang/data";
 
-type ControlsProps = StateShape & typeof simSlice.actions;
+type ControlsProps = Pick<StateShape, "language" | "sim" | "theme"> & typeof simSlice.actions;
 
 class Controls extends Component<ControlsProps> {
 
-    /// Properties
+    /// Public static methods
 
-    static stateToProps = ({ language, sim, theme }: StateShape) => ({ language, sim, theme });
+    public static stateToProps = ({ language, sim, theme }: StateShape) => ({ language, sim, theme });
    
-    /// Methods
+    /// Public methods
     
-    render() {
+    public render() {
 
         // --- shorthands 
         const simRunning = this.props.sim.running;
