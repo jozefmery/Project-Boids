@@ -17,8 +17,6 @@ import defaultState from "./defaultState";
 // create shorthand
 const simState = defaultState.sim;
 
-export type SimStateShape = typeof simState;
-
 export default createSlice({
 
     name: "sim",
@@ -28,7 +26,7 @@ export default createSlice({
         // safe to mutate state thanks to redux toolkit
 
         // whole state
-        setSimSettings: (_, { payload: state }: PayloadAction<SimStateShape>) => state,
+        setSimSettings: (_, { payload: state }: PayloadAction<typeof simState>) => state,
         
         // running
         setSimRunning: (state, { payload: running }: PayloadAction<typeof simState.running>) => 
