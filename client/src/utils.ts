@@ -9,9 +9,7 @@
  */
 
 // import dependencies
-import { Slice, 
-        ActionCreatorWithPayload,
-        ActionCreatorWithoutPayload } from "@reduxjs/toolkit";
+import { Slice } from "@reduxjs/toolkit";
 
 function capitalize(target: string): string {
 
@@ -27,7 +25,7 @@ function clamp(target: number, min: number, max: number): number {
 
 interface DispatchToPropsMap {
 
-    [index: string]: ActionCreatorWithPayload<any> | ActionCreatorWithoutPayload;
+    [index: string]: any;
 }
 
 function dispatchToProps(sliceArray: Slice[]): DispatchToPropsMap {
