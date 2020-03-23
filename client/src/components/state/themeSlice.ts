@@ -9,7 +9,7 @@
  */
 
 // import redux toolkit
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 // import default state
 import defaultState from "./defaultState";
@@ -21,6 +21,8 @@ const themeInverter: { [index: string]: string } = {
     light: "dark"
 }
 
+export type ThemeStateShape = typeof defaultState.theme;
+
 export default createSlice({
 
     name: "theme",
@@ -29,7 +31,7 @@ export default createSlice({
 
         // safe to mutate state thanks to redux toolkit
 
-        setTheme: (_, { payload: theme }) => theme, 
+        setTheme: (_, { payload: theme }: PayloadAction<ThemeStateShape>) => theme, 
         toggleTheme: (state) => themeInverter[state],
     }
 });

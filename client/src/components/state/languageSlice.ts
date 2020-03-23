@@ -9,10 +9,12 @@
  */
 
 // import redux toolkit
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 // import default state
 import defaultState from "./defaultState";
+
+export type LanguageStateShape = typeof defaultState.language;
 
 export default createSlice({
 
@@ -22,6 +24,6 @@ export default createSlice({
 
         // safe to mutate state thanks to redux toolkit
 
-        setLanguage: (_, { payload: language }) => language
+        setLanguage: (_, { payload: language }: PayloadAction<LanguageStateShape>) => language
     }
 });
