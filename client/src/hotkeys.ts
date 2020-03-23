@@ -72,7 +72,7 @@ class Combination {
                 ({ ...rest, [current]: true}), {});
     }
 
-    /// Public static meethods
+    /// Public static methods
 
     public static fromString(combination: string): Combination {
 
