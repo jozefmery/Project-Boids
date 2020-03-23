@@ -1,5 +1,5 @@
 /**
- * File: Button.jsx
+ * File: Button.tsx
  * 
  * Author: Jozef Méry <xmeryj00@stud.fit.vutbr.cz>
  * Date: 27.1.2020
@@ -10,34 +10,27 @@
 
 // import dependencies
 import React, { Component } from 'react';
-import PropTypes from "prop-types";
 import classNames from "classnames";
 
-class Button extends Component {
+type ButtonProps = {
+
+    classNames?: string | string[];
+    id?: string;
+    onClick: () => void;
+    content: () => JSX.Element | string;
+    tooltip: string;
+};
+
+class Button extends Component<ButtonProps> {
     
     /// Properties
-
-    static propTypes = {
-
-        classNames: PropTypes.oneOfType([
-
-            PropTypes.string,
-            PropTypes.array,
-            PropTypes.object
-        ]),
-        
-        id: PropTypes.string,
-        onClick: PropTypes.func,
-        content: PropTypes.func,
-        tooltip: PropTypes.string
-    };
 
     static defaultProps = {
 
         classNames: "",
         id: "",
         onClick: null,
-        content: null,
+        content: () => null,
         tooltip: ""
     };
 
@@ -47,7 +40,7 @@ class Button extends Component {
 
         return (
             <div className={classNames("button", this.props.classNames)} id={this.props.id} onClick={this.props.onClick} title={this.props.tooltip}>
-            {this.props.content ? this.props.content() : null}
+            {this.props.content()}
             </div>
             );
     }

@@ -1,5 +1,5 @@
 /**
- * File: ToggleButton.jsx
+ * File: ToggleButton.tsx
  * 
  * Author: Jozef Méry <xmeryj00@stud.fit.vutbr.cz>
  * Date: 29.2.2020
@@ -10,27 +10,20 @@
 
 // import dependencies
 import React, { Component } from 'react';
-import PropTypes from "prop-types";
 import classNames from "classnames";
 
-class Button extends Component {
+type ToggleButtonProps = {
+
+    classNames?: string | string[];
+    id?: string;
+    onClick: () => void;
+    tooltip: string;
+    isToggled: boolean;
+}
+;
+class Button extends Component<ToggleButtonProps> {
     
     /// Properties
-
-    static propTypes = {
-
-        classNames: PropTypes.oneOfType([
-
-            PropTypes.string,
-            PropTypes.array,
-            PropTypes.object
-        ]),
-        
-        id: PropTypes.string,
-        onClick: PropTypes.func,
-        tooltip: PropTypes.string,
-        isToggled: PropTypes.bool
-    };
 
     static defaultProps = {
 

@@ -1,5 +1,5 @@
 /**
- * File: Main.jsx
+ * File: Main.tsx
  * 
  * Author: Jozef Méry <xmeryj00@stud.fit.vutbr.cz>
  * Date: 27.1.2020
@@ -19,23 +19,28 @@ import Controls from "./Controls";
 import TopBar from "./TopBar";
 
 // import language data
-import LanguageData from "../../lang/data";
+import languageData from "../../lang/data";
 
-class Main extends Component {
+// import type information
+import { StateShape } from "../state/defaultState";
+
+type MainProps = Pick<StateShape, "language">;
+
+class Main extends Component<MainProps> {
 
     /// Properties
 
-    static stateToProps = ({ language }) => ({ language });
+    static stateToProps = ({ language }: StateShape) => ({ language });
 
     /// Methods
 
     updateAppTitle() {
 
         // --- shorthands 
-        const languageData = LanguageData[this.props.language];
+        const currentLang = languageData[this.props.language];
         // --- shorthands
 
-        document.title = languageData.title;
+        document.title = currentLang.title;
     }
 
     componentDidMount() {

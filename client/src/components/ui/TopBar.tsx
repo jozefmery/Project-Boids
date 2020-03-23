@@ -10,7 +10,6 @@
 
 // import dependencies
 import React, { Component } from "react";
-import { DispatchToProps } from "../../utils";
 import classNames from "classnames";
 
 // import react-redux
@@ -22,11 +21,16 @@ import themeSlice from "../state/themeSlice";
 // import custom components
 import ToggleButton from "./ToggleButton";
 
-class TopBar extends Component {
+// import type information
+import { StateShape } from "../state/defaultState";
+
+type TopBarProps = Pick<StateShape, "theme"> & typeof themeSlice.actions;
+
+class TopBar extends Component<TopBarProps> {
     
     /// Properties
 
-    static stateToProps = ({ theme }) => ({ theme });
+    static stateToProps = ({ theme }: StateShape) => ({ theme });
    
     /// Methods
 
@@ -44,5 +48,5 @@ class TopBar extends Component {
                 );
     }
 }
- 
-export default connect(TopBar.stateToProps, DispatchToProps([themeSlice]))(TopBar);
+
+export default connect(TopBar.stateToProps, { ...themeSlice.actions })(TopBar);
