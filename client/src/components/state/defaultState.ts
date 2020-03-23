@@ -8,7 +8,7 @@
  * 
  */
 
-export default {
+const defaultState =  {
 
     sim: {
 
@@ -48,3 +48,6 @@ export default {
 
     theme: "dark"
 }
+
+export default defaultState;
+export type StateShape = typeof defaultState;
