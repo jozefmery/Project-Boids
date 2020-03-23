@@ -20,12 +20,14 @@ function capitalize(target: string): string {
 
 function clamp(target: number, min: number, max: number): number {
 
+    if(min > max) throw new Error("Minimal value shouldn't be greater than the maximal value");
+
     return Math.min(Math.max(target, min), max);
 }
 
 interface DispatchToPropsMap {
 
-    [index: string]: ActionCreatorWithPayload<any, string> | ActionCreatorWithoutPayload<string>;
+    [index: string]: ActionCreatorWithPayload<any> | ActionCreatorWithoutPayload;
 }
 
 function dispatchToProps(sliceArray: Slice[]): DispatchToPropsMap {
@@ -35,6 +37,9 @@ function dispatchToProps(sliceArray: Slice[]): DispatchToPropsMap {
     sliceArray.forEach(slice => {
 
         for(let action in slice.actions) {
+
+            // check if action name is unique
+            if(converter[action] !== undefined) throw Error(`Dupliate action name: ${action}`);
 
             converter[action] = slice.actions[action];
         }
