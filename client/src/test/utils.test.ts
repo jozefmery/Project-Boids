@@ -8,13 +8,9 @@
  * 
  */
 
-// import dependencies
-import { createSlice } from "@reduxjs/toolkit";
-
 // import test subjects
 import { capitalize,
         clamp,
-        dispatchToProps,
         runStaticMethods
      } from "../utils"; 
 
@@ -46,87 +42,6 @@ test("Clamp utiliy tests", () => {
     expect(clamp(1000.0, 1.0, 2.0)).toBeCloseTo(2.0);
     expect(clamp(-123.123, 0.001, 0.005)).toBeCloseTo(0.001);
     expect(clamp(9999.9999, 10.1, 10.123)).toBeCloseTo(10.123);
-});
-
-test("Dispatch to props mapper utility function tests", () => {
-
-    // create test slices
-    const testSliceA = createSlice({
-
-        name: "A",
-        initialState: null,
-
-        reducers: {
-
-            // action body doesn't matter
-            A1: (state, _) => state,
-            A2: (state, _) => state,
-            A3: (state, _) => state
-        }
-    });
-
-    const testSliceB = createSlice({
-
-        name: "B",
-        initialState: null,
-
-        reducers: {
-
-            // action body doesn't matter
-            B1: (state, _) => state,
-            B2: (state, _) => state,
-            B3: (state, _) => state
-        }
-    });
-
-    const testSliceCduplicate = createSlice({
-
-        name: "C",
-        initialState: null,
-
-        reducers: {
-
-            // action body doesn't matter
-            C1: (state, _) => state,
-            C2: (state, _) => state,
-            A3: (state, _) => state // intentional duplicate name
-        }
-    });
-
-    // no slices test
-    expect(dispatchToProps([])).toStrictEqual({});
-
-    // single slice test
-    expect(dispatchToProps([testSliceA])).toStrictEqual({ 
-        A1: testSliceA.actions.A1, 
-        A2: testSliceA.actions.A2, 
-        A3: testSliceA.actions.A3});
-    
-    // multiple slices test
-    expect(dispatchToProps([testSliceA, testSliceB])).toStrictEqual({ 
-        A1: testSliceA.actions.A1, 
-        A2: testSliceA.actions.A2, 
-        A3: testSliceA.actions.A3,
-        B1: testSliceB.actions.B1,
-        B2: testSliceB.actions.B2,
-        B3: testSliceB.actions.B3});
-    
-    // order of slices shouldn't matter
-    expect(dispatchToProps([testSliceB, testSliceA])).toStrictEqual({ 
-        A1: testSliceA.actions.A1, 
-        A2: testSliceA.actions.A2, 
-        A3: testSliceA.actions.A3,
-        B1: testSliceB.actions.B1,
-        B2: testSliceB.actions.B2,
-        B3: testSliceB.actions.B3});
-
-    // duplicate name test
-    expect(() => dispatchToProps([testSliceA, testSliceA])).toThrow(Error);
-    expect(() => dispatchToProps([testSliceA, testSliceCduplicate])).toThrow(Error);
-
-    // check if correct duplicate name was detected
-    expect(() => dispatchToProps([testSliceA, testSliceCduplicate]))
-        .toThrowError("A3");
 });
 
 let mockFunction = jest.fn();

@@ -23,29 +23,6 @@ function clamp(target: number, min: number, max: number): number {
     return Math.min(Math.max(target, min), max);
 }
 
-interface DispatchToPropsMap {
-
-    [index: string]: any;
-}
-
-function dispatchToProps(sliceArray: Slice[]): DispatchToPropsMap {
-
-    let converter: DispatchToPropsMap = {};
-
-    sliceArray.forEach(slice => {
-
-        for(let action in slice.actions) {
-
-            // check if action name is unique
-            if(converter[action] !== undefined) throw Error(`Dupliate action name: ${action}`);
-
-            converter[action] = slice.actions[action];
-        }
-    });
-
-    return converter;
-};
-
 interface Class<T> {
 
     new (...args: any[]): T;
@@ -61,4 +38,4 @@ function runStaticMethods<T>(classObject: Class<T>, nameCondition?: RegExp): voi
     });
 };
 
-export { capitalize, clamp, dispatchToProps, runStaticMethods };
+export { capitalize, clamp, runStaticMethods };
