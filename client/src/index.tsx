@@ -1,5 +1,5 @@
 /**
- * File: index.js
+ * File: index.tsx
  * 
  * Author: Jozef Méry <xmeryj00@stud.fit.vutbr.cz>
  * Date: 27.1.2020
