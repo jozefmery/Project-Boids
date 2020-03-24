@@ -11,14 +11,17 @@
 // import redux toolkit
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
+// import enums
+import { Theme } from "../../stylers";
+
 // import default state
 import defaultState from "./defaultState";
 
 // helper object for inverting color theme
-const themeInverter: { [index: string]: string } = {
+const themeInverter = {
 
-    dark: "light",
-    light: "dark"
+    [Theme.DARK]: Theme.LIGHT,
+    [Theme.LIGHT]: Theme.DARK
 }
 
 export default createSlice({
