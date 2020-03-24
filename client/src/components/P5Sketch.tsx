@@ -13,20 +13,17 @@ import React, { Component } from "react";
 import P5 from "p5";
 import classNames from "classnames";
 
-type P5SetupCallback = (p5: P5, parent: HTMLDivElement) => void;
-type P5Callback = (event?: object) => void;
-
 const P5Events = [
+
     "draw",
     "windowResized",
-    "preload",
+    "mouseWheel",
     "mouseClicked",
     "doubleClicked",
-    "mouseMoved",
     "mousePressed",
-    "mouseWheel",
-    "mouseDragged",
     "mouseReleased",
+    "mouseMoved",
+    "mouseDragged",
     "keyPressed",
     "keyReleased",
     "keyTyped",
@@ -35,22 +32,36 @@ const P5Events = [
     "touchEnded",
     "deviceMoved",
     "deviceTurned",
-    "deviceShaken" 
+    "deviceShaken"
+
 ] as const;
-
-type P5EventTypes = {
-
-    [events in typeof P5Events[number]]?: P5Callback;
-}
 
 type P5SketchProps = {
 
     classNames?: string | string[];
     id?: string;
 
-    setup: P5SetupCallback;
-    
-} & P5EventTypes;
+    preload?: (p5: P5) => void;
+    setup: (p5: P5, parent: HTMLDivElement) => void;
+    draw?: () => void;
+    windowResized?: () => void;
+    mouseWheel?: (event: WheelEvent) => boolean | void;
+    mouseClicked?: (event: MouseEvent) => boolean | void;
+    doubleClicked?: (event: MouseEvent) => boolean | void;
+    mousePressed?: (event: MouseEvent) => boolean | void;
+    mouseReleased?: (event: MouseEvent) => boolean | void;
+    mouseMoved?: (event: MouseEvent) => boolean | void;
+    mouseDragged?: (event: MouseEvent) => boolean | void;
+    keyPressed?: (event: KeyboardEvent) => boolean | void;
+    keyReleased?: (event: KeyboardEvent) => boolean | void;
+    keyTyped?: (event: KeyboardEvent) => boolean | void;
+    touchStarted?: (event: TouchEvent) => boolean | void;
+    touchMoved?: (event: TouchEvent) => boolean | void;
+    touchEnded?: (event: TouchEvent) => boolean | void;
+    deviceMoved?: () => void;
+    deviceTurned?: () => void;
+    deviceShaken?: () => void;
+};
 
 export default class P5Sketch extends Component<P5SketchProps> {
 
@@ -82,10 +93,15 @@ export default class P5Sketch extends Component<P5SketchProps> {
 
         this.p5 = new P5((p5: P5) => {
 
-            p5.setup = () => {
-                
-                this.props.setup(p5, this.canvasParent.current as HTMLDivElement);
-            };
+            if(this.props.preload) {
+
+                // create helper reference to satisfy type system
+                const callback = this.props.preload;
+                p5.preload = () => callback(p5);
+            }
+            
+
+            p5.setup = () => this.props.setup(p5, this.canvasParent.current as HTMLDivElement);
         });
     }
 
@@ -93,7 +109,8 @@ export default class P5Sketch extends Component<P5SketchProps> {
 
         P5Events.forEach(event => {
 
-            const callback = this.props[event];
+            // use any to prevent errors as p5 library doesn't use sufficient types
+            const callback: any = this.props[event];
 
             if(callback) this.p5[event] = callback; 
         });
