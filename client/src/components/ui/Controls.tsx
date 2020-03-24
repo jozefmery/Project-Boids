@@ -26,7 +26,7 @@ import Button from "./Button";
 import { StateShape } from "../state/defaultState";
 
 // import language data
-import LanguageData from "../../lang/data";
+import LanguageData from "../../lang/all";
 
 type ControlsProps = Pick<StateShape, "language" | "sim" | "theme"> & typeof simSlice.actions;
 

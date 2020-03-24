@@ -19,7 +19,7 @@ import Controls from "./Controls";
 import TopBar from "./TopBar";
 
 // import language data
-import languageData from "../../lang/data";
+import languageData from "../../lang/all";
 
 // import type information
 import { StateShape } from "../state/defaultState";
