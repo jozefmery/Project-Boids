@@ -8,10 +8,15 @@
  * 
  */
 
-export default {
+// import interface
+import { ILanguageDefinition } from "./all";
+
+const data: ILanguageDefinition = {
 
     title: "Predator-Prey Simulation",
     play: "play",
     pause: "pause",
 
- };
+};
+
+export default data;

@@ -8,9 +8,14 @@
  * 
  */
 
-export default {
+// import interface
+import { ILanguageDefinition } from "./all";
+
+const data: ILanguageDefinition = {
 
     title: "Simulácia Lovec-Korisť",
     play: "spustiť",
     pause: "zastaviť"
 };
+
+export default data;
