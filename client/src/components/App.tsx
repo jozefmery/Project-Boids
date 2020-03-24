@@ -27,7 +27,7 @@ class App extends Component {
 
 		return (
 			<ReduxStateProvider store={reduxStateStore}>
-				<Simulation parentID="p5-canvas-parent"/> 
+				<Simulation parentID="sim-canvas-parent"/> 
 				<UI /> 
 			</ReduxStateProvider>
 		);
