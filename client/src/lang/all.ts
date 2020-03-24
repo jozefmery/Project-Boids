@@ -12,22 +12,23 @@
 import en from "./en";
 import sk from "./sk";
 
-interface ILanguageDefinition {
+export interface ILanguageDefinition {
 
     title: string;
     play: string;
     pause: string;
 };
 
-interface ILanguages {
+export enum Languages {
 
-    [index: string]: ILanguageDefinition;
+    EN,
+    SK
 }
 
-const languageData: ILanguages = {
+const languageData = {
 
-    en,
-    sk
+    [Languages.EN]: en,
+    [Languages.SK]: sk
 };
 
 export default languageData;
