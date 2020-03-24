@@ -54,7 +54,7 @@ class Combination {
 
     /// Constructor function
 
-    constructor(combination: Readonly<ICombination> = {}) {
+    public constructor(combination: Readonly<ICombination> = {}) {
 
         // create copy
         this.combination = { ...combination };
@@ -162,7 +162,7 @@ class Sequence {
 
     /// Constructor function
 
-    constructor(sequence: string = "") {
+    public constructor(sequence: string = "") {
 
         this.sequence = Sequence.getNormalized(sequence);
     }
@@ -260,7 +260,7 @@ class Hotkey {
 
     /// Constructor function
 
-    constructor(sequences: SequenceDefinitions, 
+    public constructor(sequences: SequenceDefinitions, 
                 protected callback: Callback, 
                 protected eventType: HotkeyEvent) {
 
@@ -378,7 +378,7 @@ class HotKeyContext {
 
     /// Constructor function
 
-    constructor() {
+    public constructor() {
 
         // enable context by default
         this.enabled = true;
