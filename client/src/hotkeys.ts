@@ -90,6 +90,11 @@ class Combination {
         
         return this.combination;
     }
+
+    public toString(): string {
+
+        return Object.keys(this.combination).sort().join("+");
+    }
     
     public clear(): void {
 
@@ -553,6 +558,16 @@ class HotKeyContext {
     public setEnabled(enable: boolean): void {
 
         this.enabled = enable;
+    }
+
+    public currentCombination(): Readonly<Combination> {
+
+        return this.keyCombination;
+    }
+
+    public clearCombination(): void {
+
+        this.keyCombination.clear();
     }
 };
 
