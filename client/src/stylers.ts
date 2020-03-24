@@ -11,9 +11,28 @@
 // import dependecies
 import P5 from "p5";
 
-export default {
+export enum Theme {
 
-    "dark": {
+    LIGHT = "light",
+    DARK = "dark"
+}
+
+interface Styler {
+
+    background: (p5: P5) => void;
+    area: (p5: P5) => void;
+    grid: (p5: P5) => void;
+    boundingBox: (p5: P5) => void;
+}
+
+type IStylers = {
+
+    [key in Theme]: Styler;
+}
+
+const stylers: IStylers = {
+
+    [Theme.DARK]: {
 
         background: (p5: P5) => p5.background(70),
         
@@ -33,7 +52,7 @@ export default {
         }
     },
 
-    "light": {
+    [Theme.LIGHT]: {
 
         background: (p5: P5) => p5.background(200),
 
@@ -53,3 +72,5 @@ export default {
         }
     },
 };
+
+export default stylers;
