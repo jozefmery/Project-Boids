@@ -8,6 +8,10 @@
  * 
  */
 
+// import enums
+import { Theme } from "../../stylers";
+import { Languages } from "../../lang/all";
+
 const defaultState =  {
 
     sim: {
@@ -44,9 +48,9 @@ const defaultState =  {
         }
     },
 
-    language: "en",
+    language: Languages.EN,
 
-    theme: "dark"
+    theme: Theme.DARK
 }
 
 export default defaultState;
