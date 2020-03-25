@@ -36,31 +36,46 @@ const P5Events = [
 
 ] as const;
 
+interface SetupCallback {
+
+    (p5: P5, parent: HTMLDivElement): void;
+}
+
+interface EmptyCallback {
+
+    (): void;
+}
+
+interface EventCallback<Event> {
+
+    (event: Event): boolean | void;
+}
+
 type P5SketchProps = {
 
     classNames?: string | string[];
     id?: string;
 
     preload?: (p5: P5) => void;
-    setup: (p5: P5, parent: HTMLDivElement) => void;
-    draw?: () => void;
-    windowResized?: () => void;
-    mouseWheel?: (event: WheelEvent) => boolean | void;
-    mouseClicked?: (event: MouseEvent) => boolean | void;
-    doubleClicked?: (event: MouseEvent) => boolean | void;
-    mousePressed?: (event: MouseEvent) => boolean | void;
-    mouseReleased?: (event: MouseEvent) => boolean | void;
-    mouseMoved?: (event: MouseEvent) => boolean | void;
-    mouseDragged?: (event: MouseEvent) => boolean | void;
-    keyPressed?: (event: KeyboardEvent) => boolean | void;
-    keyReleased?: (event: KeyboardEvent) => boolean | void;
-    keyTyped?: (event: KeyboardEvent) => boolean | void;
-    touchStarted?: (event: TouchEvent) => boolean | void;
-    touchMoved?: (event: TouchEvent) => boolean | void;
-    touchEnded?: (event: TouchEvent) => boolean | void;
-    deviceMoved?: () => void;
-    deviceTurned?: () => void;
-    deviceShaken?: () => void;
+    setup: SetupCallback;
+    draw?: EmptyCallback;
+    windowResized?: EmptyCallback;
+    mouseWheel?: EventCallback<WheelEvent>;
+    mouseClicked?: EventCallback<MouseEvent>;
+    doubleClicked?: EventCallback<MouseEvent>;
+    mousePressed?: EventCallback<MouseEvent>;
+    mouseReleased?: EventCallback<MouseEvent>;
+    mouseMoved?: EventCallback<MouseEvent>;
+    mouseDragged?: EventCallback<MouseEvent>;
+    keyPressed?: EventCallback<KeyboardEvent>;
+    keyReleased?: EventCallback<KeyboardEvent>;
+    keyTyped?: EventCallback<KeyboardEvent>;
+    touchStarted?: EventCallback<TouchEvent>;
+    touchMoved?: EventCallback<TouchEvent>;
+    touchEnded?: EventCallback<TouchEvent>;
+    deviceMoved?: EmptyCallback;
+    deviceTurned?: EmptyCallback;
+    deviceShaken?: EmptyCallback;
 };
 
 export default class P5Sketch extends Component<P5SketchProps> {
