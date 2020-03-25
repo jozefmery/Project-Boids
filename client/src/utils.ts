@@ -20,13 +20,13 @@ function clamp(target: number, min: number, max: number): number {
     return Math.min(Math.max(target, min), max);
 }
 
-interface Class<T> {
+interface Class {
 
-    new (...args: any[]): T;
+    new (...args: any[]): any;
     [index: string]: any;
 }
 
-function runStaticMethods<T>(classObject: Class<T>, nameCondition?: RegExp): void {
+function runStaticMethods(classObject: Class, nameCondition?: RegExp): void {
 
     Object.getOwnPropertyNames(classObject).forEach((property: string) => {
 
