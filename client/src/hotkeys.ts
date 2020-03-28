@@ -18,15 +18,26 @@
 // import dependencies
 import uniqid from "uniqid";
 
-// helper object which contains key names present in event objects
-// and normalized strings as values which are used in sequence definitions
-const keyNameNormalizer: { [index: string]: string } = {
+/**
+ * 
+ * Helper object which contains key names present in event objects
+ * and normalized strings as values which are used in sequence definitions.
+ */
+const keyNameNormalizer: { readonly [index: string]: string } = {
     "+": "plus",
     " ": "space",
     "control": "ctrl"
-};
+} as const;
 
-function normalizeKeyName(key: string): string {
+/**
+ * 
+ * Converts a key name present in KeyboardEvent objects to a normalized name
+ * used in sequence definitions.
+ * 
+ * @param  {string} key Key name present in KeyboardEvent object.
+ * @returns string      Normalized key name.
+ */
+function normalizeEventKey(key: string): string {
 
     // convert to lower case to simplify comparison
     const lowerKey = key.toLowerCase(); 
@@ -34,6 +45,10 @@ function normalizeKeyName(key: string): string {
     return normalized ? normalized : lowerKey;
 };
 
+/**
+ * 
+ * Defines which event type should a callback listen to.
+ */
 enum HotkeyEvent {
 
     KEYDOWN,
@@ -41,88 +56,278 @@ enum HotkeyEvent {
     BOTH
 };
 
-interface ICombination { 
+/**
+ * 
+ * Shape of internal combination representation.
+ */
+interface CombinationData {
 
     [index: string]: boolean;
 };
 
-class Combination {
+/**
+ * 
+ * Types which can be used to set/construct a Combination.
+ */
+type CombinationDefinition = Readonly<CombinationData> | Readonly<Combination> | string;
 
+/**
+ * 
+ * Class for representing a keypress combination with various ways of construction and
+ * mutation. Contains various helper query methods.
+ */
+class Combination {
+    
     /// Protected members
 
-    protected combination: ICombination;
+    /**
+     * 
+     * Internal combination representation - object, where keys are 
+     * string representations of keyboard keys and the values represent
+     * whether a key new.
+     */
+    protected combination: CombinationData = {};
 
     /// Constructor function
 
-    public constructor(combination: Readonly<ICombination> = {}) {
+    /**
+     * 
+     * Constructs a Combination object based on the supplied parameter.
+     * Options:
+     *  - undefined         - Create empty representation.
+     *  - string            - Keys separated with a "+", spaces and case is ignored,
+     *                        all keys are stored as new.
+     *  - Combination       - Copy representation from other instance.
+     *  - CombinationData   - Define the combination using the internal representation.
+     *                        Object keys are normalized - spaces and case are ignored. 
+     * 
+     * @param  {CombinationDefinition={}} combination Reference for construction.
+     */
+    public constructor(combination: CombinationDefinition = {}) {
 
-        // create copy
-        this.combination = { ...combination };
+        this.setCombinationData(combination);
     }
 
     /// Protected static methods 
 
-    protected static getNormalized(combination: string): ICombination {
+    /**
+     * 
+     * Removes all spaces from supplied string and converts it to lower case.
+     * 
+     * @param  {string} key Key to be normalized.
+     * @returns string      Normalized key name.
+     */
+    protected static normalizeKey(key: string): string {
 
-        return combination.replace(/\s+/g, "")  // remove redundant spaces
-                .split("+")                     // split combination to an array of keys
-                .map(key => key.toLowerCase())  // all keys must be lower case to simplify comparison
-                .filter(key => key.length)      // remove empty string
-                .reduce((rest, current) =>      // reduce array of keys to an object
-                ({ ...rest, [current]: true}), {});
+        return key.replace(/\s+/g, "")  // remove redundant spaces
+                .toLowerCase();         // all keys must be lower case to simplify comparison
     }
 
-    /// Public static methods
+    /**
+     * 
+     * Normalizes a combination representation by normalizing each key name,
+     * while preserving the values. Empty key names and corresponding values
+     * are removed. If multiple keys refer to the same key after normalization,
+     * while their values are different, the value of the given 
+     * key is undefined (true or false, type remains boolean).
+     * 
+     * @param  {Readonly<CombinationData>} combination  Combination data to be normalized. 
+     * @returns CombinationData                         Normalized combination representation.
+     */
+    protected static fromObject(combination: Readonly<CombinationData>): CombinationData {
 
-    public static fromString(combination: string): Combination {
+        return Object.entries(combination)
+            .map(([key, value]): [string, boolean] => 
+            [Combination.normalizeKey(key),             // normalize key             
+            value])                                     // preserve value
+            .filter(([key]) => key.length)              // remove empty keys                 
+            .reduce((rest, [key, value]) =>             // reduce array of key value pairs to an object
+            ({ ...rest, [key]: value }), {});
+    }
+    
+    /**
+     * 
+     * Transforms a string representation of a combination to the internal representation.
+     * 
+     * @param  {string} combination String to be transformed.
+     * @returns CombinationData     Normalized combination representation.
+     */
+    protected static fromString(combination: string): CombinationData {
 
-        return new Combination(Combination.getNormalized(combination));
+        return combination.split("+")               // split combination to an array of keys
+                .map(key => 
+                    Combination.normalizeKey(key))  // normalize key
+                .filter(key => key.length)          // remove empty string
+                .reduce((rest, current) =>          // reduce array of keys to an object
+                ({ ...rest, [current]: true }), {});
     }
 
-    public static fromOther(combination: Readonly<Combination>) {
+    /**
+     * 
+     * Creates a copy of internal representation from a Combination instance.
+     * 
+     * @param  {Readonly<Combination>} other    Copy target.
+     * @returns CombinationData                 Copied combination representation.
+     */
+    protected static fromOther(other: Readonly<Combination>): CombinationData {
 
-        return new Combination(combination.get());
+        return { ...(other.get()) };
+    }
+
+    /// Protected methods
+
+    /**
+     * 
+     * Sets the internal representation in different ways based on the type of
+     * the supplied parameter.
+     * 
+     * @param  {CombinationDefinition} combination Reference for setting the internal representation.
+     * @returns void
+     */
+    protected setCombinationData(combination: CombinationDefinition): void {
+
+        if(typeof combination === "string") {
+
+            this.combination = Combination.fromString(combination);
+
+        } else if(combination instanceof Combination) {
+
+            this.combination = Combination.fromOther(combination);
+
+        } else {
+
+            // if combination parameter isn't a string or a Combination instance,
+            // it has to be an CombinationData compliant plain object
+            this.combination = Combination.fromObject(combination as CombinationData);
+        }
     }
 
     /// Public methods
 
-    public get(): Readonly<ICombination> {
+    // mutator methods
+
+    /**
+     * 
+     * Sets the internal representation based on the parameter.
+     * Works same as the constructor function, except combination can't be undefined.
+     * 
+     * @param  {CombinationDefinition} combination  Reference for setting the internal representation.
+     * @returns Combination                         Reference to instance to enable chain calls.
+     */
+    public set(combination: CombinationDefinition): Combination {
+
+        this.setCombinationData(combination);
+
+        return this;
+    }
+
+    /**
+     * 
+     * Removes all keys from the internal representation.
+     * 
+     * @returns Combination Reference to instance to enable chain calls.
+     */
+    public clear(): Combination {
+
+        this.combination = {};
+
+        return this;
+    }
+    
+    /**
+     * 
+     * Adds a new key to the internal representation.
+     * Key name is normalized - case and spaces are ignored.
+     * Empty strings are also ignored.
+     * Existing keys have their value updated.
+     * 
+     * @param  {string} key         Key to be added.
+     * @param  {boolean} asNew=true Value associated with the key.
+     * @returns Combination         Reference to instance to enable chain calls.
+     */
+    public addKey(key: string, asNew = true): Combination {
+
+        const normalized = Combination.normalizeKey(key);
+
+        // do not allow empty strings as keys
+        if(normalized.length) {
+
+            this.combination[normalized] = asNew;
+        }
+
+        return this;
+    }
+    
+    /**
+     * 
+     * Removes a key from the internal representation.
+     * Key name is normalized. Invalid or missing keys are ignored.
+     * 
+     * @param  {string} key Key name to be removed.
+     * @returns Combination Reference to instance to enable chain calls.
+     */
+    public removeKey(key: string): Combination {
+
+        // no need to check if key exists
+        delete this.combination[Combination.normalizeKey(key)];
+
+        return this;
+    }
+
+    /**
+     * 
+     * Sets all key values.
+     * 
+     * @param  {boolean} value  Value to be set for each key.
+     * @returns                 Combination Reference to instance to enable chain calls.
+     */
+    public setKeysTo(value: boolean): Combination {
+
+        for(let key in this.combination) {
+
+            this.combination[key] = value;
+        }
+
+        return this;
+    }
+
+    // query methods
+    
+    /**
+     * 
+     * Returns the internal representation for reading.
+     * 
+     * @returns Readonly<CombinationData> Internal representation.
+     */
+    public get(): Readonly<CombinationData> {
         
         return this.combination;
     }
-
+    
+    /**
+     * 
+     * Transforms the internal representation to a string.
+     * Sorted keys are joined using "+" and all are lower case.
+     * 
+     * @returns string String created from representation.
+     */
     public toString(): string {
 
         return Object.keys(this.combination).sort().join("+");
     }
     
-    public clear(): void {
-
-        this.combination = {};
-    }
-
-    public addKey(key: string): void {
-
-        this.combination[key] = true;
-    }
-
-    public removeKey(key: string) {
-
-        delete this.combination[key];
-    }
-
-    public setOldKeys() {
-
-        for(let key in this.combination) {
-
-            this.combination[key] = false;
-        }
-    }
-
-    public isSubsetOf(other: Readonly<Combination>, exact: boolean): boolean {
+    /**
+     * 
+     * Checks if every key is present in a different instance.
+     * 
+     * @param  {Readonly<Combination>} other    Instance for comparing.
+     * @param  {boolean} requireNewKey          Require at least one of the checked keys to be true (new) in the other instance.
+     * @returns boolean                         Return whether instance is sufficient subset of the other instance.
+     */
+    public isSubsetOf(other: Readonly<Combination>, requireNewKey: boolean): boolean {
         
         let matched = true;
-        let matchedExactly = false;
+        let foundNewKey = false;
         const superset = other.get();
 
         for(const key in this.combination) {
@@ -134,13 +339,20 @@ class Combination {
             
             } else if(superset[key] === true) {
 
-                matchedExactly = true;
+                foundNewKey = true;
             } 
         }
 
-        return exact ? matchedExactly && matched : matched;
+        return requireNewKey ? foundNewKey && matched : matched;
     }
-
+    
+    /**
+     * 
+     * Checks if every key of an other instance is old in the current instance.
+     * 
+     * @param  {Readonly<Combination>} other    Instance for comparing.
+     * @returns boolean                         Return whether current instance has every key of other instance as old.
+     */
     public hasOldKeysOf(other: Readonly<Combination>): boolean {
 
         const old = other.get();
@@ -157,60 +369,233 @@ class Combination {
     }
 };
 
+/**
+ * 
+ * Defines the internal representation of sequences.
+ */
 type SequenceData = Array<Combination>;
 
+/**
+ * 
+ * Types which can be used to set/construct a Sequence. 
+ */
+type SequenceDefinition = string | Readonly<SequenceData> | Readonly<Sequence>; 
+
+/**
+ * 
+ * Class for representing a keypress combination sequence with 
+ * various utility methods. 
+ */
 class Sequence {
 
     /// Protected members
 
-    protected sequence: SequenceData;
+    /**
+     * 
+     * Internal sequence representation - array of Combinations.
+     */
+    protected sequence: SequenceData = [];
 
     /// Constructor function
+    
+    /**
+     * 
+     * Constructs a sequence based on the supplied paramater.
+     * Options:
+     *  - undefined     - Create empty representation.
+     *  - string        - Sequence of combinations separated with spaces. Individual
+     *                    keys in a combination are separated with a "+". Case and additional
+     *                    spaces are ignored.   
+     *  - Sequence      - Copy representation from other instance.
+     *  - SequenceData  - Define the sequence using an array of combinations.
+     * 
+     * @param  {SequenceDefinition=[]} sequence Reference for construction.
+     */
+    public constructor(sequence: SequenceDefinition = []) {
 
-    public constructor(sequence: string = "") {
-
-        this.sequence = Sequence.getNormalized(sequence);
+        this.setSequenceData(sequence);
     }
 
     /// Protected static methods
 
-    protected static getNormalized(sequence: string): SequenceData {
+    /**
+     * 
+     * Transforms a string representation of a sequence to the internal representation.
+     * 
+     * @param  {string} sequence    String be transformed.
+     * @returns SequenceData        Normalized sequence representation.
+     */
+    protected static fromString(sequence: string): SequenceData {
 
-        return sequence.split(" ")                              // split whole sequence to an array of combinations
+        return sequence.replace(/\s*\+\s*/g, "+")               // remove redudant spaces within a combination
+            .split(" ")                                         // split whole sequence to an array of combinations
             .filter(combination => combination.length)          // discard empty strings e.g.: "a  b" => ["a", "", "b"] => ["a", "b"]
                                                                 // space is defined using "space" string
-            .map(combination => Combination.fromString(combination));
+            .map(combination => new Combination(combination));
+    }
+
+    /**
+     * 
+     * Creates a copy of internal representation from a Sequence instance.
+     * 
+     * @param  {Readonly<Sequence>} sequence    Copy target.
+     * @returns SequenceData                    Copied sequence representation.
+     */
+    protected static fromOther(sequence: Readonly<Sequence>): SequenceData {
+
+        return Sequence.fromArray(sequence.get());
+    }
+
+    /**
+     * 
+     * Creates a copy of internal representation from an array of combinations.
+     * 
+     * @param  {Readonly<SequenceData>} sequence    Array of combinations.
+     * @returns SequenceData                        Copied sequence representation.
+     */
+    protected static fromArray(sequence: Readonly<SequenceData>): SequenceData {
+
+        // create a copy
+        return sequence.map(combination => new Combination(combination));
+    }
+
+    /// Protected methods
+    
+    /**
+     * 
+     * Sets the internal representaion based on the type of the supplied parameter.
+     * 
+     * @param  {SequenceDefinition} sequence    Reference for setting the internal representation.
+     * @returns void
+     */
+    protected setSequenceData(sequence: SequenceDefinition): void {
+
+        if(typeof sequence === "string") {
+
+            this.sequence = Sequence.fromString(sequence);
+        
+        } else if(sequence instanceof Sequence) {
+
+            this.sequence = Sequence.fromOther(sequence);
+        
+        } else {
+
+            // if sequence isn't a string or an instance of Sequence
+            // it has to be SequenceData array
+            this.sequence = Sequence.fromArray(sequence as Readonly<SequenceData>);
+        }
     }
 
     /// Public methods
 
+    // mutator methods
+
+    /**
+     * 
+     * Sets the internal representation based on the parameter.
+     * Works same as the constructor function, except sequence can't be undefined.
+     * 
+     * @param  {SequenceDefinition} sequence    Reference for setting the internal representation.
+     * @returns Sequence                        Reference to instance to enable chain calls.
+     */
+    public set(sequence: SequenceDefinition): Sequence {
+
+        this.setSequenceData(sequence);
+
+        return this;
+    }
+    
+    /**
+     * 
+     * Adds a copy of a combination to the end of the combination array (internal representation).
+     * 
+     * @param  {Readonly<Combination>} combination  Combination to be added.
+     * @returns Sequence                            Reference to instance to enable chain calls.
+     */
+    public push(combination: Readonly<Combination>): Sequence {
+        
+        // push a copy
+        this.sequence.push(new Combination(combination));
+
+        return this;
+    }
+    
+    /**
+     * 
+     * Clears the combination array. 
+     * 
+     * @returns Sequence Reference to instance to enable chain calls.
+     */
+    public clear(): Sequence {
+
+        this.sequence = [];
+
+        return this;
+    }
+
+    /**
+     * 
+     * Removes the second-to-last Combination from the internal representation,
+     * if the last Combination contains every key of the second-to-last Combination
+     * as old. Does nothing if there aren't at least two Combinations.
+     * 
+     * @returns Sequence Reference to instance to enable chain calls.
+     */
+    public mergeOldKeys(): Sequence {
+
+        // shorthand
+        const sequence = this.sequence;
+
+        if(sequence.length < 2) return this;
+        
+        const oldCombination = sequence[sequence.length - 2];
+        const newCombination = sequence[sequence.length - 1];
+
+        if(newCombination.hasOldKeysOf(oldCombination)) {
+
+            sequence.splice(sequence.length - 2, 1);
+        }
+
+        return this;
+    }
+
+    // query methods
+
+    /**
+     * 
+     * Returns the internal representation for reading.
+     * 
+     * @returns Readonly<SequenceData> Internal representation.
+     */
     public get(): Readonly<SequenceData> {
 
         return this.sequence;
     }
 
-    public push(combination: Readonly<Combination>): void {
-        
-        // push a copy
-        this.sequence.push(Combination.fromOther(combination));
+    /**
+     * 
+     * Transforms the internal representation to a string.
+     * Combinations are joined with " ".
+     * 
+     * @returns string String created from representation.
+     */
+    public toString(): string {
+
+        return this.sequence.map(combination => combination.toString()).join(" ");
     }
+  
+    /**
+     * 
+     * Checks if every Combination is a subset of the corresponding Combination
+     * in an other sequence. Checked from the back of the arrays.
+     * 
+     * @param  {Readonly<Sequence>} other   Superset for comparison.
+     * @param  {boolean} requireNewKey      Require a new key in every checked combination of the superset.
+     * @returns boolean                     Return whether the sequence is a sufficient subset of the other sequence.
+     */
+    public isMatchingSubsetOf(other: Readonly<Sequence>, requireNewKey: boolean): boolean {
 
-    public clear(): void {
-
-        this.sequence = [];
-    }
-
-    public mergeOldKeys(): void {
-
-        // sanity check
-        if(this.sequence.length < 2) throw new Error("Attempting to merge keys when there aren't at least 2 combinations");
-
-        this.sequence.splice(this.sequence.length - 2, 1);
-    }
-
-    public match(sequence: Readonly<Sequence>, exact: boolean): boolean {
-
-        const buffer = sequence.get();
+        const buffer = other.get();
 
         // empty sequence definition matches everything
         if(this.sequence.length === 0) return true;
@@ -218,8 +603,8 @@ class Sequence {
         if(buffer.length < this.sequence.length) return false;
 
         // iterate backwards 
-        let bufferIndex = buffer.length - 1;
         let sequenceIndex = this.sequence.length - 1;
+        let bufferIndex = buffer.length - 1;
 
         while(bufferIndex >= 0 && sequenceIndex >= 0) {
 
@@ -227,7 +612,7 @@ class Sequence {
             const superset = buffer[bufferIndex];
 
             // check if for combination match
-            if(subset.isSubsetOf(superset, exact)) {
+            if(subset.isSubsetOf(superset, requireNewKey)) {
 
                 // if last combination matched, the sequence matched
                 if(sequenceIndex === 0) {
@@ -249,29 +634,63 @@ class Sequence {
     }
 };
 
-// define callback signature
+/**
+ * 
+ * Defines hotkey callback signature.
+ */
 type Callback = (event: { event: HotkeyEvent }) => boolean | void;
+
+/**
+ * 
+ * Type used for defining hotkey sequences.
+ */
 type SequenceDefinitions = Readonly<Array<string>>;
 
+/**
+ * 
+ * Class for representing hotkeys, including various methods for changing
+ * settings after construction.
+ */
 class Hotkey {
 
     /// Protected members
 
+    /**
+     * 
+     * Unique identifier used mainly by HotkeyContext.
+     */
     protected readonly id: string;
-    protected toggled: boolean;
+
+    /**
+     * 
+     * Flag representing whether the callback should be invoked 
+     * on match. Invoking the callback manually ignores this flag.
+     */
     protected enabled: boolean;
 
+    /**
+     * 
+     * Possible sequences for matching. Callback is invoked
+     * once even if multiple sequences match.
+     */
     protected sequences: Array<Sequence>;
 
     /// Constructor function
-
+    
+    /**
+     * 
+     * Constructs a Hotkey object.
+     * 
+     * @param  {SequenceDefinitions} sequences  Possible sequences for matching.
+     * @param  {Callback} callback              Callback to be invoked on sequene match.     
+     * @param  {HotkeyEvent} eventType          Event type upon which to attempt matching.
+     */
     public constructor(sequences: SequenceDefinitions, 
-                protected callback: Callback, 
+                protected callback: Callback,
                 protected eventType: HotkeyEvent) {
 
         // create helper properties
         this.id = uniqid();
-        this.toggled = false;
 
         // enable hotkey by default
         this.enabled = true;
@@ -281,7 +700,15 @@ class Hotkey {
     }
 
     /// Protected static methods
-
+    
+    /**
+     * 
+     * Converts an array of string sequence definitions to 
+     * an array of corresponding Sequence instances.
+     * 
+     * @param  {SequenceDefinitions} sequences  Array of string sequence definitions to be converted.
+     * @returns Array<Sequence>                 Converted array of Sequence instances.
+     */
     protected static stringsToSequences(sequences: SequenceDefinitions): Array<Sequence> {
 
         return sequences.map(sequence => new Sequence(sequence));
@@ -289,66 +716,148 @@ class Hotkey {
 
     /// Public methods
 
-    public invoke(event: HotkeyEvent = HotkeyEvent.KEYDOWN): ReturnType<Callback> {
+    // mutator methods
+    
+    /**
+     * Sets the callback which is called upon match
+     * or when invoked manually using invoke().
+     * 
+     * @param  {Callback} callback  Desired callback.
+     * @returns Hotkey              Reference to instance to enable chain calls. 
+     */
+    public setCallback(callback: Callback): Hotkey {
 
-        return this.callback({ event });
+        this.callback = callback;
+
+        return this;
+    }
+    
+    /**
+     * 
+     * Sets the enabled flag to a desired value.
+     * 
+     * @param  {boolean} enable Desired enabled flag value.
+     * @returns Hotkey          Reference to instance to enable chain calls. 
+     */
+    public setEnabled(enable: boolean): Hotkey {
+
+        this.enabled = enable;
+
+        return this;
+    }
+    
+    /**
+     * 
+     * Sets the possible sequences for matching.
+     * 
+     * @param  {SequenceDefinitions} sequences  Array of string sequence definitions.
+     * @returns Hotkey                          Reference to instance to enable chain calls. 
+     */
+    public setSequences(sequences: SequenceDefinitions): Hotkey {
+
+        this.sequences = Hotkey.stringsToSequences(sequences);
+
+        return this;
     }
 
-    public isToggled(): boolean {
+    /**
+     * 
+     * Sets the event type upon which the matching of
+     * sequences is attempted.
+     * 
+     * @param  {HotkeyEvent} eventType  Desired event type.
+     * @returns Hotkey                  Reference to instance to enable chain calls. 
+     */
+    public setEventType(eventType: HotkeyEvent): Hotkey {
 
-        return this.toggled;
+        this.eventType = eventType;
+
+        return this;
     }
 
-    public setToggled(toggle: boolean): void {
+    // utility methods
+   
+    /**
+     * 
+     * Invokes the callback with a specific event type.
+     * Event type cannot be HotkeyEvent.BOTH, because
+     * BOTH refers to listening to KEYUP or KEYDOWN
+     * and callback are always called with one of those.
+     * 
+     * @param  {HotkeyEvent.KEYUP|HotkeyEvent.KEYDOWN=HotkeyEvent.KEYDOWN} event    Event type passed to the callback.
+     * @returns boolean | undefined Returns whether the callback requested to prevent default behavior.
+     */
+    public invoke(event: HotkeyEvent.KEYUP | HotkeyEvent.KEYDOWN = HotkeyEvent.KEYDOWN): ReturnType<Callback> {
 
-        this.toggled = toggle;
+        if(this.callback) {
+
+            return this.callback({ event });
+        }
+
+        return false;
     }
 
+    // query methods
+    
+    /**
+     * 
+     * Returns whether the enabled flag is set.
+     * 
+     * @returns boolean Enabled flag.
+     */
     public isEnabled(): boolean {
 
         return this.enabled;
     }
-
-    public setEnabled(enable: boolean): void {
-
-        this.enabled = enable;
-    }
-
-    public setCallback(callback: Callback): void {
-
-        this.callback = callback;
-    }
-
-    public setSequences(sequences: SequenceDefinitions): void {
-
-        this.sequences = Hotkey.stringsToSequences(sequences);
-    }
-
+    
+    /**
+     * 
+     * Returns the currently set event type.
+     * 
+     * @returns HotkeyEvent Current event type.
+     */
     public getEventType(): HotkeyEvent {
 
         return this.eventType;
     }
 
-    public setEventType(eventType: HotkeyEvent): void {
-
-        this.eventType = eventType;
-    }
-
+    /**
+     * 
+     * Checks whether Hotkey listens to a certain event type.
+     * 
+     * @param  {HotkeyEvent} event  Queried event type.
+     * @returns boolean             Whether Hotkey listens to queried event.
+     */
     public eventMatch(event: HotkeyEvent): boolean {
 
         return this.eventType === HotkeyEvent.BOTH || this.eventType === event;
     }
-
+    
+    /**
+     * 
+     * Returns a unique instance identifier.
+     * Used mainly by HotkeyContext.
+     * 
+     * @returns string Unique identifier.
+     */
     public getId(): string {
 
         return this.id;
     }
-
-    public match(sequence: Readonly<Sequence>, exact: boolean): boolean {
+    
+    /**
+     * 
+     * Checks whether contains at least one matching sequence subset.
+     * 
+     * @param  {Readonly<Sequence>} sequence    Sequence superset used for comparison.
+     * @param  {boolean} requireNewKey          Require at least one new key in matched combinations.
+     * @returns boolean                         Whether at least one sequence matched.
+     */
+    public hasMatchingSequence(sequence: Readonly<Sequence>, requireNewKey: boolean): boolean {
 
         for(const idx in this.sequences) {
 
-            if(this.sequences[idx].match(sequence, exact)) {
+            if(this.sequences[idx].isMatchingSubsetOf(sequence, requireNewKey)) {
 
                 return true;
             }
@@ -358,12 +867,21 @@ class Hotkey {
     }
 };
 
+/**
+ * 
+ * Defines object shape which stores a sequence and
+ * its corresponding reset timeout id.
+ */
 type SequenceBuffer = {
 
     reset: ReturnType<typeof setTimeout>;
     buffer: Sequence;
 };
 
+/**
+ * 
+ * Union type used for indexing Sequence buffers.
+ */
 type EventIndexer = HotkeyEvent.KEYDOWN | HotkeyEvent.KEYUP;
 
 class HotKeyContext {
@@ -373,13 +891,11 @@ class HotKeyContext {
     protected enabled: boolean;
     protected hotkeys: { [index: string]: Hotkey };
     protected keyCombination: Combination;
-    protected sequences : {
-
-        [HotkeyEvent.KEYUP]: SequenceBuffer;
-        [HotkeyEvent.KEYDOWN]: SequenceBuffer;
-
-    };
+    protected sequences: Record<EventIndexer, SequenceBuffer>; 
+    
     protected bufferResetTime: number;
+
+    protected blurCallbackRef?: () => void;
 
     /// Constructor function
 
@@ -407,60 +923,39 @@ class HotKeyContext {
             },
         };
         
-        this.bufferResetTime = 1000; // ms
+        this.bufferResetTime = 5000; // ms
     }
 
     /// Protected methods
 
-    protected resetSequenceBuffer(event: EventIndexer): void {
+    protected clearSequenceBuffer(event: EventIndexer): void {
 
         this.sequences[event].buffer.clear();
     }
 
-    protected callMatchingHandlers(events: HotkeyEvent, sequence: Readonly<Sequence>, 
-                                exactMatch: boolean, toggleHandler: boolean): boolean {
+    protected callMatchingHandlers(event: EventIndexer, sequence: Readonly<Sequence>, 
+                                    requireNewKey: boolean): boolean {
 
         let preventDefault = false;
 
-        let eventArray = events === HotkeyEvent.BOTH ? [HotkeyEvent.KEYDOWN, HotkeyEvent.KEYUP] : [events];
+        // check every registered hotkey
+        for(const id in this.hotkeys) {
 
-        for(const event of eventArray) {
+            // shorthand
+            const hotkey = this.hotkeys[id];
 
-            for(const id in this.hotkeys) {
+            // check if hotkey is enabled and if event type matches
+            if(!hotkey.isEnabled() || !hotkey.eventMatch(event)) continue;
 
-                const hotkey = this.hotkeys[id];
+            if(hotkey.hasMatchingSequence(sequence, requireNewKey)) {
 
-                // check if hotkey is enabled and the event type matches
-                if(!hotkey.isEnabled() || !hotkey.eventMatch(event)) continue;
-
-                if(hotkey.match(sequence, exactMatch)) {
-
-                    hotkey.setToggled(toggleHandler && event === HotkeyEvent.KEYDOWN);
-
-                    // call handler and exit
-                    preventDefault = hotkey.invoke(event) || preventDefault;
-                    break;
-                }
+                // call handler and exit
+                preventDefault = hotkey.invoke(event) || preventDefault;
+                break;
             }
         }
 
         return preventDefault;
-    }
-
-    protected mergeOldKeys(event: EventIndexer): void {
-        
-        const sequence = this.sequences[event].buffer; 
-        const buffer = sequence.get();
-
-        if(buffer.length < 2 || event === HotkeyEvent.KEYUP) return;
-        
-        const oldCombination = buffer[buffer.length - 2];
-        const newCombination = buffer[buffer.length - 1];
-
-        if(newCombination.hasOldKeysOf(oldCombination)) {
-
-            sequence.mergeOldKeys();
-        }
     }
 
     protected registerHotkey(hotkey: Hotkey): Hotkey {
@@ -471,93 +966,146 @@ class HotKeyContext {
         return hotkey;
     }
 
-    /// Public methods
+    protected recieveKey(event: EventIndexer, key: string): void {
 
-    public onBlurCallback(): void {
+        // set other keys as old
+        this.keyCombination.setKeysTo(false);
+        // add key as new
+        this.keyCombination.addKey(key, true);
+        
+        // save current state
+        this.sequences[event].buffer.push(this.keyCombination);
+        
+        if(event === HotkeyEvent.KEYDOWN) {
 
-        for(const id in this.hotkeys) {
+            // merging keys makes sense only on key down events
+            this.sequences[HotkeyEvent.KEYDOWN].buffer.mergeOldKeys();
 
-            const hotkey = this.hotkeys[id];
+        } else { // KEYUP
 
-            if(hotkey.isToggled() && hotkey.eventMatch(HotkeyEvent.KEYUP)) {
-
-                hotkey.setToggled(false);
-                hotkey.invoke(HotkeyEvent.KEYUP);
-            }
+            this.keyCombination.removeKey(key);
         }
-
-        this.keyCombination.clear();
     }
 
-    public onKeyChangedCallback(event: { key: string, pressed: boolean }): boolean {
+    protected setupBufferReset(event: EventIndexer): void {
+
+        // clear existing reset buffer timeout
+        // no need to check if reset id is valid
+        clearTimeout(this.sequences[event].reset);
+
+        this.sequences[event].reset = setTimeout(() => this.clearSequenceBuffer(event), this.bufferResetTime);
+    } 
+
+    /// Public methods
+
+    // mutator methods
+
+    public attachBlurHandlerToWindow(): HotKeyContext {
+
+        this.blurCallbackRef = () => this.onBlur();
+
+        window.addEventListener("blur", this.blurCallbackRef);
+
+        return this;
+    }
+
+    public clearBlurHandler(): HotKeyContext {
+
+        if(this.blurCallbackRef) {
+
+            window.removeEventListener("blur", this.blurCallbackRef);
+
+            this.blurCallbackRef = undefined;
+        }
+
+        return this;
+    }
+
+    public onBlur(): void {
+
+        if(!this.isEnabled()) return;
+
+        const event = HotkeyEvent.KEYUP;
+        
+        // set all currently pressed keys to new
+        this.keyCombination.setKeysTo(true);
+
+        this.sequences[event].buffer.push(this.keyCombination);
+
+        this.clearCombination();
+        
+        this.setupBufferReset(event);
+        
+        this.callMatchingHandlers(event, this.sequences[event].buffer, true);
+    }
+
+    public onKeyChanged(eventData: { key: string, pressed: boolean }): boolean {
 
         // check if context is enabled
         if(!this.isEnabled()) return false; 
 
-        const eventType = event.pressed ? HotkeyEvent.KEYDOWN : HotkeyEvent.KEYUP;
+        const event = eventData.pressed ? HotkeyEvent.KEYDOWN : HotkeyEvent.KEYUP;
 
-        const key = normalizeKeyName(event.key);
+        const key = normalizeEventKey(eventData.key);
 
-        // set other keys as old
-        this.keyCombination.setOldKeys();
-        // set as neweset key
-        this.keyCombination.addKey(key);
-        
-        // save current state
-        this.sequences[eventType].buffer.push(this.keyCombination);
-    
-        if(eventType === HotkeyEvent.KEYUP) {
+        this.recieveKey(event, key);
 
-            this.keyCombination.removeKey(key);
-        }
+        this.setupBufferReset(event);
 
-        // clear existing reset buffer timeout
-
-        clearTimeout(this.sequences[eventType].reset);
-
-        this.mergeOldKeys(eventType);
-
-        const preventDefault = this.callMatchingHandlers(eventType, this.sequences[eventType].buffer, true, true);
-        
-        this.sequences[eventType].reset = setTimeout(() => this.resetSequenceBuffer(eventType), this.bufferResetTime);
-
-        return preventDefault;
+        return this.callMatchingHandlers(event, this.sequences[event].buffer, true);
     }
 
-    public createHotkey(sequences: Readonly<Array<string>>, callback: Callback, eventType = HotkeyEvent.KEYDOWN): Hotkey {
+    public createHotkey(sequences: SequenceDefinitions, callback: Callback, eventType: HotkeyEvent): Hotkey {
 
         return this.registerHotkey(new Hotkey(sequences, callback, eventType));
     }
 
-    public removeHotkey(hotkey: Readonly<Hotkey>): void {
+    public removeHotkey(hotkey: Readonly<Hotkey>): HotKeyContext {
 
-        // remove reference
         delete this.hotkeys[hotkey.getId()];
+
+        return this;
     }
 
-    public clearHotkeys(): void {
+    public clearHotkeys(): HotKeyContext {
 
         this.hotkeys = {};
+
+        return this;
     }
-
-    public invokeSequence(sequence: string, event = HotkeyEvent.KEYDOWN): boolean {
-
-        return this.callMatchingHandlers(event, new Sequence(sequence), false, false);
-    }
-
-    public setKeyPressDiffTime(ms: number): void {
+    
+    public setKeyPressDiffTime(ms: number): HotKeyContext {
 
         this.bufferResetTime = ms;
+
+        return this;
     }
+
+    public setEnabled(enable: boolean): HotKeyContext {
+
+        this.enabled = enable;
+
+        if(!this.isEnabled()) {
+            // clear combination when disabling context
+            // otherwise keys would remain as pressed
+            this.clearCombination();
+        }
+
+        return this;
+    }
+
+    public clearCombination(): HotKeyContext {
+
+        this.keyCombination.clear();
+
+        return this;
+    }
+
+    // query methods
 
     public isEnabled(): boolean {
 
         return this.enabled;
-    }
-
-    public setEnabled(enable: boolean): void {
-
-        this.enabled = enable;
     }
 
     public currentCombination(): Readonly<Combination> {
@@ -565,9 +1113,9 @@ class HotKeyContext {
         return this.keyCombination;
     }
 
-    public clearCombination(): void {
+    public isKeyPressed(key: string): boolean {
 
-        this.keyCombination.clear();
+        return this.keyCombination.get()[key] !== undefined;
     }
 };
 
@@ -577,7 +1125,7 @@ export { HotKeyContext, HotkeyEvent };
 // export testables
 export const _testables = {
 
-    normalizeKeyName,
+    normalizeEventKey,
     Combination,
     Sequence,
     Hotkey
