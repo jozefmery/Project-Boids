@@ -13,7 +13,7 @@
   * Transforms a string's first character to upper case and the rest to lower.
   * 
   * @param  {string} target String to be transformed.
-  * @returns string         Transformed string.
+  * @returns {string}       Transformed string.
   */
 function capitalize(target: string): string {
 
@@ -27,7 +27,7 @@ function capitalize(target: string): string {
  * @param  {number} target  Number to be clamped.
  * @param  {number} min     Lower bound.
  * @param  {number} max     Upper bound.
- * @returns number          Clamped number.
+ * @returns {number}        Clamped number.
  */
 function clamp(target: number, min: number, max: number): number {
 
@@ -53,7 +53,7 @@ interface Class {
  * 
  * @param  {Class} classObject      Class object (constructor function) whose static methods are to be ran.
  * @param  {RegExp} nameCondition?  Condition for running a static method.
- * @returns void
+ * @returns {void}
  */
 function runStaticMethods(classObject: Class, nameCondition?: RegExp): void {
 
