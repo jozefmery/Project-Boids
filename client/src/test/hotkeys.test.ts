@@ -190,13 +190,15 @@ class CombinationTest extends Combination {
             expect(subject("a+b").removeKey(" C ").get()).toStrictEqual({ a: true, b: true });
         });
 
-        test("Combination.setOldKeys()", () => {
+        test("Combination.setKeysTo()", () => {
 
-            expect(subject().setOldKeys().get()).toStrictEqual({});
+            expect(subject().setKeysTo(false).get()).toStrictEqual({});
 
-            expect(subject("a+b").setOldKeys().get()).toStrictEqual({ a: false, b: false });
+            expect(subject("a+b").setKeysTo(false).get()).toStrictEqual({ a: false, b: false });
 
-            expect(subject("a+b").addKey("b", false).setOldKeys().get()).toStrictEqual({ a: false, b: false });
+            expect(subject("a+b").addKey("b", false).setKeysTo(false).get()).toStrictEqual({ a: false, b: false });
+
+            expect(subject({ a: true, b: true }).addKey("b", false).setKeysTo(true).get()).toStrictEqual({ a: true, b: true });
         });
     }
 
@@ -232,40 +234,28 @@ class CombinationTest extends Combination {
 
         test("Combination.isSubsetOf()", () => {
 
-            expect(subject().isSubsetOf(subject(), false)).toBeTruthy();
+            expect(subject().isSubsetOf(subject())).toBeFalsy();
 
-            expect(subject().isSubsetOf(subject(), true)).toBeFalsy();
-
-            expect(subject().isSubsetOf(subject("a+b"), false)).toBeTruthy();
-
-            expect(subject().isSubsetOf(subject("a+b"), true)).toBeFalsy();
+            expect(subject().isSubsetOf(subject("a+b"))).toBeFalsy();
             
-            expect(subject({ a: false }).isSubsetOf(subject({ a: false }), false)).toBeTruthy();
-            
-            expect(subject({ a: false }).isSubsetOf(subject({ a: false }), true)).toBeFalsy();
+            expect(subject({ a: false }).isSubsetOf(subject({ a: false }))).toBeFalsy();
 
-            expect(subject({ a: true, b: true }).isSubsetOf(subject({ a: true }), false)).toBeFalsy();
+            expect(subject({ a: true, b: true }).isSubsetOf(subject({ a: true }))).toBeFalsy();
 
             expect(subject({ a: false, b: false })
-                .isSubsetOf(subject({ a: false, b: true }), false)).toBeTruthy();
+                .isSubsetOf(subject({ a: false, b: true }))).toBeTruthy();
 
             expect(subject({ a: false, b: false })
-                .isSubsetOf(subject({ a: false, b: true }), true)).toBeTruthy();
+                .isSubsetOf(subject({ a: false, b: false }))).toBeFalsy();
 
             expect(subject({ a: false, b: false })
-                .isSubsetOf(subject({ a: false, b: false }), true)).toBeFalsy();
+                .isSubsetOf(subject({ a: false, b: false, c: false }))).toBeFalsy();
 
             expect(subject({ a: false, b: false })
-                .isSubsetOf(subject({ a: false, b: false, c: false }), false)).toBeTruthy();
-
-            expect(subject({ a: false, b: false })
-                .isSubsetOf(subject({ a: false, b: false, c: false }), true)).toBeFalsy();
-
-            expect(subject({ a: false, b: false })
-                .isSubsetOf(subject({ a: false, b: true, c: false }), true)).toBeTruthy();
+                .isSubsetOf(subject({ a: false, b: true, c: false }))).toBeTruthy();
             
             expect(subject({ a: false, b: false })
-                .isSubsetOf(subject({ b: true, c: false }), false)).toBeFalsy();
+                .isSubsetOf(subject({ b: true, c: false }))).toBeFalsy();
         });
 
         test("Combination.hasOldKeysOf()", () => {
@@ -291,6 +281,21 @@ class CombinationTest extends Combination {
 
             expect(subject({ a: false, b: false })
                 .hasOldKeysOf(subject({ a: false, b: false, c: true }))).toBeFalsy();
+        });
+
+        test("Combination.isEmpty()", () => {
+
+            expect(subject().isEmpty()).toBeTruthy();
+
+            expect(subject({}).isEmpty()).toBeTruthy();
+
+            expect(subject("").isEmpty()).toBeTruthy();
+
+            expect(subject("  ").isEmpty()).toBeTruthy();
+
+            expect(subject("a").isEmpty()).toBeFalsy();
+
+            expect(subject("a+B").isEmpty()).toBeFalsy();
         });
     }
 };
@@ -321,9 +326,13 @@ class SequenceTest extends Sequence {
 
             expect(subject(" a+b  b+a").sequence).toStrictEqual([new Combination("b+a"), new Combination("a+b")]);
 
-            expect(subject("a+b+c c+b+a ctrl").sequence).toStrictEqual([new Combination("b+a+c"), 
-                                                                        new Combination("c+a+b"),
-                                                                        new Combination("ctrl")]);
+            expect(subject(" a + b + c    c + b + a ctrl").sequence).toStrictEqual([new Combination("b+a+c"), 
+                                                                                    new Combination("c+a+b"),
+                                                                                    new Combination("ctrl")]);
+     
+            expect(subject("A+b b  +  A A").sequence).toStrictEqual([new Combination("a+b"), 
+                                                                    new Combination("a+b"),
+                                                                    new Combination("a")]);
         });
 
         test("new Sequence(SequenceData)", () => {
@@ -437,97 +446,81 @@ class SequenceTest extends Sequence {
 
             expect(subject(sequence).get()).not.toBe(sequence);
         });
+
+        test("Sequence.toString()", () =>{
+
+            expect(subject().toString()).toBe("");
+            
+            expect(subject("   ").toString()).toBe("");
+
+            expect(subject("a a a").toString()).toBe("a a a");
+
+            expect(subject("A A A").toString()).toBe("a a a");
+
+            expect(subject("A+b b  +  A A").toString()).toBe("a+b a+b a");
+        });
         
         test("Sequence.isMatchingSubsetOf()", () => {
 
-            expect(subject().isMatchingSubsetOf(subject(), false)).toBeTruthy();
-
-            expect(subject().isMatchingSubsetOf(subject(), true)).toBeTruthy();
+            expect(subject().isMatchingSubsetOf(subject())).toBeTruthy();
 
             expect(subject([new Combination({ a: false })])
-                .isMatchingSubsetOf(subject([new Combination({ a: false })]), false))
-                .toBeTruthy();
-
-            expect(subject([new Combination({ a: false })])
-                .isMatchingSubsetOf(subject([new Combination({ a: false })]), true))
+                .isMatchingSubsetOf(subject([new Combination({ a: false })])))
                 .toBeFalsy();
             
             expect(subject([new Combination({ a: false })])
-                .isMatchingSubsetOf(subject([new Combination({ a: true, b: false })]), false))
+                .isMatchingSubsetOf(subject([new Combination({ a: true, b: false })])))
                 .toBeTruthy();
 
-            expect(subject([new Combination({ a: true })]).isMatchingSubsetOf(subject(), false))
-                .toBeFalsy();
-
-            expect(subject([new Combination({ a: true })]).isMatchingSubsetOf(subject(), true))
+            expect(subject([new Combination({ a: true })]).isMatchingSubsetOf(subject()))
                 .toBeFalsy();
 
             let testSequence = [new Combination({ a: true, b: false })];
 
             expect(subject([new Combination({ a: true })])
-                .isMatchingSubsetOf(subject(testSequence), false))
-                .toBeTruthy();
-
-            expect(subject([new Combination({ a: true })])
-                .isMatchingSubsetOf(subject(testSequence), true))
+                .isMatchingSubsetOf(subject(testSequence)))
                 .toBeTruthy();
 
             expect(subject([new Combination({ c: true })])
-                .isMatchingSubsetOf(subject(testSequence), false))
+                .isMatchingSubsetOf(subject(testSequence)))
                 .toBeFalsy();
-            
-            expect(subject([new Combination({ a: true, b: false })])
-                .isMatchingSubsetOf(subject(testSequence), false))
-                .toBeTruthy();
 
             expect(subject([new Combination({ a: true, b: false })])
-                .isMatchingSubsetOf(subject(testSequence), true))
+                .isMatchingSubsetOf(subject(testSequence)))
                 .toBeTruthy();
 
             expect(subject([new Combination({ a: true, b: false, c: true })])
-                .isMatchingSubsetOf(subject(testSequence), false))
-                .toBeFalsy();
-
-            expect(subject([new Combination({ a: true, b: false, c: true })])
-                .isMatchingSubsetOf(subject(testSequence), true))
+                .isMatchingSubsetOf(subject(testSequence)))
                 .toBeFalsy();
 
             testSequence = [new Combination({ a: true }), new Combination({ b: true, c: false })];
 
             expect(subject()
-                .isMatchingSubsetOf(subject(testSequence), true))
+                .isMatchingSubsetOf(subject(testSequence)))
                 .toBeTruthy()
 
             expect(subject([new Combination({ b: true })])
-                .isMatchingSubsetOf(subject(testSequence), false))
-                .toBeTruthy();
-
-            expect(subject([new Combination({ b: true })])
-                .isMatchingSubsetOf(subject(testSequence), true))
+                .isMatchingSubsetOf(subject(testSequence)))
                 .toBeTruthy();
 
             expect(subject([new Combination({ b: false })])
-                .isMatchingSubsetOf(subject(testSequence), true))
+                .isMatchingSubsetOf(subject(testSequence)))
                 .toBeTruthy();
 
             expect(subject([new Combination({ b: true, c: false })])
-                .isMatchingSubsetOf(subject(testSequence), true))
-                .toBeTruthy();
-
-            expect(subject([new Combination({ a: false }), new Combination({ b: false })])
-                .isMatchingSubsetOf(subject(testSequence), false))
+                .isMatchingSubsetOf(subject(testSequence)))
                 .toBeTruthy();
 
             expect(subject([new Combination({ a: false }), new Combination({ c: false })])
-                .isMatchingSubsetOf(subject(testSequence), true))
+                .isMatchingSubsetOf(subject(testSequence)))
                 .toBeFalsy();
 
             expect(subject([new Combination({ a: false, b: true }), new Combination({ a: true })])
-                .isMatchingSubsetOf(subject(testSequence), false))
+                .isMatchingSubsetOf(subject(testSequence)))
                 .toBeFalsy();
 
             expect(subject([new Combination({ a: false }), new Combination({ c: true })])
-                .isMatchingSubsetOf(subject(testSequence), true))
+                .isMatchingSubsetOf(subject(testSequence)))
                 .toBeFalsy();
 
             testSequence = [new Combination({ a: true }), 
@@ -535,39 +528,55 @@ class SequenceTest extends Sequence {
                             new Combination({ a: false, b: false, c: true })];
 
             expect(subject([new Combination({ c: false })])
-                .isMatchingSubsetOf(subject(testSequence), true))
+                .isMatchingSubsetOf(subject(testSequence)))
                 .toBeTruthy();
 
             expect(subject([new Combination({ b: false })])
-                .isMatchingSubsetOf(subject(testSequence), true))
+                .isMatchingSubsetOf(subject(testSequence)))
                 .toBeFalsy();
 
-            expect(subject([new Combination({ b: false })])
-                .isMatchingSubsetOf(subject(testSequence), false))
-                .toBeTruthy();
-
             expect(subject([new Combination({ b: true }), new Combination({ c: true })])
-                .isMatchingSubsetOf(subject(testSequence), true))
+                .isMatchingSubsetOf(subject(testSequence)))
                 .toBeTruthy();
             
             expect(subject([new Combination({ a: true }), new Combination({ c: true })])
-                .isMatchingSubsetOf(subject(testSequence), true))
+                .isMatchingSubsetOf(subject(testSequence)))
                 .toBeFalsy();
 
             expect(subject([new Combination({ a: true, b: true })])
-                .isMatchingSubsetOf(subject(testSequence), true))
+                .isMatchingSubsetOf(subject(testSequence)))
                 .toBeFalsy();
 
             expect(subject([new Combination("a"), new Combination("a+b"),  
                             new Combination("a+b+c")])
-                .isMatchingSubsetOf(subject(testSequence), true))
+                .isMatchingSubsetOf(subject(testSequence)))
                 .toBeTruthy();
         });
     }
 };
 
+class HotkeyTest extends Hotkey {
+
+    private static create() {
+
+
+    }
+
+};
+
+class HotKeyContextTest extends HotKeyContext {
+
+    private static create() {
+
+    }
+
+    
+};
+
 [
     CombinationTest,
-    SequenceTest
+    SequenceTest,
+    HotkeyTest,
+    HotKeyContextTest
 
 ].forEach(classObject => runStaticMethods(classObject, /^_test/));
