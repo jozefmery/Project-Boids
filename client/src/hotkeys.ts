@@ -1306,6 +1306,13 @@ class HotKeyContext {
         return this.keyCombination.toString();
     }
 
+    /**
+     * 
+     * Checks whether a key is currently pressed.
+     * 
+     * @param   {string} key    Queried key name.
+     * @returns {boolean}       Whether queried key is pressed.
+     */
     public isKeyPressed(key: string): boolean {
 
         return this.keyCombination.get()[key] !== undefined;
