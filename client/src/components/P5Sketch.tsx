@@ -36,11 +36,6 @@ const P5Events = [
 
 ] as const;
 
-interface SetupCallback {
-
-    (p5: P5, parent: HTMLDivElement): void;
-}
-
 interface EmptyCallback {
 
     (): void;
@@ -48,7 +43,7 @@ interface EmptyCallback {
 
 interface EventCallback<Event> {
 
-    (event: Event): boolean | void;
+    (event: Event): void;
 }
 
 type P5SketchProps = {
@@ -57,7 +52,7 @@ type P5SketchProps = {
     id?: string;
 
     preload?: (p5: P5) => void;
-    setup: SetupCallback;
+    setup: (p5: P5, parent: HTMLDivElement) => void;
     draw?: EmptyCallback;
     windowResized?: EmptyCallback;
     mouseWheel?: EventCallback<WheelEvent>;
@@ -124,8 +119,9 @@ export default class P5Sketch extends Component<P5SketchProps> {
 
         P5Events.forEach(event => {
 
-            // use any to prevent errors as p5 library doesn't use sufficient types
-            const callback: any = this.props[event];
+            // cast to function type without parameters or return type
+            // to enable looping
+            const callback = this.props[event] as () => void;
 
             if(callback) this.p5[event] = callback; 
         });
