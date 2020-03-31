@@ -318,13 +318,13 @@ class Combination {
     
     /**
      * 
-     * Checks if every key is present in a different instance, with at least one 
-     * of the checked keys being new in the other instance.
+     * Checks if every key is present in a different instance.
      * 
-     * @param   {Readonly<Combination>} other   Instance for comparing.
-     * @returns {boolean}                       Return whether instance is sufficient subset of the other instance.
+     * @param  {Readonly<Combination>} other    Instance for comparing.
+     * @param  {boolean} requireNewKey          Require at least one of the checked keys to be true (new) in the other instance.
+     * @returns boolean                         Return whether instance is sufficient subset of the other instance.
      */
-    public isSubsetOf(other: Readonly<Combination>): boolean {
+    public isSubsetOf(other: Readonly<Combination>, requireNewKey: boolean): boolean {
         
         let matched = true;
         let foundNewKey = false;
@@ -343,7 +343,7 @@ class Combination {
             } 
         }
 
-        return foundNewKey && matched;
+        return requireNewKey ? foundNewKey && matched : matched;
     }
     
     /**
@@ -624,7 +624,7 @@ class Sequence {
             const superset = buffer[bufferIndex];
 
             // check if for combination match
-            if(subset.isSubsetOf(superset)) {
+            if(subset.isSubsetOf(superset, true)) {
 
                 // if last combination matched, the sequence matched
                 if(sequenceIndex === 0) {
@@ -1308,14 +1308,16 @@ class HotKeyContext {
 
     /**
      * 
-     * Checks whether a key is currently pressed.
+     * Checks whether a key combination is currently pressed.
+     * Individual keys are separated with a "+", case and spaces
+     * are ignored.
      * 
-     * @param   {string} key    Queried key name.
-     * @returns {boolean}       Whether queried key is pressed.
+     * @param   {string} combination    Queried key combination.
+     * @returns {boolean}               Whether queried key combination is pressed.
      */
-    public isKeyPressed(key: string): boolean {
+    public isCombinationPressed(combination: string): boolean {
 
-        return this.keyCombination.get()[key] !== undefined;
+        return new Combination(combination).isSubsetOf(this.keyCombination, false);
     }
 };
 
