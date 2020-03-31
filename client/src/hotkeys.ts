@@ -1173,25 +1173,28 @@ class HotKeyContext {
     /**
      * 
      * Updates key combination, resets existing sequence reset timeout
-     * and sets it up again and calls matching handlers.
+     * and sets it up again, calls matching handlers and prevents
+     * default browser behavior if at least called handler requested it.
      * 
-     * @param   {string} key        Key name present in KeyboardEvent object.
-     * @param   {boolean} pressed   Whether key was pressed or released.
-     * @returns {boolean}           Whether at least one called handler requested
-     *                              to prevent default behavior.
+     * @param   {KeyboardEvent} keyboardEvent   Event object passed to the base handler.
+     * @param   {boolean} pressed               Whether key was pressed or released.
+     * @returns {void}
      */
-    public onKeyChanged(key: string, pressed: boolean): boolean {
+    public onKeyChanged(keyboardEvent: KeyboardEvent, pressed: boolean): void {
 
         // check if context is enabled
-        if(!this.isEnabled()) return false; 
+        if(!this.isEnabled()) return; 
 
         const event = pressed ? HotkeyEvent.KEYDOWN : HotkeyEvent.KEYUP;
 
-        this.recieveKey(event, normalizeEventKey(key));
+        this.recieveKey(event, normalizeEventKey(keyboardEvent.key));
 
         this.setupBufferReset(event);
 
-        return this.callMatchingHandlers(event, this.sequences[event].buffer);
+        if(this.callMatchingHandlers(event, this.sequences[event].buffer)) {
+
+            keyboardEvent.preventDefault();
+        }
     }
     
     /**
