@@ -17,12 +17,17 @@ export enum Theme {
     DARK = "dark"
 }
 
-interface Styler {
+type stylerList =   "background"    |
+                    "area"          |
+                    "grid"          |
+                    "gridHighlight" |
+                    "boundingBox";
 
-    background: (p5: P5) => void;
-    area: (p5: P5) => void;
-    grid: (p5: P5) => void;
-    boundingBox: (p5: P5) => void;
+type StylerCallback = (p5: P5) => void;
+
+type Styler = {
+
+    [styler in stylerList]: StylerCallback;
 }
 
 type IStylers = {
@@ -34,17 +39,23 @@ const stylers: IStylers = {
 
     [Theme.DARK]: {
 
-        background: (p5: P5) => p5.background(70),
+        background: (p5) => p5.background(70),
         
-        area: (p5: P5) => {
+        area: (p5) => {
             
             p5.fill(40);
             p5.noStroke();
         },
 
-        grid: (p5: P5) => p5.stroke(120),
+        grid: (p5) => {
+
+            p5.stroke(120);
+            p5.strokeWeight(1);
+        },
+
+        gridHighlight: (p5) => p5.strokeWeight(2),
         
-        boundingBox: (p5: P5) => {
+        boundingBox: (p5) => {
 
             p5.noFill();
             p5.stroke(59, 85, 128);
@@ -54,17 +65,23 @@ const stylers: IStylers = {
 
     [Theme.LIGHT]: {
 
-        background: (p5: P5) => p5.background(200),
+        background: (p5) => p5.background(200),
 
-        area: (p5: P5) => {
+        area: (p5) => {
             
             p5.fill(220);
             p5.noStroke();
         },
 
-        grid: (p5: P5) => p5.stroke(150),
+        grid: (p5) => {
 
-        boundingBox: (p5: P5) => {
+            p5.stroke(150);
+            p5.strokeWeight(1);
+        },
+
+        gridHighlight: (p5) => p5.strokeWeight(2),
+
+        boundingBox: (p5) => {
 
             p5.noFill();
             p5.stroke(30);
