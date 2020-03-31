@@ -234,28 +234,40 @@ class CombinationTest extends Combination {
 
         test("Combination.isSubsetOf()", () => {
 
-            expect(subject().isSubsetOf(subject())).toBeFalsy();
+            expect(subject().isSubsetOf(subject(), false)).toBeTruthy();
 
-            expect(subject().isSubsetOf(subject("a+b"))).toBeFalsy();
+            expect(subject().isSubsetOf(subject(), true)).toBeFalsy();
+
+            expect(subject().isSubsetOf(subject("a+b"), false)).toBeTruthy();
+
+            expect(subject().isSubsetOf(subject("a+b"), true)).toBeFalsy();
             
-            expect(subject({ a: false }).isSubsetOf(subject({ a: false }))).toBeFalsy();
+            expect(subject({ a: false }).isSubsetOf(subject({ a: false }), false)).toBeTruthy();
+            
+            expect(subject({ a: false }).isSubsetOf(subject({ a: false }), true)).toBeFalsy();
 
-            expect(subject({ a: true, b: true }).isSubsetOf(subject({ a: true }))).toBeFalsy();
-
-            expect(subject({ a: false, b: false })
-                .isSubsetOf(subject({ a: false, b: true }))).toBeTruthy();
-
-            expect(subject({ a: false, b: false })
-                .isSubsetOf(subject({ a: false, b: false }))).toBeFalsy();
+            expect(subject({ a: true, b: true }).isSubsetOf(subject({ a: true }), false)).toBeFalsy();
 
             expect(subject({ a: false, b: false })
-                .isSubsetOf(subject({ a: false, b: false, c: false }))).toBeFalsy();
+                .isSubsetOf(subject({ a: false, b: true }), false)).toBeTruthy();
 
             expect(subject({ a: false, b: false })
-                .isSubsetOf(subject({ a: false, b: true, c: false }))).toBeTruthy();
+                .isSubsetOf(subject({ a: false, b: true }), true)).toBeTruthy();
+
+            expect(subject({ a: false, b: false })
+                .isSubsetOf(subject({ a: false, b: false }), true)).toBeFalsy();
+
+            expect(subject({ a: false, b: false })
+                .isSubsetOf(subject({ a: false, b: false, c: false }), false)).toBeTruthy();
+
+            expect(subject({ a: false, b: false })
+                .isSubsetOf(subject({ a: false, b: false, c: false }), true)).toBeFalsy();
+
+            expect(subject({ a: false, b: false })
+                .isSubsetOf(subject({ a: false, b: true, c: false }), true)).toBeTruthy();
             
             expect(subject({ a: false, b: false })
-                .isSubsetOf(subject({ b: true, c: false }))).toBeFalsy();
+                .isSubsetOf(subject({ b: true, c: false }), false)).toBeFalsy();
         });
 
         test("Combination.hasOldKeysOf()", () => {
