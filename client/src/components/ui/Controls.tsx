@@ -17,13 +17,13 @@ import classNames from "classnames";
 import { connect } from "react-redux";
 
 // import redux slices
-import simSlice from "../state/simSlice";
+import simSlice from "../../state/simSlice";
 
 // import custom components
 import Button from "./Button";
 
 // import type information
-import { StateShape } from "../state/defaultState";
+import { StateShape } from "../../state/defaultState";
 
 // import language data
 import LanguageData from "../../lang/all";
