@@ -11,6 +11,7 @@
 // import enums
 import { Theme } from "../stylers";
 import { Languages } from "../lang/all";
+import { SimZoomTarget } from "../components/Simulation";
 
 // import key binding types
 import { SimulationBindings } from "../components/Simulation";
@@ -38,6 +39,7 @@ export type StateShape = {
                 max: number;
                 delta: number;
                 enabled: boolean;
+                target: SimZoomTarget;
             }
 
             moveDelta: number;
@@ -87,7 +89,8 @@ const defaultState: StateShape =  {
                 min: 0.5,
                 max: 1.5,
                 delta: 0.05,
-                enabled: true
+                enabled: true,
+                target: SimZoomTarget.CURSOR
             },
             
             moveDelta: 250 
