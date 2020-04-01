@@ -13,73 +13,46 @@ import React, { Component } from "react";
 import P5 from "p5";
 import classNames from "classnames";
 
-const P5Events = [
-
-    "draw",
-    "windowResized",
-    "mouseWheel",
-    "mouseClicked",
-    "doubleClicked",
-    "mousePressed",
-    "mouseReleased",
-    "mouseMoved",
-    "mouseDragged",
-    "keyPressed",
-    "keyReleased",
-    "keyTyped",
-    "touchStarted",
-    "touchMoved",
-    "touchEnded",
-    "deviceMoved",
-    "deviceTurned",
-    "deviceShaken"
-
-] as const;
-
 interface EmptyCallback {
 
     (): void;
 }
 
-interface EventCallback<Event> {
 
-    (event: Event): void;
-}
 
 type P5SketchProps = {
 
     classNames?: string | string[];
     id?: string;
-
+    // p5 setup
     preload?: (p5: P5) => void;
     setup: (p5: P5, parent: HTMLDivElement) => void;
+    // p5 events
     draw?: EmptyCallback;
     windowResized?: EmptyCallback;
-    mouseWheel?: EventCallback<WheelEvent>;
-    mouseClicked?: EventCallback<MouseEvent>;
-    doubleClicked?: EventCallback<MouseEvent>;
-    mousePressed?: EventCallback<MouseEvent>;
-    mouseReleased?: EventCallback<MouseEvent>;
-    mouseMoved?: EventCallback<MouseEvent>;
-    mouseDragged?: EventCallback<MouseEvent>;
-    keyPressed?: EventCallback<KeyboardEvent>;
-    keyReleased?: EventCallback<KeyboardEvent>;
-    keyTyped?: EventCallback<KeyboardEvent>;
-    touchStarted?: EventCallback<TouchEvent>;
-    touchMoved?: EventCallback<TouchEvent>;
-    touchEnded?: EventCallback<TouchEvent>;
-    deviceMoved?: EmptyCallback;
-    deviceTurned?: EmptyCallback;
-    deviceShaken?: EmptyCallback;
+    // react events
+    onWheel?: React.EventHandler<React.WheelEvent>;
+    onClick?: React.EventHandler<React.MouseEvent>;
+    onDoubleClick?: React.EventHandler<React.MouseEvent>;
+    onMouseDown?: React.EventHandler<React.MouseEvent>;
+    onMouseUp?: React.EventHandler<React.MouseEvent>;
+    onMouseMove?: React.EventHandler<React.MouseEvent>;
+    onMouseEnter?: React.EventHandler<React.MouseEvent>;
+    onMouseLeave?: React.EventHandler<React.MouseEvent>;
+    onKeyDown?: React.EventHandler<React.KeyboardEvent>;
+    onKeyUp?: React.EventHandler<React.KeyboardEvent>;
+    onTouchStart?: React.EventHandler<React.TouchEvent>;
+    onTouchMove?: React.EventHandler<React.TouchEvent>;
+    onTouchEnd?: React.EventHandler<React.TouchEvent>;
 };
 
 export default class P5Sketch extends Component<P5SketchProps> {
 
     /// Public static members
 
-    public static defaultProps = {
+    public static readonly defaultProps = {
 
-        classNames: "",
+        classNames: "asd",
         id: "p5-sketch"
     };
 
@@ -105,26 +78,22 @@ export default class P5Sketch extends Component<P5SketchProps> {
 
             if(this.props.preload) {
 
-                // create helper reference to satisfy type system
-                const callback = this.props.preload;
-                p5.preload = () => callback(p5);
+                // cast to original type
+                // check is provided above
+                p5.preload = () => (this.props.preload as (p5: P5) => void)(p5);
             }
             
-
+            // cast canvasParent to div because it can't be undefined at this point
             p5.setup = () => this.props.setup(p5, this.canvasParent.current as HTMLDivElement);
         });
     }
 
     private setP5events() {
 
-        P5Events.forEach(event => {
-
-            // cast to function type without parameters or return type
-            // to enable looping
-            const callback = this.props[event] as () => void;
-
-            if(callback) this.p5[event] = callback; 
-        });
+        // cast to empty callback even if undefined
+        // to enable removing callbacks
+        this.p5.draw = this.props.draw as EmptyCallback;
+        this.p5.windowResized = this.props.windowResized as EmptyCallback;
     }
 
     /// Public methods
@@ -147,6 +116,23 @@ export default class P5Sketch extends Component<P5SketchProps> {
 
     public render() {
 
-        return <div ref={this.canvasParent} className={classNames(this.props.classNames)} id={this.props.id} />;
+        const { 
+            // extract redundant props
+            preload,
+            setup,
+            windowResized,
+            draw,
+            // extract class list to be called with classNames
+            classNames: classList,
+            // extract rest of event handlers
+            ...props 
+        } = this.props;
+
+        return <div ref={this.canvasParent} 
+                    className={classNames(classList)}
+                    tabIndex={0} // enable keyboard events
+                    // pass event handlers as is
+                    { ...props }
+                    />;
     }
 };
