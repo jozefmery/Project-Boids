@@ -12,6 +12,12 @@
 import React from "react";
 import ReactDOM from "react-dom";
 
+// import react-redux
+import { Provider as ReduxStateProvider } from "react-redux";
+
+// import redux store
+import { reduxStateStore } from "./state/stateStore";
+
 // import styles
 import "./css/index.scss";
 
@@ -19,4 +25,8 @@ import "./css/index.scss";
 import App from "./components/App";
 
 // render main component into main container #root div defined in "public/index.html"
-ReactDOM.render(<App />, document.getElementById("root"));
+ReactDOM.render(<ReduxStateProvider store={reduxStateStore}>
+                    <App />
+                </ReduxStateProvider>, 
+                
+                document.getElementById("root"));
