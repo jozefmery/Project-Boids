@@ -10,28 +10,62 @@
 
 // import dependencies
 import React, { Component } from "react";
-import { Provider as ReduxStateProvider } from "react-redux";
 
-// import redux store
-import { reduxStateStore } from "./state/stateStore";
+// import react-redux
+import { connect } from "react-redux";
 
 // import custom components
 import Simulation from "./Simulation";
-import UI from "./ui/Main";
+import Controls from "./ui/Controls";
+import TopBar from "./ui/TopBar";
 
-class App extends Component {
+// import language data
+import languageData from "../lang/all";
+
+// import type information
+import { StateShape } from "../state/defaultState";
+
+type AppProps = Pick<StateShape, "language">;
+
+class App extends Component<AppProps> {
+
+	/// Public static methods
+
+    public static stateToProps = ({ language }: StateShape) => ({ language });
+
+    /// Private methods
+    
+    private updateAppTitle() {
+        
+        // --- shorthands 
+        const currentLang = languageData[this.props.language];
+        // --- shorthands
+        
+        document.title = currentLang.title;
+    }
 
 	/// Public methods
+
+	public componentDidMount() {
+
+        this.updateAppTitle();
+    }
+
+    public componentDidUpdate() {
+
+        this.updateAppTitle();
+    }
 
 	public render() {
 
 		return (
-			<ReduxStateProvider store={reduxStateStore}>
+			<React.Fragment>
 				<Simulation parentID="sim-canvas-parent"/> 
-				<UI /> 
-			</ReduxStateProvider>
+				<TopBar />
+                <Controls />
+			</React.Fragment>
 		);
 	}
 }
 
-export default App;
+export default connect(App.stateToProps)(App);
