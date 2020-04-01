@@ -10,8 +10,9 @@
 
 body {
 
-    // no margin by default
+    // no margin or padding by default
     margin: 0;
+    padding: 0;
     // prevent selecting text on buttons and other UI items
     user-select: none;
 }
@@ -20,14 +21,14 @@ body {
 
     // position 
     position: absolute;
+    // fill parent
     top: 0;
     left: 0;
+    right: 0;
+    bottom: 0;
     z-index: 0;
-
-    // dimensions
-    // fill parent
-    width: 100%;
-    height: 100%;
+    
+    overflow: hidden;
 }
 
 #sim-canvas-parent {
@@ -42,23 +43,6 @@ body {
     // fill parent
     width: 100%;
     height: 100%;
-}
-
-#ui {
-
-    // position 
-    position: absolute;
-    top: 0;
-    left: 0;
-    // put ui above renderer
-    z-index: 10;
-
-    // dimensions
-    // fill parent
-    width: 100%;
-    height: 100%;
-
-    overflow: hidden;
 }
 
 .button:hover {
