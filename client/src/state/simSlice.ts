@@ -45,6 +45,8 @@ export default createSlice({
             { state.camera.scale.max = max; },
         setCameraScaleDelta: (state, { payload: delta }: PayloadAction<typeof simState.camera.scale.delta>) => 
             { state.camera.scale.delta = delta; },
+        setCameraScaleEnabled: (state, { payload: enable }: PayloadAction<typeof simState.camera.scale.enabled>) => 
+            { state.camera.scale.enabled = enable; },
         setCameraMoveDelta: (state, { payload: delta }: PayloadAction<typeof simState.camera.moveDelta>) => 
             { state.camera.moveDelta = delta; },
                                     
