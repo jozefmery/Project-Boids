@@ -14,7 +14,7 @@ import classNames from "classnames";
 
 type ToggleButtonProps = {
 
-    classNames?: string | string[];
+    classNames?: Parameters<typeof classNames>[0];
     id?: string;
     onClick: () => void;
     tooltip: string;

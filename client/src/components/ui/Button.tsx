@@ -14,7 +14,7 @@ import classNames from "classnames";
 
 type ButtonProps = {
 
-    classNames?: string | string[];
+    classNames?: Parameters<typeof classNames>[0];
     id?: string;
     onClick: () => void;
     content: () => JSX.Element | string;

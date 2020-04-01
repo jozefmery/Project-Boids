@@ -22,7 +22,7 @@ interface EmptyCallback {
 
 type P5SketchProps = {
 
-    classNames?: string | string[];
+    classNames?: Parameters<typeof classNames>[0];
     id?: string;
     // p5 setup
     preload?: (p5: P5) => void;
