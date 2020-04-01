@@ -16,13 +16,13 @@ import classNames from "classnames";
 import { connect } from "react-redux";
 
 // import redux slices
-import themeSlice from "../state/themeSlice";
+import themeSlice from "../../state/themeSlice";
 
 // import custom components
 import ToggleButton from "./ToggleButton";
 
 // import type information
-import { StateShape } from "../state/defaultState";
+import { StateShape } from "../../state/defaultState";
 
 type TopBarProps = Pick<StateShape, "theme"> & typeof themeSlice.actions;
 
