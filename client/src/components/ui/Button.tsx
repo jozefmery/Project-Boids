@@ -25,7 +25,7 @@ class Button extends Component<ButtonProps> {
     
     /// Public static members
 
-    public static defaultProps = {
+    public static readonly defaultProps = {
 
         classNames: "",
         id: "",
