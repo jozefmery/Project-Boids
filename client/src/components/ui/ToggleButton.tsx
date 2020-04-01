@@ -25,7 +25,7 @@ class Button extends Component<ToggleButtonProps> {
     
     /// Public static members
 
-    public static defaultProps = {
+    public static readonly defaultProps = {
 
         classNames: "",
         id: "",
