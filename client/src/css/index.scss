@@ -43,6 +43,24 @@ body {
     // fill parent
     width: 100%;
     height: 100%;
+
+    // style
+    cursor: grab;
+
+    &.dragging {
+
+        cursor: grabbing;
+    }
+
+    &.zoom-in {
+
+        cursor: zoom-in;
+    }
+
+    &.zoom-out {
+
+        cursor: zoom-out;
+    }
 }
 
 .button:hover {
