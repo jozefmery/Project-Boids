@@ -24,7 +24,7 @@ import "./css/index.scss";
 // import main component
 import App from "./components/App";
 
-// render main component into main container #root div defined in "public/index.html"
+// render main component and state provider into main container #root div defined in "public/index.html"
 ReactDOM.render(<ReduxStateProvider store={reduxStateStore}>
                     <App />
                 </ReduxStateProvider>, 
