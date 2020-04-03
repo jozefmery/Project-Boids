@@ -802,12 +802,7 @@ class Hotkey {
      */
     public invoke(event: HotkeyEvent.KEYUP | HotkeyEvent.KEYDOWN = HotkeyEvent.KEYDOWN): ReturnType<Callback> {
 
-        if(this.callback) {
-
-            return this.callback({ event });
-        }
-
-        return false;
+        return this.callback({ event });
     }
 
     // query methods
