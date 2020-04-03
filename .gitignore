@@ -1,4 +1,14 @@
-node_modules
+
+# Node.js
+node_modules/
 package-lock.json
+
+# IDE
 .vscode/
+
+# built files
 build/
+
+# Typescript
+react-app-env.d.ts
+setupTests.ts
