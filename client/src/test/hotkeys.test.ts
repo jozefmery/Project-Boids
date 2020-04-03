@@ -15,9 +15,13 @@ const { normalizeEventKey,
 test("Key name normalizing", () => {
 
     expect(normalizeEventKey("a")).toBe("a");
+
     expect(normalizeEventKey("A")).toBe("a");
+
     expect(normalizeEventKey("+")).toBe("plus");
+
     expect(normalizeEventKey("Control")).toBe("ctrl");
+
     expect(normalizeEventKey(" ")).toBe("space");
 });
 
@@ -567,20 +571,226 @@ class SequenceTest extends Sequence {
     }
 };
 
+type HotkeyParam = ConstructorParameters<typeof Hotkey>;
+
 class HotkeyTest extends Hotkey {
 
-    private static create() {
+    private static create(sequences: HotkeyParam[0] = [], 
+                            callback: HotkeyParam[1] = () => {}, 
+                            eventType: HotkeyParam[2] = HotkeyEvent.KEYDOWN): HotkeyTest {
 
-
+        return new Hotkey(sequences, callback, eventType);
     }
 
+    public static _testConstructors() {
+
+        const subject = HotkeyTest.create;
+
+        test("new Hotkey()", () => {
+
+            let testSubject = subject();
+
+            expect(testSubject.sequences).toHaveLength(0);
+
+            expect(testSubject.sequences).toStrictEqual([]);
+
+            expect(testSubject.enabled).toBeTruthy();
+
+            expect(testSubject.id).not.toBe("");
+
+            expect(testSubject.eventType).toBe(HotkeyEvent.KEYDOWN);
+
+            expect(testSubject.callback).toBeTruthy();
+
+            const testCallback = () => {};
+            testSubject = subject([" a + b ", " B+B   + c "], testCallback, HotkeyEvent.BOTH);
+
+            expect(testSubject.sequences).toHaveLength(2);
+
+            expect(testSubject.sequences).toStrictEqual([new Sequence("a+b"), new Sequence("b+c")]);
+
+            expect(testSubject.enabled).toBeTruthy();
+
+            expect(testSubject.id).not.toBe("");
+
+            expect(testSubject.eventType).toBe(HotkeyEvent.BOTH);
+
+            expect(testSubject.callback).toBeTruthy();
+
+            expect(testSubject.callback).toBe(testCallback);
+        });
+    }
+
+    public static _testMutatorMethods() {
+
+        const subject = HotkeyTest.create;
+
+        test("Hotkey.setCallback()", () => {
+
+            const testCallback1 = () => {};
+            const testCallback2 = () => {};
+            const testSubject = subject([], testCallback1);
+
+            expect((testSubject as HotkeyTest).callback)
+                .toBe(testCallback1);
+            
+            expect((testSubject.setCallback(testCallback2) as HotkeyTest).callback)
+                .toBe(testCallback2);
+        });
+
+        test("Hotkey.setEnabled()", () => {
+
+            expect(subject().isEnabled()).toBeTruthy();
+
+            expect(subject().setEnabled(true).isEnabled()).toBeTruthy();
+
+            expect(subject().setEnabled(false).isEnabled()).toBeFalsy();
+
+            expect(subject().setEnabled(true).setEnabled(false).isEnabled()).toBeFalsy();
+
+            expect(subject().setEnabled(true).setEnabled(true).isEnabled()).toBeTruthy();
+        });
+
+        test("Hotkey.setSequences()", () => {
+
+            const testSubject = subject();
+
+            expect(testSubject.sequences).toHaveLength(0);
+
+            testSubject.setSequences(["a", "b"]);
+            expect(testSubject.sequences).toStrictEqual([new Sequence("a"), new Sequence("b")]);
+            
+            testSubject.setSequences([]);
+            expect(testSubject.sequences).toHaveLength(0);
+
+            testSubject.setSequences(["a+b+c", "+ b + c + a + D  +"]);
+            expect(testSubject.sequences).toStrictEqual([new Sequence("a+b+c"), new Sequence("a+b+c+d")]);
+        });
+
+        test("Hotkey.setEventType()", () => {
+            
+            expect(subject().setEventType(HotkeyEvent.KEYDOWN).getEventType()).toBe(HotkeyEvent.KEYDOWN);
+
+            expect(subject().setEventType(HotkeyEvent.KEYUP).getEventType()).toBe(HotkeyEvent.KEYUP);
+
+            expect(subject().setEventType(HotkeyEvent.BOTH).getEventType()).toBe(HotkeyEvent.BOTH);
+        });
+    }
+
+    public static _testUtilityMethods() {
+
+        const subject = HotkeyTest.create;
+
+        test("Hotkey.invoke()", () => {
+
+            const testSubject = subject([], jest.fn());
+
+            expect(testSubject.callback).toHaveBeenCalledTimes(0);
+            
+            testSubject.invoke();
+            expect(testSubject.callback).toHaveBeenCalledTimes(1);
+
+            testSubject.invoke();
+            expect(testSubject.callback).toHaveBeenCalledTimes(2);
+            
+            testSubject.setCallback(jest.fn());
+            testSubject.invoke();
+            expect(testSubject.callback).toHaveBeenCalledTimes(1);
+
+            testSubject.setCallback(() => false);
+            expect(testSubject.invoke()).toBe(false);
+
+            testSubject.setCallback(() => true);
+            expect(testSubject.invoke()).toBe(true);
+        });
+    }
+
+    public static _testQueryMethods() {
+
+        const subject = HotkeyTest.create;
+
+        test("Hotkey.isEnabled()", () => {
+
+            expect(subject().isEnabled()).toBeTruthy();
+            
+            let testSubject = subject();
+            testSubject.enabled = false;
+            expect(testSubject.isEnabled()).toBeFalsy();
+
+            expect(subject().setEnabled(true).isEnabled()).toBeTruthy();
+
+            expect(subject().setEnabled(false).isEnabled()).toBeFalsy();
+        });
+
+        test("Hotkey.getEventType()", () => {
+
+            let testSubject = subject([], () => {}, HotkeyEvent.KEYDOWN);
+            expect(testSubject.eventType).toBe(HotkeyEvent.KEYDOWN);
+
+            testSubject.eventType = HotkeyEvent.KEYUP;
+            expect(testSubject.getEventType()).toBe(HotkeyEvent.KEYUP);
+
+            expect(testSubject.setEventType(HotkeyEvent.BOTH).getEventType()).toBe(HotkeyEvent.BOTH);
+        });
+
+        test("Hotkey.eventMatch()", () => {
+
+            expect(subject([], () => {}, HotkeyEvent.KEYUP).eventMatch(HotkeyEvent.KEYUP)).toBeTruthy();
+
+            expect(subject([], () => {}, HotkeyEvent.KEYDOWN).eventMatch(HotkeyEvent.KEYDOWN)).toBeTruthy();
+
+            expect(subject([], () => {}, HotkeyEvent.BOTH).eventMatch(HotkeyEvent.BOTH)).toBeTruthy();
+
+            expect(subject([], () => {}, HotkeyEvent.BOTH).eventMatch(HotkeyEvent.KEYDOWN)).toBeTruthy();
+
+            expect(subject([], () => {}, HotkeyEvent.BOTH).eventMatch(HotkeyEvent.KEYUP)).toBeTruthy();
+
+            expect(subject([], () => {}, HotkeyEvent.KEYDOWN).eventMatch(HotkeyEvent.BOTH)).toBeFalsy();
+
+            expect(subject([], () => {}, HotkeyEvent.KEYUP).eventMatch(HotkeyEvent.BOTH)).toBeFalsy();
+
+            expect(subject([], () => {}, HotkeyEvent.KEYDOWN).eventMatch(HotkeyEvent.KEYUP)).toBeFalsy();
+
+            expect(subject([], () => {}, HotkeyEvent.KEYUP).eventMatch(HotkeyEvent.KEYDOWN)).toBeFalsy();
+        });
+
+        test("Hotkey.getId()", () => {
+
+            expect(subject().getId()).not.toBe("");
+
+            expect(subject().getId() !== subject().getId()).toBeTruthy();
+        });
+
+        test("Hotkey.hasMatchingSequence()", () => {
+
+            let testSubject = subject([]);
+
+            expect(testSubject.hasMatchingSequence(new Sequence())).toBeFalsy();
+            
+            testSubject.setSequences(["a"]);
+            expect(testSubject.hasMatchingSequence(new Sequence("a"))).toBeTruthy();
+            
+            expect(testSubject.hasMatchingSequence(new Sequence("b"))).toBeFalsy();
+            
+            testSubject.setSequences(["a", "b"]);
+            expect(testSubject.hasMatchingSequence(new Sequence("b"))).toBeTruthy();
+
+            expect(testSubject.hasMatchingSequence(new Sequence("a+b"))).toBeTruthy();
+
+            expect(testSubject.hasMatchingSequence(new Sequence("b+c"))).toBeTruthy();
+            
+            testSubject.setSequences([]);
+            expect(testSubject.hasMatchingSequence(new Sequence("b+c"))).toBeFalsy();
+            
+            testSubject.setSequences(["a"]);
+            expect(testSubject.hasMatchingSequence(new Sequence("b+c"))).toBeFalsy();
+        });
+    }
 };
 
 class HotKeyContextTest extends HotKeyContext {
 
-    private static create() {
-
-    }
+    
 
     
 };
