@@ -11,30 +11,48 @@
 // import dependecies
 import P5 from "p5";
 
+/**
+ * 
+ * Enum representing the possible global application themes, with values representing assigned class names.
+ */
 export enum Theme {
 
     LIGHT = "light",
     DARK = "dark"
 }
 
+/**
+ * 
+ * List of properties every styler requires.
+ */
 type stylerList =   "background"    |
                     "area"          |
                     "grid"          |
                     "gridHighlight" |
                     "boundingBox";
 
-type StylerCallback = (p5: P5) => void;
-
+/**
+ * 
+ * Plain object type which contains every styler function from styler list.
+ */
 type Styler = {
 
-    [styler in stylerList]: StylerCallback;
+    [styler in stylerList]: (p5: P5) => void;
 }
 
+/**
+ * 
+ * Plain object type which contains a Styler object for every theme.
+ */
 type IStylers = {
 
-    [key in Theme]: Styler;
+    [theme in Theme]: Styler;
 }
 
+/**
+ * 
+ * Styler implementations for every theme.
+ */
 const stylers: IStylers = {
 
     [Theme.DARK]: {
