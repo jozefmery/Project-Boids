@@ -1207,6 +1207,14 @@ class HotKeyContext {
      * context method should be called to delete a reference to the
      * instance preventing possible future invoking.
      * 
+     * Sequences are defined using an array of strings, while each string
+     * contains key combinations separated with a space (" "). Individual
+     * combinations are key names present in event objects separated with 
+     * a "+". Exceptions: "+"" is defined as "plus", " " as space and
+     * "Control" as "ctrl". Case and additional spaces are ignored.
+     * The callback is invoked once even if there are multiple matching 
+     * sequences.
+     * 
      * @param   {SequenceDefinitions} sequences Possible sequences for matching.
      * @param   {Callback} callback             Callback to be invoked on sequence match.
      * @param   {HotkeyEvent} eventType         Type of event upon which to attempt matching.
@@ -1320,8 +1328,36 @@ class HotKeyContext {
      */
     public isCombinationPressed(combination: string): boolean {
 
+        // do not require new key when comparing
         return new Combination(combination).isSubsetOf(this.keyCombination, false);
     }
+
+    /**
+     * 
+     * Invokes a sequence and calls every matching handler 
+     * registered in this context. For sequence definition
+     * explanation see HotkeyContext.createHotkey.
+     * 
+     * @param   {string} sequence                               Sequence to be invoked.
+     * @param   {HotkeyEvent.KEYDOWN|HotkeyEvent.KEYUP} event   Type of event to be invoked.
+     * @returns {boolean}                                       Whether at least one called handler requested to prevent default behavior.
+     */
+    public invokeSequence(sequence: string, event: HotkeyEvent.KEYDOWN | HotkeyEvent.KEYUP): boolean {
+
+        let preventDefault = false;
+
+        // store internal representation
+        const superset = new Sequence(sequence).get();
+
+        // allow i to equal superset length to make sure last iteration is the whole sequence
+        for(let i = 1; i <= superset.length; ++i) {
+            
+            // use internal sequence representation to create an increasingly bigger superset to compare against
+            preventDefault = this.callMatchingHandlers(event, new Sequence(superset.slice(0, i))) || preventDefault;
+        }
+
+        return preventDefault;
+    } 
 };
 
 // export public interface
