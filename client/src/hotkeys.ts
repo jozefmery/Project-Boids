@@ -886,7 +886,7 @@ class Hotkey {
  */
 type SequenceBuffer = {
 
-    reset: ReturnType<typeof setTimeout>;
+    reset: number
     buffer: Sequence;
 };
 
@@ -965,13 +965,13 @@ class HotKeyContext {
 
             [HotkeyEvent.KEYDOWN]: {
 
-                reset: undefined as any, // default to invalid timeout id
+                reset: 0, // default to invalid timeout id
                 buffer: new Sequence()
             },
 
             [HotkeyEvent.KEYUP]: {
 
-                reset: undefined as any, 
+                reset: 0, 
                 buffer: new Sequence()
             },
         };
@@ -1084,7 +1084,7 @@ class HotKeyContext {
         // no need to check if reset id is valid
         clearTimeout(this.sequences[event].reset);
 
-        this.sequences[event].reset = setTimeout(() => this.clearSequenceBuffer(event), this.keyPressDelay);
+        this.sequences[event].reset = window.setTimeout(() => this.clearSequenceBuffer(event), this.keyPressDelay);
     } 
 
     /**
