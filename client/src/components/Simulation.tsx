@@ -88,10 +88,19 @@ class Simulation extends Component<SimulationProps, { mouseDragging: boolean, zo
 
     protected camera: { x: number, 
                         y: number, 
-                        scale: number
-                        zoomTimeout: number };
+                        scale: number };
 
     protected mouse: { lastX: number, lastY: number };
+
+    protected timeouts: {
+
+        // add index signature to enable looping
+        [index: string]: number;
+        zooming: number;
+        updateFPS: number;
+    };
+
+    protected fps: number;
     
     protected bindings: {
 
@@ -112,20 +121,31 @@ class Simulation extends Component<SimulationProps, { mouseDragging: boolean, zo
 
         // setup timing variables
         this.timeStamp = new Date().getTime();
-        this.timeDelta = 0;
+        this.timeDelta = 16.7;
 
         this.hotkeys = new HotKeyContext();
 
-        this.camera = { x: 0, y: 0, scale: 1.0, zoomTimeout: 0 };
+        this.camera = { x: 0, y: 0, scale: 1.0 };
 
         this.mouse = {
 
             lastX: 0,
             lastY: 0
-        }
+        };
+
+        this.timeouts = {
+
+            zooming: 0,
+            updateFPS: 0
+        };
+
+        this.fps = 0;
 
         this.setupHotkeys();
         this.setupKeyBindings();
+
+        // initiate fps update loop
+        this.updateFPS();
     }
 
     /// Protected methods
@@ -140,9 +160,9 @@ class Simulation extends Component<SimulationProps, { mouseDragging: boolean, zo
     protected setupKeyBindings(): void {
 
         this.bindings.moveCameraLeft = () => this.moveCamera(-this.getCameraMoveDelta(), 0);
-        this.bindings.moveCameraUp = () => {};
-        this.bindings.moveCameraRight = () => {};
-        this.bindings.moveCameraDown = () => {};
+        this.bindings.moveCameraUp = () => this.moveCamera(0, -this.getCameraMoveDelta());
+        this.bindings.moveCameraRight = () => this.moveCamera(this.getCameraMoveDelta(), 0);;
+        this.bindings.moveCameraDown = () => this.moveCamera(0, this.getCameraMoveDelta());
     }
 
     protected /* p5 */ setup = (p5: P5, parent: HTMLElement): void => {
@@ -256,7 +276,7 @@ class Simulation extends Component<SimulationProps, { mouseDragging: boolean, zo
 
     protected getCameraMoveDelta(): number {
 
-        return (this.props.sim.camera.moveDelta / 1000) * this.timeDelta;
+        return (this.props.sim.camera.moveDelta / 1000) * this.timeDelta * this.camera.scale;
     }
     
     // mutator methods
@@ -264,8 +284,8 @@ class Simulation extends Component<SimulationProps, { mouseDragging: boolean, zo
     protected showZoomCursor(zoomModifier: number): void {
 
         this.setState({ ...this.state, zoomModifier });
-        clearTimeout(this.camera.zoomTimeout);
-        this.camera.zoomTimeout = setTimeout(() => this.setState({ ...this.state, zoomModifier: 0 }), 400) as any;
+        clearTimeout(this.timeouts.zooming);
+        this.timeouts.zooming = setTimeout(() => this.setState({ ...this.state, zoomModifier: 0 }), 400) as any;
     }
 
     protected adjustCamera(targetX: number, targetY: number, scaleDelta: number): void {
@@ -281,6 +301,14 @@ class Simulation extends Component<SimulationProps, { mouseDragging: boolean, zo
     }
 
     // update methods
+
+    protected updateFPS(): void {
+
+        // update fps once every second
+        this.timeouts.updateFPS = window.setTimeout(() => this.updateFPS(), 500);
+
+        this.fps = Math.round(1000 / this.timeDelta);
+    }
 
     protected updateTimeData(): void {
 
@@ -322,13 +350,25 @@ class Simulation extends Component<SimulationProps, { mouseDragging: boolean, zo
 
     protected draw(): void {
 
-        this.applyTransform();
+        this.p5.push();
         this.drawBackground();
+        this.applyTransform();
         this.drawArea();
         this.drawGrid();
         this.drawBoundingBox();
+        this.p5.pop();
+        this.drawFPS();
     }
-
+    
+    protected drawBackground(): void {
+        
+        // --- shorthands 
+        const styler = stylers[this.props.theme];
+        // --- shorthands
+        
+        styler.background(this.p5);
+    }
+    
     protected applyTransform(): void {
 
         // --- shorthands 
@@ -338,16 +378,7 @@ class Simulation extends Component<SimulationProps, { mouseDragging: boolean, zo
         p5.translate(-this.camera.x, -this.camera.y);
         this.p5.scale(this.camera.scale);
     }
-
-    protected drawBackground(): void {
-
-        // --- shorthands 
-        const styler = stylers[this.props.theme];
-        // --- shorthands
-
-        styler.background(this.p5);
-    }
-
+    
     protected drawArea(): void {
 
         // --- shorthands 
@@ -420,11 +451,29 @@ class Simulation extends Component<SimulationProps, { mouseDragging: boolean, zo
         p5.rect(0, 0, area.x, area.y)
     }
 
+    protected drawFPS(): void {
+
+        // --- shorthands
+        const p5 = this.p5;
+        // --- shorthands
+
+        p5.textAlign(p5.RIGHT);
+        p5.textSize(15);
+        p5.fill(255);
+        p5.text(`FPS: ${this.fps}`, p5.windowWidth - 10, p5.windowHeight - 10);
+    }
+
     /// Public methods
 
     public componentWillUnmount(): void {
 
         this.hotkeys.clearBlurHandler();
+
+        // clear all timeouts
+        for(const timeout in this.timeouts) {
+
+            window.clearTimeout(this.timeouts[timeout]);
+        }
     }
 
     public /* react */ render(): JSX.Element {
