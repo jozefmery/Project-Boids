@@ -1,8 +1,18 @@
-// import helper
-import { runStaticMethods } from "../utils";
+/**
+ * File: hotkey.test.ts
+ * 
+ * Author: Jozef Méry <xmeryj00@stud.fit.vutbr.cz>
+ * Date: 4.4.2020
+ * License: none
+ * Description: Defines unit test for hotkey classes and functions.
+ * 
+ */
 
 // import test subjects
 import { HotKeyContext, HotkeyEvent, _testables } from "../hotkeys";
+
+// import test utilities
+import { FunctionTest, ObjectTest, runTest } from "./test-utils";
 
 // extract testables
 const { normalizeEventKey,
@@ -12,309 +22,356 @@ const { normalizeEventKey,
 
 } = _testables;
 
-test("Key name normalizing", () => {
+test("normalizeEventKey()", () => {
 
-    expect(normalizeEventKey("a")).toBe("a");
+    const description: FunctionTest = {
+        
+        func: normalizeEventKey,
+        matchers: [{ name: "toBe" }],
+        cases: [
 
-    expect(normalizeEventKey("A")).toBe("a");
+            { args: ["a"],          result: "a" },
+            { args: ["A"],          result: "a" },
+            { args: ["+"],          result: "plus" },
+            { args: ["Control"],    result: "ctrl" },
+            { args: [" "],          result: "space" }
+        ] 
+    };
 
-    expect(normalizeEventKey("+")).toBe("plus");
-
-    expect(normalizeEventKey("Control")).toBe("ctrl");
-
-    expect(normalizeEventKey(" ")).toBe("space");
+    runTest(description);
 });
 
-class CombinationTest extends Combination {
+test("new Combination(CombinationData)", () => {
 
-    private static create(combination?: ConstructorParameters<typeof Combination>[0]): CombinationTest {
+    const description: ObjectTest = {
         
-        return new Combination(combination);
-    }
+        ctor: Combination,
+        property: "combination",
+        // test deep equaliy and reference difference
+        matchers: [{ name: "toStrictEqual" }, { name: "toBe", invert: true }],
+        cases: [
+        
+            // default construction test
+            { args: undefined, result: {} },
 
-    public static _testConstructors() {
+            // empty object
+            { args: [{}], result: {} },
 
-        // shorthand
-        const subject = CombinationTest.create;
+            // non empty objects
+            { args: [{ a: true }],                      result: { a: true } },
+            { args: [{ a: false, b: true }],            result: { a: false, b: true } },
+            { args: [{ a: false, b: true, c: true }],   result: { a: false, b: true, c: true } },
+            { args: [{ "": true }],                     result: {} },
+            { args: [{ "   ": true }],                  result: {} },
+            { args: [{ A: true }],                      result: { a: true } },
+            { args: [{ "  A  ": false }],               result: { a: false } },
+        ]
+    };
 
-        test("new Combination(CombinationData)", () => {
+    runTest(description);
+});
 
-            // default construct test
-            expect(subject().combination).toStrictEqual({});
+test("new Combination(string)", () => {
 
-            // empty equality test
-            const param = {};
-            expect(subject(param).combination).toStrictEqual(param);
-            // check if combination object is a different copy from parameter
-            expect(subject(param).combination).not.toBe(param);
-
-            // non empty equality test
-            expect(subject({ a: true }).combination).toStrictEqual({ a: true });
-
-            expect(subject({ a: false, b: true }).combination).toStrictEqual({ a: false, b: true });
-            
-            expect(subject({ a: false, b: true, c: true }).combination).toStrictEqual({ a: false, b: true, c: true });
-
-            expect(subject({ "": true }).combination).toStrictEqual({});
-
-            expect(subject({ "   ": true }).combination).toStrictEqual({});
-
-            expect(subject({ A: true }).combination).toStrictEqual({ a: true });
-
-            expect(subject({ "  A  ": false }).combination).toStrictEqual({ a: false });
-        });
-
-        test("new Combination(string)", () => {
-
+    const description: ObjectTest = {
+        
+        ctor: Combination,
+        property: "combination",
+        matchers: [{ name: "toStrictEqual" }],
+        cases: [
+        
             // empty definition
-            expect(subject("").combination).toStrictEqual({});
+            { args: [""], result: {} },
 
             // redundant spaces
-            expect(subject(" ").combination).toStrictEqual({});
+            { args: [" "],                  result: {} },
+            { args: ["     "],              result: {} },
+            { args: [" a"],                 result: { a: true } },
+            { args: ["a    "],              result: { a: true } },
+            { args: ["   a   +   b    "],   result: { a: true, b: true } },
+            { args: [" c  t  r  l"],        result: { ctrl: true } },
 
-            expect(subject("     ").combination).toStrictEqual({});
-
-            expect(subject(" a").combination).toStrictEqual({ a: true });
-            
-            expect(subject("a    ").combination).toStrictEqual({ a: true });
-
-            expect(subject("   a   +   b    ").combination).toStrictEqual({ a: true, b: true });
-
-            expect(subject(" c  t  r  l").combination).toStrictEqual({ ctrl: true });
-            
-            // test redundant '+' characters
-            expect(subject("+").combination).toStrictEqual({});
-
-            expect(subject("+a").combination).toStrictEqual({ a: true });
-
-            expect(subject("a+").combination).toStrictEqual({ a: true });
-
-            expect(subject("+a+b").combination).toStrictEqual({ a: true, b: true });
-            
-            expect(subject("a+b+").combination).toStrictEqual({ a: true, b: true });
-
-            expect(subject("    a   +   b  +  ").combination).toStrictEqual({ a: true, b: true });
+            // redundant "+" characters
+            { args: ["+"],                  result: {} },
+            { args: ["+a"],                 result: { a: true } },
+            { args: ["a+"],                 result: { a: true } },
+            { args: ["+a+b"],               result: { a: true, b: true } },
+            { args: ["a+b+"],               result: { a: true, b: true } },
+            { args: ["    a   +   b  +  "], result: { a: true, b: true } },
 
             // duplicate keys
-            expect(subject("a+a").combination).toStrictEqual({ a: true });
-
-            expect(subject("a+a+b+b").combination).toStrictEqual({ a: true, b: true });
-
+            { args: ["a+a"],        result: { a: true } },
+            { args: ["a+a+b+b"],    result: { a: true, b: true } },
+            
             // complex combinations
-            expect(subject("a+b+ctrl+c").combination).toStrictEqual({ a: true, b: true, c: true, ctrl: true });
+            { args: ["a+b+ctrl+c"], result: { a: true, b: true, c: true, ctrl: true } },
+            { args: ["c+ctrl+b+a"], result: { a: true, b: true, c: true, ctrl: true } },
+        ]
+    };
 
-            expect(subject("c+ctrl+b+a").combination).toStrictEqual({ a: true, b: true, c: true, ctrl: true });
+    runTest(description);
+});
 
-        });
+test("new Combination(Combination)", () => {
 
-        test("new Combination(Combination)", () => {
+    const testSubject = new Combination({ a: true, b: false });
 
-            const subject1 = subject({ a: true, b: false });
-            const subject2 = subject(subject1);
+    const description: ObjectTest = {
 
-            expect(subject1).toStrictEqual(subject2)
-            // check if a copy was created
-            expect(subject1.combination).not.toBe(subject2.combination)
-        });
-    }    
+        ctor: Combination,
+        matchers: [ { name: "toStrictEqual" }, { name: "toBe", invert: true }],
 
-    public static _testMutatorMethods() {
+        cases: [
+            // test constructing from other object
+            { args: [testSubject], result: testSubject }
+        ]
+    };
 
-        // shorthand
-        const subject = CombinationTest.create;
+    runTest(description);
+});
 
-        test("Combination.clear()", () => {
+test("Combination.clear()", () => {
 
-            // simple clear tests
-            expect(subject().clear().get()).toStrictEqual({});
+    const parameter = { a: true, b: false };
 
-            expect(subject({ a: true }).clear().get()).toStrictEqual({});
-            
-            expect(subject({ a: true, b: false, c: true, d: false }).clear().get()).toStrictEqual({});
-            
-            // tests with a parameter
-            const param = { a: true, b: false };
+    let description: ObjectTest = {
 
-            expect(subject(param).clear().get()).toStrictEqual({});
-            // make sure parameter remains unaltered
-            expect(param).toStrictEqual({ a: true, b: false });
-            
-            expect(subject(param).set(param).clear().get()).toStrictEqual({});
-            
-            expect(param).toStrictEqual({ a: true, b: false });
-            // chain method calls
-            expect(subject(param).clear().set(param).clear().get()).toStrictEqual({});
-        });
+        ctor: Combination,
+        property: "combination",
+        matchers: [{ name: "toStrictEqual" }],
+        cases: [
+            // simple clear calls
+            { 
+                calls: [{ method: "clear" }],
+                result: {}
+            },
+            {
+                args: [{ a: true }],
+                calls: [{ method: "clear" }],
+                result: {}
+            },
+            {
+                args: [{ a: true, b: false, c: true, d: false }],
+                calls: [{ method: "clear" }],
+                result: {}
+            },
+            // chain calls
+            {   
+                args: [{ a: true, b: false}],
+                calls: [{ method: "clear" }, 
+                        { method: "set", args: ["a+b"] }, 
+                        { method: "clear" }],
+                result: {}
+            },
+            // make sure parameter is unchanged
+            {
+                args: [parameter],
+                calls: [{ method: "clear" }],
+                matchers: [{ name: "toStrictEqual", result: {} },
+                            { name: "toBe", invert: true, result: parameter }]
+            }
+        ]
+    };
 
-        test("Combination.addKey()", () => {
+    runTest(description);    
+});
 
+test("Combination.addKey()", () => {
+
+    const description: ObjectTest = {
+
+        ctor: Combination,
+        property: "combination",
+        matchers: [{ name: "toStrictEqual" }],
+        cases: [
             // simple tests
-            expect(subject().addKey("a").get()).toStrictEqual({ a: true });
-            
-            expect(subject({ a: false }).addKey("b").get()).toStrictEqual({ a: false, b: true });
-
-            expect(subject({ a: false }).addKey("a", false).get()).toStrictEqual({ a: false });
-            
-            expect(subject({ a: false }).addKey("a", true).get()).toStrictEqual({ a: true });
+            {
+                calls: [{ method: "addKey", args: ["a"] }],
+                result: { a: true }
+            },
+            {
+                args: [{ a: false }],
+                calls: [{ method: "addKey", args: ["b"] }],
+                result: { a: false, b: true }
+            },
+            {
+                args: [{ a: false }],
+                calls: [{ method: "addKey", args: ["a", false] }],
+                result: { a: false }
+            },
+            {
+                args: [{ a: false }],
+                calls: [{ method: "addKey", args: ["a", true] }],
+                result: { a: true }
+            },
             // chained method calls
-            expect(subject().addKey("a", false).addKey("b", true).get()).toStrictEqual({ a: false, b: true });
+            {
+                calls: [{ method: "addKey", args: ["a", false] },
+                        { method: "addKey", args: ["b", true ] }],
+                result: { a: false, b: true }
+            },
+            {
+                args: [{ c: false }],
+                calls: [{ method: "set", args: [{}] },
+                        { method: "addKey", args: ["a", true] },
+                        { method: "clear" },
+                        { method: "addKey", args: ["b", false] }],
+                result: { b: false }    
+            },
+            // key name normalization
+        ]
+    };
 
-            expect(subject({ c: false }).set({}).addKey("a", true).clear().addKey("b", false).get()).
-                toStrictEqual({ b: false });
-            // key name normalization tests
-            expect(subject({ a: true }).addKey("   A  ", false).get()).toStrictEqual({ a: false });
+    runTest(description);
 
-            expect(subject({ a: true }).addKey("   A  ", false).get()).toStrictEqual({ a: false });
-            // invalid key tests
-            expect(subject().addKey("", true).get()).toStrictEqual({});
-            
-            expect(subject().addKey("   ", false).get()).toStrictEqual({});
-        });
+    // // key name normalization tests
+    // expect(subject({ a: true }).addKey("   A  ", false).get()).toStrictEqual({ a: false });
 
-        test("Combination.removeKey()", () => {
+    // expect(subject({ a: true }).addKey("   A  ", false).get()).toStrictEqual({ a: false });
+    // // invalid key tests
+    // expect(subject().addKey("", true).get()).toStrictEqual({});
+    
+    // expect(subject().addKey("   ", false).get()).toStrictEqual({});
+});
 
-            // simple tests
-            expect(subject().removeKey("a").get()).toStrictEqual({});
+// test("Combination.removeKey()", () => {
 
-            expect(subject("a").removeKey("a").get()).toStrictEqual({});
-            // chained method calls
-            expect(subject({ a: true, b: false }).addKey("c").removeKey("a").get()).toStrictEqual({ b: false, c: true });
+//     // simple tests
+//     expect(subject().removeKey("a").get()).toStrictEqual({});
 
-            expect(subject("a+b+b").removeKey("a").addKey("b").removeKey("b").get()).toStrictEqual({});
-            // key name normalization tests
-            expect(subject("a+b").removeKey("  A  ").get()).toStrictEqual({ b: true });            
-            // invalid key tests
-            expect(subject("a+b").removeKey("").get()).toStrictEqual({ a: true, b: true });
+//     expect(subject("a").removeKey("a").get()).toStrictEqual({});
+//     // chained method calls
+//     expect(subject({ a: true, b: false }).addKey("c").removeKey("a").get()).toStrictEqual({ b: false, c: true });
 
-            expect(subject("a+b").removeKey("  ").get()).toStrictEqual({ a: true, b: true });
+//     expect(subject("a+b+b").removeKey("a").addKey("b").removeKey("b").get()).toStrictEqual({});
+//     // key name normalization tests
+//     expect(subject("a+b").removeKey("  A  ").get()).toStrictEqual({ b: true });            
+//     // invalid key tests
+//     expect(subject("a+b").removeKey("").get()).toStrictEqual({ a: true, b: true });
 
-            // missing key tests
-            expect(subject("a+b").removeKey("c").get()).toStrictEqual({ a: true, b: true });
+//     expect(subject("a+b").removeKey("  ").get()).toStrictEqual({ a: true, b: true });
 
-            expect(subject("a+b").removeKey(" C ").get()).toStrictEqual({ a: true, b: true });
-        });
+//     // missing key tests
+//     expect(subject("a+b").removeKey("c").get()).toStrictEqual({ a: true, b: true });
 
-        test("Combination.setKeysTo()", () => {
+//     expect(subject("a+b").removeKey(" C ").get()).toStrictEqual({ a: true, b: true });
+// });
 
-            expect(subject().setKeysTo(false).get()).toStrictEqual({});
+// test("Combination.setKeysTo()", () => {
 
-            expect(subject("a+b").setKeysTo(false).get()).toStrictEqual({ a: false, b: false });
+//     expect(subject().setKeysTo(false).get()).toStrictEqual({});
 
-            expect(subject("a+b").addKey("b", false).setKeysTo(false).get()).toStrictEqual({ a: false, b: false });
+//     expect(subject("a+b").setKeysTo(false).get()).toStrictEqual({ a: false, b: false });
 
-            expect(subject({ a: true, b: true }).addKey("b", false).setKeysTo(true).get()).toStrictEqual({ a: true, b: true });
-        });
-    }
+//     expect(subject("a+b").addKey("b", false).setKeysTo(false).get()).toStrictEqual({ a: false, b: false });
 
-    public static _testQueryMethods() {
+//     expect(subject({ a: true, b: true }).addKey("b", false).setKeysTo(true).get()).toStrictEqual({ a: true, b: true });
+// });
 
-        // shorthand
-        const subject = CombinationTest.create;
+// test("Combination.get()", () => {
 
-        test("Combination.get()", () => {
+//     const testSubject = subject(); 
 
-            const testSubject = subject(); 
+//     expect(testSubject.get()).toStrictEqual(testSubject.combination);
 
-            expect(testSubject.get()).toStrictEqual(testSubject.combination);
+//     expect(testSubject.get()).toBe(testSubject.combination);
+// });
 
-            expect(testSubject.get()).toBe(testSubject.combination);
-        });
+// test("Combination.toString()", () => {
 
-        test("Combination.toString()", () => {
+//     // simple tests
+//     expect(subject().toString()).toBe("");
 
-            // simple tests
-            expect(subject().toString()).toBe("");
+//     expect(subject({ a: true }).toString()).toBe("a");
 
-            expect(subject({ a: true }).toString()).toBe("a");
+//     expect(subject({ a: false }).toString()).toBe("a");
+//     // keys sorting tests
+//     expect(subject({ a: true, b: false }).toString()).toBe("a+b");
+    
+//     expect(subject({ b: false, a: false }).toString()).toBe("a+b");
 
-            expect(subject({ a: false }).toString()).toBe("a");
-            // keys sorting tests
-            expect(subject({ a: true, b: false }).toString()).toBe("a+b");
-            
-            expect(subject({ b: false, a: false }).toString()).toBe("a+b");
+//     expect(subject(" b + a ").toString()).toBe("a+b");
+// });
 
-            expect(subject(" b + a ").toString()).toBe("a+b");
-        });
+// test("Combination.isSubsetOf()", () => {
 
-        test("Combination.isSubsetOf()", () => {
+//     expect(subject().isSubsetOf(subject(), false)).toBeTruthy();
 
-            expect(subject().isSubsetOf(subject(), false)).toBeTruthy();
+//     expect(subject().isSubsetOf(subject(), true)).toBeFalsy();
 
-            expect(subject().isSubsetOf(subject(), true)).toBeFalsy();
+//     expect(subject().isSubsetOf(subject("a+b"), false)).toBeTruthy();
 
-            expect(subject().isSubsetOf(subject("a+b"), false)).toBeTruthy();
+//     expect(subject().isSubsetOf(subject("a+b"), true)).toBeFalsy();
+    
+//     expect(subject({ a: false }).isSubsetOf(subject({ a: false }), false)).toBeTruthy();
+    
+//     expect(subject({ a: false }).isSubsetOf(subject({ a: false }), true)).toBeFalsy();
 
-            expect(subject().isSubsetOf(subject("a+b"), true)).toBeFalsy();
-            
-            expect(subject({ a: false }).isSubsetOf(subject({ a: false }), false)).toBeTruthy();
-            
-            expect(subject({ a: false }).isSubsetOf(subject({ a: false }), true)).toBeFalsy();
+//     expect(subject({ a: true, b: true }).isSubsetOf(subject({ a: true }), false)).toBeFalsy();
 
-            expect(subject({ a: true, b: true }).isSubsetOf(subject({ a: true }), false)).toBeFalsy();
+//     expect(subject({ a: false, b: false })
+//         .isSubsetOf(subject({ a: false, b: true }), false)).toBeTruthy();
 
-            expect(subject({ a: false, b: false })
-                .isSubsetOf(subject({ a: false, b: true }), false)).toBeTruthy();
+//     expect(subject({ a: false, b: false })
+//         .isSubsetOf(subject({ a: false, b: true }), true)).toBeTruthy();
 
-            expect(subject({ a: false, b: false })
-                .isSubsetOf(subject({ a: false, b: true }), true)).toBeTruthy();
+//     expect(subject({ a: false, b: false })
+//         .isSubsetOf(subject({ a: false, b: false }), true)).toBeFalsy();
 
-            expect(subject({ a: false, b: false })
-                .isSubsetOf(subject({ a: false, b: false }), true)).toBeFalsy();
+//     expect(subject({ a: false, b: false })
+//         .isSubsetOf(subject({ a: false, b: false, c: false }), false)).toBeTruthy();
 
-            expect(subject({ a: false, b: false })
-                .isSubsetOf(subject({ a: false, b: false, c: false }), false)).toBeTruthy();
+//     expect(subject({ a: false, b: false })
+//         .isSubsetOf(subject({ a: false, b: false, c: false }), true)).toBeFalsy();
 
-            expect(subject({ a: false, b: false })
-                .isSubsetOf(subject({ a: false, b: false, c: false }), true)).toBeFalsy();
+//     expect(subject({ a: false, b: false })
+//         .isSubsetOf(subject({ a: false, b: true, c: false }), true)).toBeTruthy();
+    
+//     expect(subject({ a: false, b: false })
+//         .isSubsetOf(subject({ b: true, c: false }), false)).toBeFalsy();
+// });
 
-            expect(subject({ a: false, b: false })
-                .isSubsetOf(subject({ a: false, b: true, c: false }), true)).toBeTruthy();
-            
-            expect(subject({ a: false, b: false })
-                .isSubsetOf(subject({ b: true, c: false }), false)).toBeFalsy();
-        });
+// test("Combination.hasOldKeysOf()", () => {
 
-        test("Combination.hasOldKeysOf()", () => {
+//     expect(subject().hasOldKeysOf(subject())).toBeTruthy();
 
-            expect(subject().hasOldKeysOf(subject())).toBeTruthy();
+//     expect(subject({ a: true }).hasOldKeysOf(subject())).toBeTruthy();
 
-            expect(subject({ a: true }).hasOldKeysOf(subject())).toBeTruthy();
+//     expect(subject({ a: true, b: true })
+//         .hasOldKeysOf(subject())).toBeTruthy();
 
-            expect(subject({ a: true, b: true })
-                .hasOldKeysOf(subject())).toBeTruthy();
+//     expect(subject({ a: true, b: true })
+//         .hasOldKeysOf(subject({ a: true }))).toBeFalsy();
 
-            expect(subject({ a: true, b: true })
-                .hasOldKeysOf(subject({ a: true }))).toBeFalsy();
+//     expect(subject({ a: false, b: true })
+//         .hasOldKeysOf(subject({ a: true }))).toBeTruthy();
 
-            expect(subject({ a: false, b: true })
-                .hasOldKeysOf(subject({ a: true }))).toBeTruthy();
+//     expect(subject({ a: false, b: false })
+//         .hasOldKeysOf(subject({ a: false, b: false }))).toBeTruthy();
 
-            expect(subject({ a: false, b: false })
-                .hasOldKeysOf(subject({ a: false, b: false }))).toBeTruthy();
+//     expect(subject({ a: false, b: false })
+//         .hasOldKeysOf(subject({ a: true, b: true }))).toBeTruthy();
 
-            expect(subject({ a: false, b: false })
-                .hasOldKeysOf(subject({ a: true, b: true }))).toBeTruthy();
+//     expect(subject({ a: false, b: false })
+//         .hasOldKeysOf(subject({ a: false, b: false, c: true }))).toBeFalsy();
+// });
 
-            expect(subject({ a: false, b: false })
-                .hasOldKeysOf(subject({ a: false, b: false, c: true }))).toBeFalsy();
-        });
+// test("Combination.isEmpty()", () => {
 
-        test("Combination.isEmpty()", () => {
+//     expect(subject().isEmpty()).toBeTruthy();
 
-            expect(subject().isEmpty()).toBeTruthy();
+//     expect(subject({}).isEmpty()).toBeTruthy();
 
-            expect(subject({}).isEmpty()).toBeTruthy();
+//     expect(subject("").isEmpty()).toBeTruthy();
 
-            expect(subject("").isEmpty()).toBeTruthy();
+//     expect(subject("  ").isEmpty()).toBeTruthy();
 
-            expect(subject("  ").isEmpty()).toBeTruthy();
+//     expect(subject("a").isEmpty()).toBeFalsy();
 
-            expect(subject("a").isEmpty()).toBeFalsy();
+//     expect(subject("a+B").isEmpty()).toBeFalsy();
+// });
 
-            expect(subject("a+B").isEmpty()).toBeFalsy();
-        });
-    }
-};
+
 
 class SequenceTest extends Sequence {
 
@@ -794,11 +851,3 @@ class HotKeyContextTest extends HotKeyContext {
 
     
 };
-
-[
-    CombinationTest,
-    SequenceTest,
-    HotkeyTest,
-    HotKeyContextTest
-
-].forEach(classObject => runStaticMethods(classObject, /^_test/));
