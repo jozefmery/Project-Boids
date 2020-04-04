@@ -173,6 +173,8 @@ class Simulation extends Component<SimulationProps, { mouseDragging: boolean, zo
 
         // create canvas with current parent size
         this.p5.createCanvas(this.p5.windowWidth, this.p5.windowHeight).parent(this.parent);
+
+        this.moveToAreaCenter();
     }
 
     // event handler methods
@@ -280,6 +282,18 @@ class Simulation extends Component<SimulationProps, { mouseDragging: boolean, zo
     }
     
     // mutator methods
+
+    protected moveToAreaCenter() {
+
+        // --- shorthands
+        const camera = this.camera;
+        const p5 = this.p5;
+        const area = this.props.sim.area;
+        // --- shorthands
+
+        camera.x = (- p5.windowWidth / 2) + area.x / 2;
+        camera.y = (- p5.windowHeight / 2) + area.y / 2 ;
+    }
 
     protected showZoomCursor(zoomModifier: number): void {
 
