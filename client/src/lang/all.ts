@@ -12,6 +12,10 @@
 import en from "./en";
 import sk from "./sk";
 
+/**
+ * 
+ * Defines the shape of any given language.
+ */
 export interface ILanguageDefinition {
 
     title: string;
@@ -19,16 +23,25 @@ export interface ILanguageDefinition {
     pause: string;
 };
 
+/**
+ * 
+ * Defines available languages.
+ */
 export enum Languages {
 
     EN,
     SK
 }
 
+/**
+ * 
+ * Gathers data of various languages into a single indexable object.
+ */
 const languageData = {
 
     [Languages.EN]: en,
     [Languages.SK]: sk
 };
 
+// export all languages
 export default languageData;
