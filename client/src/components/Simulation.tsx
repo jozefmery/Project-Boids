@@ -154,7 +154,6 @@ class Simulation extends Component<SimulationProps, { mouseDragging: boolean, zo
 
     protected setupHotkeys(): void {
 
-        this.hotkeys.attachBlurHandlerToWindow();
     }
 
     protected setupKeyBindings(): void {
