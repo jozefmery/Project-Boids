@@ -944,10 +944,11 @@ class HotKeyContext {
      * 
      * Constructs a HotkeyContext instance enabled by default.
      * 
-     * @param {number} keyPressDelay    Time in milliseconds after which individual 
-     *                                  sequence buffers are reset.
+     * @param {number} keyPressDelay                Time in milliseconds after which individual 
+     *                                              sequence buffers are reset.
+     * @param {boolean} attachBlurHandlerToWindow   Whether to call attachBlurHandlerToWindow().
      */
-    public constructor(protected keyPressDelay: number = 500) {
+    public constructor(protected keyPressDelay: number = 500, attachBlurHandlerToWindow: boolean = true) {
 
         // enable context by default
         this.enabled = true;
@@ -970,6 +971,11 @@ class HotKeyContext {
                 buffer: new Sequence()
             },
         };
+
+        if(attachBlurHandlerToWindow) {
+
+            this.attachBlurHandlerToWindow();
+        }
     }
 
     /// Protected methods
@@ -1104,6 +1110,8 @@ class HotKeyContext {
      * Attaches onBlur handler to window. Does nothing if called multiple times
      * without calling clearBlurHandler.
      * This method should usually be used in a setup phase.
+     * If used, clearBlurHandler() should be called before
+     * deleting this instance.
      * 
      * @returns {HotKeyContext} Reference to instance to enable chain calls.
      */
