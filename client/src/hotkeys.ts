@@ -650,7 +650,7 @@ class Sequence {
  * 
  * Defines hotkey callback signature.
  */
-type Callback = (event: { event: HotkeyEvent }) => boolean | void;
+type Callback = (event: { event: HotkeyEvent }) => any;
 
 /**
  * 
@@ -800,9 +800,11 @@ class Hotkey {
      * @param   {HotkeyEvent.KEYUP|HotkeyEvent.KEYDOWN} event   Event type passed to the callback.
      * @returns {boolean|void}                                  Returns whether the callback requested to prevent default behavior.
      */
-    public invoke(event: HotkeyEvent.KEYUP | HotkeyEvent.KEYDOWN = HotkeyEvent.KEYDOWN): ReturnType<Callback> {
+    public invoke(event: HotkeyEvent.KEYUP | HotkeyEvent.KEYDOWN = HotkeyEvent.KEYDOWN): boolean {
 
-        return this.callback({ event });
+        const returned = this.callback({ event });
+        // only return true if return value of the callback is boolean
+        return typeof returned === "boolean" && returned;
     }
 
     // query methods
