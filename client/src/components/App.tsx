@@ -14,34 +14,46 @@ import React, { Component } from "react";
 // import react-redux
 import { connect } from "react-redux";
 
+// import font
+import "typeface-roboto";
+
 // import custom components
 import Simulation from "./Simulation";
 import Controls from "./ui/Controls";
 import TopBar from "./ui/TopBar";
+
+// import stylers
+import { createMuiTheme, ThemeProvider, Theme as MUITheme } from "@material-ui/core/styles";
 
 // import language data
 import languageData from "../lang/all";
 
 // import type information
 import { StateShape } from "../state/defaultState";
+import { ThemeData } from "../stylers";
 
-type AppProps = Pick<StateShape, "language">;
+type AppProps = Pick<StateShape, "language" | "theme">;
 
 class App extends Component<AppProps> {
 
 	/// Public static methods
 
-    public static stateToProps = ({ language }: StateShape) => ({ language });
+    public static stateToProps = ({ language, theme }: StateShape) => ({ language, theme });
 
-    /// Private methods
+    /// Protected methods
     
-    private updateAppTitle() {
+    protected updateAppTitle() {
         
         // --- shorthands 
         const currentLang = languageData[this.props.language];
         // --- shorthands
         
         document.title = currentLang.title;
+    }
+
+    protected getTheme(): MUITheme {
+
+        return createMuiTheme({ theme: this.props.theme } as ThemeData);
     }
 
 	/// Public methods
@@ -59,11 +71,11 @@ class App extends Component<AppProps> {
 	public render() {
 
 		return (
-			<React.Fragment>
+			<ThemeProvider theme={this.getTheme()}>
 				<Simulation parentID="sim-canvas-parent"/> 
 				<TopBar />
                 <Controls />
-			</React.Fragment>
+			</ThemeProvider>
 		);
 	}
 }
