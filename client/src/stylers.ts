@@ -10,6 +10,7 @@
 
 // import dependecies
 import P5 from "p5";
+import { Theme as MUITheme } from "@material-ui/core/styles";
 
 /**
  * 
@@ -20,6 +21,16 @@ export enum Theme {
     LIGHT = "light",
     DARK = "dark"
 }
+
+/**
+ * 
+ * Extended Material UI theme with a custom variable
+ * representing the global theme.
+ */
+export interface ThemeData extends MUITheme {
+
+    theme: Theme;
+};
 
 /**
  * 
