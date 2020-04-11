@@ -14,9 +14,10 @@ import { ILanguageDefinition } from "./all";
 const data: ILanguageDefinition = {
 
     title: "Predator-Prey Simulation",
-    play: "play",
-    pause: "pause",
-
+    play: "Play",
+    pause: "Pause",
+    setDarkTheme: "Switch to dark theme",
+    setLightTheme: "Switch to light theme"
 };
 
 export default data;

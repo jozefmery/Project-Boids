@@ -21,6 +21,8 @@ export interface ILanguageDefinition {
     title: string;
     play: string;
     pause: string;
+    setDarkTheme: string;
+    setLightTheme: string;
 };
 
 /**

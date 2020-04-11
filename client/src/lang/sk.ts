@@ -14,8 +14,10 @@ import { ILanguageDefinition } from "./all";
 const data: ILanguageDefinition = {
 
     title: "Simulácia Lovec-Korisť",
-    play: "spustiť",
-    pause: "zastaviť"
+    play: "Spustiť",
+    pause: "Zastaviť",
+    setDarkTheme: "Prepnúť na tmavý motív",
+    setLightTheme: "Prepnúť na svetlý motív"
 };
 
 export default data;
