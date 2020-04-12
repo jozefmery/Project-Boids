@@ -12,7 +12,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 // import enums
-import { Theme } from "../stylers";
+import { ColorTheme } from "../stylers";
 
 // import default state
 import defaultState from "./defaultState";
@@ -20,11 +20,11 @@ import defaultState from "./defaultState";
 // helper object for inverting color theme
 const themeInverter = {
 
-    [Theme.DARK]: Theme.LIGHT,
-    [Theme.LIGHT]: Theme.DARK
+    [ColorTheme.DARK]: ColorTheme.LIGHT,
+    [ColorTheme.LIGHT]: ColorTheme.DARK
 }
 
-export default createSlice({
+const themeSlice = createSlice({
 
     name: "theme",
     initialState: defaultState.theme,
@@ -36,3 +36,12 @@ export default createSlice({
         toggleTheme: (state) => themeInverter[state],
     }
 });
+
+export const {
+
+    setTheme,
+    toggleTheme
+
+} = themeSlice.actions;
+
+export default themeSlice.reducer;

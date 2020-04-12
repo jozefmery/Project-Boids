@@ -14,7 +14,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 // import default state and bindings type
 import defaultState, { Bindings } from "./defaultState";
 
-export default createSlice({
+const keyboardSlice = createSlice({
 
     name: "keyboard",
     initialState: defaultState.keyboard,
@@ -27,3 +27,11 @@ export default createSlice({
         }
     }
 });
+
+export const { 
+    
+    setKeyBinding 
+
+} = keyboardSlice.actions;
+
+export default keyboardSlice.reducer;

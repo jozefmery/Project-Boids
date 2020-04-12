@@ -17,7 +17,7 @@ import defaultState from "./defaultState";
 // create shorthand
 const simState = defaultState.sim;
 
-export default createSlice({
+const simSlice = createSlice({
 
     name: "sim",
     initialState: defaultState.sim,
@@ -66,3 +66,26 @@ export default createSlice({
             { state.grid.highlight = highlight; },        
     }
 });
+
+export const { 
+
+    setSimSettings,
+    setSimRunning,
+    toggleSimRunning,
+    setSimArea,
+    setCameraSettings,
+    setCameraMinScale,
+    setCameraMaxScale,
+    setCameraScaleDelta,
+    setCameraScaleEnabled,
+    setCameraScaleTarget,
+    setCameraMoveDelta,
+    setGridSettings,
+    setGridDraw,
+    toggleGridDraw,
+    setGridIntensity,
+    setGridHighlight
+            
+} = simSlice.actions;
+
+export default simSlice.reducer;

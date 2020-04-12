@@ -14,7 +14,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 // import default state
 import defaultState from "./defaultState";
 
-export default createSlice({
+const languageSlice = createSlice({
 
     name: "language",
     initialState: defaultState.language,
@@ -25,3 +25,11 @@ export default createSlice({
         setLanguage: (_, { payload: language }: PayloadAction<typeof defaultState.language>) => language
     }
 });
+
+export const {
+
+    setLanguage
+
+} = languageSlice.actions;
+
+export default languageSlice.reducer;
