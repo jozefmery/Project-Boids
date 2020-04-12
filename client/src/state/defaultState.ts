@@ -9,7 +9,7 @@
  */
 
 // import enums
-import { Theme } from "../stylers";
+import { ColorTheme } from "../stylers";
 import { Languages } from "../lang/all";
 import { SimZoomTarget } from "../components/Simulation";
 
@@ -55,7 +55,7 @@ export type StateShape = {
 
     language: Languages;
 
-    theme: Theme;
+    theme: ColorTheme;
 
     keyboard: {
 
@@ -106,7 +106,7 @@ const defaultState: StateShape =  {
 
     language: Languages.EN,
 
-    theme: Theme.DARK,
+    theme: ColorTheme.DARK,
 
     keyboard: {
 
