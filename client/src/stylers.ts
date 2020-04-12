@@ -15,7 +15,7 @@ import P5 from "p5";
 import lodash from "lodash";
 
 // import MUI stylers
-import { CSSProperties as MUICSSProperties } from "@material-ui/styles/withStyles";
+import { CSSProperties } from "@material-ui/styles/withStyles";
 
 /**
  * 
@@ -136,13 +136,6 @@ export const simStylers: SimStylers = {
         }
     },
 };
-
-/**
- * 
- * Defines CSS in JS object shape.
- * Re-export from MUI library.
- */
-export type CSSProperties = MUICSSProperties;
 
 type ThemedCSSProperties = {
 
