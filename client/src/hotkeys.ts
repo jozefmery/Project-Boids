@@ -656,7 +656,7 @@ type Callback = (event: { event: HotkeyEvent }) => any;
  * 
  * Type used for defining hotkey sequences.
  */
-type SequenceDefinitions = Readonly<Array<string>>;
+type SequenceDefinitions = Readonly<Array<string>> | string;
 
 /**
  * 
@@ -724,6 +724,11 @@ class Hotkey {
      */
     protected static stringsToSequences(sequences: SequenceDefinitions): Array<Sequence> {
 
+        if(typeof sequences === "string") {
+
+            return [ new Sequence(sequences) ];
+        }
+        
         return sequences.map(sequence => new Sequence(sequence));
     }
 
@@ -1225,7 +1230,7 @@ class HotKeyContext {
      * @param   {HotkeyEvent} eventType         Type of event upon which to attempt matching.
      * @returns {Hotkey}                        Reference to constructed Hotkey instance.
      */
-    public createHotkey(sequences: SequenceDefinitions, callback: Callback, eventType: HotkeyEvent): Hotkey {
+    public add(sequences: SequenceDefinitions, callback: Callback, eventType: HotkeyEvent = HotkeyEvent.KEYDOWN): Hotkey {
 
         // registerHotkey returns the referene that is passed to it 
         return this.registerHotkey(new Hotkey(sequences, callback, eventType));
