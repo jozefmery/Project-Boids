@@ -15,20 +15,16 @@ import { configureStore } from "@reduxjs/toolkit"
 // import default state
 import defaultState from "./defaultState";
 
-// import slices
-import simSlice from "./simSlice";
-import languageSlice from "./languageSlice";
-import themeSlice from "./themeSlice";
-import keyboardSlice from "./keyboardSlice";
+// import reducers
+import sim from "./simSlice";
+import language from "./languageSlice";
+import theme from "./themeSlice";
+import keyboard from "./keyboardSlice";
 
 const reduxStateStore = configureStore({
     
-    // merge slices into a root reducer
-    reducer: {  sim: simSlice.reducer, 
-                language: languageSlice.reducer,
-                theme: themeSlice.reducer,
-                keyboard: keyboardSlice.reducer },
-
+    // merge slice reducers into a root reducer
+    reducer: { sim, language, theme, keyboard },
     // enable extension for debugging
     devTools: true,
     // load default state
