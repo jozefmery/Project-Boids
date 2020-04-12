@@ -9,10 +9,10 @@
  */
 
 // import dependencies
-import React, { Component } from "react";
+import React, { useEffect } from "react";
 
 // import react-redux
-import { connect } from "react-redux";
+import { useSelector } from "react-redux";
 
 // import font
 import "typeface-roboto";
@@ -23,61 +23,41 @@ import Controls from "./ui/Controls";
 import TopBar from "./ui/TopBar";
 
 // import stylers
-import { createMuiTheme, ThemeProvider, Theme as MUITheme } from "@material-ui/core/styles";
+import { createMuiTheme, ThemeProvider, Theme } from "@material-ui/core/styles";
+import { ColorTheme } from "../stylers";
 
 // import language data
 import languageData from "../lang/all";
 
 // import type information
 import { StateShape } from "../state/defaultState";
-import { ThemeData } from "../stylers";
 
-type AppProps = Pick<StateShape, "language" | "theme">;
+function useSetTitle() {
 
-class App extends Component<AppProps> {
+    const currentLanguage = useSelector(({ language }: StateShape) => language);
 
-	/// Public static methods
+    useEffect(() => {
 
-    public static stateToProps = ({ language, theme }: StateShape) => ({ language, theme });
-
-    /// Protected methods
-    
-    protected updateAppTitle() {
+        document.title = languageData[currentLanguage].title;
         
-        // --- shorthands 
-        const currentLang = languageData[this.props.language];
-        // --- shorthands
-        
-        document.title = currentLang.title;
-    }
-
-    protected getTheme(): MUITheme {
-
-        return createMuiTheme({ theme: this.props.theme } as ThemeData);
-    }
-
-	/// Public methods
-
-	public componentDidMount() {
-
-        this.updateAppTitle();
-    }
-
-    public componentDidUpdate() {
-
-        this.updateAppTitle();
-    }
-
-	public render() {
-
-		return (
-			<ThemeProvider theme={this.getTheme()}>
-				<Simulation parentID="sim-canvas-parent"/> 
-				<TopBar />
-                <Controls />
-			</ThemeProvider>
-		);
-	}
+    }, [currentLanguage]);
 }
 
-export default connect(App.stateToProps)(App);
+function useMUItheme() {
+
+    const theme = useSelector(({ theme }: StateShape) => theme);
+    return createMuiTheme({ theme });
+}
+
+export default function App() {
+
+    useSetTitle();
+
+    return (
+        <ThemeProvider theme={useMUItheme()}>
+            <Simulation /> 
+            <TopBar />
+            <Controls />
+        </ThemeProvider>
+    );
+}
