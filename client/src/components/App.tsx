@@ -23,8 +23,7 @@ import Controls from "./ui/Controls";
 import TopBar from "./ui/TopBar";
 
 // import stylers
-import { createMuiTheme, ThemeProvider, Theme } from "@material-ui/core/styles";
-import { ColorTheme } from "../stylers";
+import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
 
 // import language data
 import languageData from "../lang/all";
