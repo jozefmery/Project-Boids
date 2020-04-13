@@ -54,11 +54,12 @@ declare module '@material-ui/core/styles/createMuiTheme' {
  * 
  * List of properties every styler requires.
  */
-type SimStylerList =   "background"    |
-                    "area"          |
-                    "grid"          |
-                    "gridHighlight" |
-                    "boundingBox";
+type SimStylerList =    "background"
+                    |   "area"
+                    |   "grid"
+                    |   "gridHighlight" 
+                    |   "boundingBox"
+                    |   "fps";
 
 /**
  * 
@@ -107,6 +108,12 @@ export const simStylers: SimStylers = {
             p5.noFill();
             p5.stroke(140);
             p5.strokeWeight(2);
+        },
+
+        fps: (p5) => {
+
+            p5.textSize(15);
+            p5.fill(255);
         }
     },
 
@@ -133,6 +140,12 @@ export const simStylers: SimStylers = {
             p5.noFill();
             p5.stroke(30);
             p5.strokeWeight(3);
+        },
+
+        fps: (p5) => {
+
+            p5.textSize(15);
+            p5.fill(0);
         }
     },
 };
