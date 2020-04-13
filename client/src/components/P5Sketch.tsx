@@ -9,88 +9,103 @@
  */
 
 // import dependencies
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import P5 from "p5";
-import classNamesFunc from "classnames";
+import ClassNames from "classnames";
+
+type P5Callback = ((p5: P5) => any) | void | undefined;
+type P5EmptyCallback = (() => any) | void | undefined;
+
+type P5EventHandlers = {
+
+    preload?: P5Callback;
+    setup?: P5Callback;
+    loop?: P5Callback;
+    cleanup?: P5Callback;
+    windowResized?: P5EmptyCallback
+};
 
 type P5SketchProps = {
 
-    classNames?: Parameters<typeof classNamesFunc>[0];
-    // p5 setup
-    preload?: ((p5: P5) => any) | void;
-    setup: (p5: P5, parent: HTMLDivElement) => any;
-    // p5 events
-    draw?: (() => any) | void;
-    windowResized?: (() => any) | void;
+    classNames?: Parameters<typeof ClassNames>[0];
 
-} & Omit<React.ComponentProps<"div">, "className" | "ref">;
+} & P5EventHandlers & Omit<React.ComponentProps<"div">, "className" | "ref">;
+     
+function useP5({ preload, setup, loop, windowResized, cleanup }: P5EventHandlers, parent: HTMLDivElement | null) {
 
-type P5Events = { draw: P5SketchProps["draw"], windowResized: P5SketchProps["windowResized"] };
-        
-function useP5(preload: P5SketchProps["preload"], events: P5Events) {
-
-    const instance = useRef<P5 | null>(null);
+    const p5 = useRef<P5 | null>(null);
 
     useEffect(() => {
 
-        instance.current = new P5((p5: P5) => {
+        // check if parent was already rendered
+        if(parent === null) return;
+
+        p5.current = new P5((p5: P5) => {
 
             if(preload) {
-    
+
                 p5.preload = () => preload(p5);
             }
-        });
+
+            p5.setup = () => {
+                
+                // create canvas by default
+                p5.createCanvas(0, 0).parent(parent);
+            
+                if(setup) {
+
+                    setup(p5);
+                }
+            }
+        })
 
         return () => {
 
-            if(instance.current) {
+            if(p5.current) {
 
-                instance.current.remove();
+                if(cleanup) {
+                    
+                    cleanup(p5.current);
+                }
+                
+                p5.current.remove();
             }
         }
 
-    }, []);
+    }, [parent]);
 
     useEffect(() => {
 
-        if(instance.current) {
+        if(p5.current) {
 
-            instance.current.draw = events.draw as () => undefined;
-            instance.current.windowResized = events.windowResized as () => undefined;
+            p5.current.draw = () => {
+                
+                if(loop && p5.current) {
+                    
+                    loop(p5.current)
+                }
+            } 
+            
+            p5.current.windowResized = windowResized as () => any;
         }
-
-    }, [events.draw, events.windowResized]);
-
-    return instance;
+        
+    }, [loop, windowResized, parent]);
 }
 
-export default function P5Sketch({ classNames = "", ...props }: P5SketchProps) {
+export default function P5Sketch({ classNames = "", preload, setup, loop, cleanup, windowResized, ...props }: P5SketchProps) {
 
-    const parent = useRef(null);
+    const parent = useRef<null | HTMLDivElement>(null);
 
-    const p5 = useP5(props.preload, { draw: props.draw, windowResized: props.windowResized });
+    // force re-rendering after initial render and
+    // provide parent to p5 to create a canvas
+    const setInitialRender = useState(false)[1];
+    useEffect(() => setInitialRender(true), []);
 
-    useEffect(() => {
+    // provide p5 with event handlers and parent
+    useP5({ preload, setup, loop, windowResized, cleanup }, parent.current);
 
-        if(p5.current !== null && parent.current !== null) {
-
-            props.setup(p5.current, parent.current as any);
-        }
-
-    }, []);
-
-    const { 
-        // extract props which are used elsewhere
-        preload,
-        setup,
-        draw,
-        windowResized,
-        // extract rest of props 
-        ...rest 
-    } = props;
-
-    return <div ref={parent} className={classNamesFunc(classNames)}
+    return <div ref={parent} 
+                className={ClassNames(classNames)}
                 // pass rest of props as is
-                { ...rest }
-                />;
+                { ...props } />;
 }
