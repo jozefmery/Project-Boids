@@ -15,7 +15,7 @@ import P5 from "p5";
 import lodash from "lodash";
 
 // import MUI stylers
-import { CSSProperties } from "@material-ui/styles/withStyles";
+import { StyleRules } from "@material-ui/styles/withStyles";
 
 /**
  * 
@@ -150,9 +150,11 @@ export const simStylers: SimStylers = {
     },
 };
 
-type ThemedCSSProperties = {
+type StyleDefinition = StyleRules<any>[string];
 
-    [theme in ColorTheme]?: CSSProperties;
+type ThemedStyleDefinition = {
+
+    [theme in ColorTheme]?: StyleDefinition;
 };
 
 type NoUndefinedField<T> = { [P in keyof T]-?: NonNullable<T[P]> };
@@ -303,8 +305,8 @@ export class Style {
     /// Protected members
 
     // members are initialized in ctor using methods 
-    protected shared: CSSProperties = {};
-    protected themed: NoUndefinedField<ThemedCSSProperties> = {
+    protected shared: StyleDefinition = {};
+    protected themed: NoUndefinedField<ThemedStyleDefinition> = {
 
         [ColorTheme.LIGHT]: {},
         [ColorTheme.DARK]: {}
@@ -314,8 +316,8 @@ export class Style {
 
     /// Constructor function
 
-    protected constructor(sharedProperties:     Readonly<CSSProperties>, 
-                            themedProperties:   Readonly<ThemedCSSProperties>, 
+    protected constructor(sharedProperties:     Readonly<StyleDefinition>, 
+                            themedProperties:   Readonly<ThemedStyleDefinition>, 
                             globalStyles:       Readonly<Array<GlobalStyle>> | GlobalStyle) {
 
         this.setSharedCSS(sharedProperties);
@@ -325,8 +327,8 @@ export class Style {
 
     /// Public static methods
 
-    public static create(sharedProperties?: CSSProperties, 
-                            themedProperties?: Readonly<ThemedCSSProperties>, 
+    public static create(sharedProperties?: StyleDefinition, 
+                            themedProperties?: Readonly<ThemedStyleDefinition>, 
                             globalStyles: Readonly<Array<GlobalStyle>> | GlobalStyle = []): Style {
 
         return new Style(sharedProperties ? sharedProperties : {}, 
@@ -336,12 +338,12 @@ export class Style {
 
     /// Public methods
 
-    public setSharedCSS(sharedProperties: Readonly<CSSProperties>): void {
+    public setSharedCSS(sharedProperties: Readonly<StyleDefinition>): void {
 
         this.shared = lodash.cloneDeep(sharedProperties);
     }
     
-    public setThemedCSS(themedProperties: Readonly<ThemedCSSProperties>): void {
+    public setThemedCSS(themedProperties: Readonly<ThemedStyleDefinition>): void {
 
         this.themed = lodash.merge({
 
@@ -378,7 +380,7 @@ export class Style {
         this.setSharedCSS({});
     }
 
-    public compose(theme: ColorTheme): CSSProperties {
+    public compose(theme: ColorTheme): StyleDefinition {
 
         const globals = this.globalStyles.map(global => Style.globalThemedStyles[global].compose(theme));
 
