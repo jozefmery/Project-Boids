@@ -176,7 +176,7 @@ export class Style {
 
             display: "flex",
             flexFlow: "row nowrap",
-            justifyContent: "space-evenly"
+            alignItems: "center"
         }),
 
         ColorTransition: Style.create({
@@ -213,6 +213,7 @@ export class Style {
             minWidth: "0px", // override default
             padding: "10px",
             borderRadius: "50%",
+            margin: "10px 3px",
 
             "& svg": {
 
