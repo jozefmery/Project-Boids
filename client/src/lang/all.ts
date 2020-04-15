@@ -23,6 +23,8 @@ export interface ILanguageDefinition {
     pause: string;
     setDarkTheme: string;
     setLightTheme: string;
+    chooseLanguage: string;
+    languageName: string;
 };
 
 /**

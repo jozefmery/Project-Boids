@@ -17,7 +17,9 @@ const data: ILanguageDefinition = {
     play: "Play",
     pause: "Pause",
     setDarkTheme: "Switch to dark theme",
-    setLightTheme: "Switch to light theme"
+    setLightTheme: "Switch to light theme",
+    chooseLanguage: "Choose language",
+    languageName: "ENGLISH"
 };
 
 export default data;

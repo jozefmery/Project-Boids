@@ -17,7 +17,9 @@ const data: ILanguageDefinition = {
     play: "Spustiť",
     pause: "Zastaviť",
     setDarkTheme: "Prepnúť na tmavý motív",
-    setLightTheme: "Prepnúť na svetlý motív"
+    setLightTheme: "Prepnúť na svetlý motív",
+    chooseLanguage: "Vybrať jazyk",
+    languageName: "SLOVENČINA"
 };
 
 export default data;
