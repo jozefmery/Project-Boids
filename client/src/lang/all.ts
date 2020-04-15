@@ -33,8 +33,8 @@ export interface ILanguageDefinition {
  */
 export enum Languages {
 
-    EN,
-    SK
+    EN = "en",
+    SK = "sk"
 }
 
 /**
