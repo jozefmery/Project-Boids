@@ -52,14 +52,7 @@ const UIPanelStyle: Style = Style.create({
 
 }, {}, ["UIPanel", "VerticalFlexBox", "ColorTransition"]);
 
-const buttonStyle: Style = Style.create({
-
-    "&:not(:last-child)": {
-
-        marginRight: "20px"
-    },
-
-}, {}, ["ControlButton", "ColorTransition"]);
+const buttonStyle: Style = Style.create({}, {}, ["ControlButton", "ColorTransition"]);
 
 const tooltipStyle: Style = Style.create(undefined, undefined, "SimpleTooltip");
 
@@ -70,46 +63,38 @@ const useControlStyles = makeStyles(({ theme }: Theme) => ({
     tooltip: tooltipStyle.compose(theme)
 }));
 
-type ControlElements = "playToggler";
-
-const mapStateToProps = ({ language, sim }: StateShape) => ({ language, sim });
-type ControlsProps = ReturnType<typeof mapStateToProps>;
-
 // define helper functions
-function getIcon(props: ControlsProps, element: ControlElements): React.ReactNode {
+function useIcon() {
 
-    // --- shorthands
-    const simRunning = props.sim.running;
-    // --- shorthands
+    // get data from redux state
+    const simRunning = useSelector((state: StateShape) => state.sim.running);
 
-    switch(element) {
+    return {
 
-        case "playToggler":
-
-            return simRunning ? <PauseIcon /> : <PlayIcon />;
+        playToggler: simRunning ? <PauseIcon /> : <PlayIcon />
     }
 }
 
-function getTooltip(props: ControlsProps, element: ControlElements): string {
+function useTooltip() {
 
-    // --- shorthands
-    const simRunning = props.sim.running;
-    const currentLanguage = languageData[props.language];
-    // --- shorthands
+    // get data from redux state
+    const simRunning = useSelector((state: StateShape) => state.sim.running);
+    const selectedLanguage = useSelector((state: StateShape) => state.language);
 
-    switch(element) {
+    // select strings based on selected language
+    const languageStrings = languageData[selectedLanguage];
 
-        case "playToggler":
+    return {
 
-            return simRunning ? currentLanguage.pause : currentLanguage.play;
+        playToggler: simRunning ? languageStrings.pause : languageStrings.play
     }
 }
 
 // define react element
 export default function Controls() {
 
-    // get data from redux store
-    const props = useSelector(mapStateToProps);
+    const icons = useIcon();
+    const tooltips = useTooltip();
 
     // get style classes
     const classes = useControlStyles();
@@ -118,12 +103,12 @@ export default function Controls() {
 
     return (
         <div className={classes.panel}>
-            <Tooltip title={getTooltip(props, "playToggler")} 
+            <Tooltip title={tooltips.playToggler} 
                     placement="top" 
                     TransitionComponent={Zoom}
                     classes={{ tooltip: classes.tooltip }}>
                 <Button className={classes.button} onClick={() => dispatch(toggleSimRunning()) }>
-                    {getIcon(props, "playToggler")}
+                    {icons.playToggler}
                 </Button>
             </Tooltip>
         </div>);
