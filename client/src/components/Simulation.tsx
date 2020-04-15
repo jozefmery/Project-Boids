@@ -8,13 +8,12 @@
  * 
  */
 
-// import dependencies
+// import react
 import React, { Component } from "react";
-import P5 from "p5";
-import classNames from "classnames";
 
 // import utilities
-import { clamp } from "../utils";
+import lodash from "lodash";
+import P5 from "p5";
 
 // import custom components
 import P5Sketch from "./P5Sketch";
@@ -23,10 +22,11 @@ import P5Sketch from "./P5Sketch";
 import { connect } from "react-redux";
  
 // import stylers
-import stylers from "../stylers";
+import { withStyles, WithStyles } from "@material-ui/core/styles";
+import { simStylers } from "../stylers";
 
 // import hotkeys
-import { HotkeyEvent, HotKeyContext } from "../hotkeys";
+import { HotKeyContext } from "../hotkeys";
 
 // import type information
 import { StateShape } from "../state/defaultState";
@@ -36,15 +36,10 @@ interface GridLineOptions {
     intensity: number;
     boundary: number;
     highlight: number;
-    getCoordinates: (_: number) => { x1: number, x2: number, 
-                            y1: number, y2: number };
+    getCoordinates: (_: number) => { x1: number, x2: number, y1: number, y2: number };
 };
 
-type SimulationProps = Pick<StateShape, "sim" | "theme" | "keyboard"> & {
-
-    parentClasses?: Parameters<typeof classNames>[0];
-    parentID: string;
-};
+type SimulationProps = Pick<StateShape, "sim" | "theme" | "keyboard"> & WithStyles<typeof Simulation.styles>
 
 export enum SimZoomTarget {
 
@@ -56,12 +51,6 @@ class Simulation extends Component<SimulationProps, { mouseDragging: boolean, zo
 
     /// Public static members
 
-    public static readonly defaultProps = {
-
-        parentClasses: "",
-        parentID: ""
-    }
-
     public static readonly bindingList = [
 
         "moveCameraLeft",
@@ -70,16 +59,49 @@ class Simulation extends Component<SimulationProps, { mouseDragging: boolean, zo
         "moveCameraDown"
 
     ] as const;
+        
+    public static styles = {
+
+        parent: {
+
+            // fill parent
+            position: "absolute",
+            top: "0",
+            right: "0",
+            bottom: "0",
+            left: "0",
+        },
+
+        zoomIn: {
+
+            cursor: "zoom-in"
+        },
+
+        zoomOut: {
+
+            cursor: "zoom-out"
+        },
+
+        grab: {
+
+            cursor: "grab"
+        },
+
+        grabbing: {
+
+            cursor: "grabbing"
+        }
+
+    } as const;
 
     /// Public static methods
-
+    
     public static stateToProps = ({ sim, theme, keyboard }: StateShape) => ({ sim, theme, keyboard });
 
     /// Protected members
 
     // references will be initialized in setup
     protected p5: P5 = null as any;
-    protected parent: HTMLElement = null as any;
 
     protected timeStamp: number;
     protected timeDelta: number;
@@ -164,14 +186,12 @@ class Simulation extends Component<SimulationProps, { mouseDragging: boolean, zo
         this.bindings.moveCameraDown = () => this.moveCamera(0, this.getCameraMoveDelta());
     }
 
-    protected /* p5 */ setup = (p5: P5, parent: HTMLElement): void => {
+    protected /* p5 */ setup = (p5: P5): void => {
 
         // setup references
         this.p5 = p5;
-        this.parent = parent;
 
-        // create canvas with current parent size
-        this.p5.createCanvas(this.p5.windowWidth, this.p5.windowHeight).parent(this.parent);
+        this.windowResizedHandler();
 
         this.moveToAreaCenter();
     }
@@ -187,7 +207,7 @@ class Simulation extends Component<SimulationProps, { mouseDragging: boolean, zo
     protected keyDownHandler = (event: React.KeyboardEvent): void => {
 
         if(event.repeat) return;
-
+        
         this.hotkeys.onKeyChanged(event.nativeEvent, true);
     }
 
@@ -265,7 +285,7 @@ class Simulation extends Component<SimulationProps, { mouseDragging: boolean, zo
         
         this.showZoomCursor(zoomModifier);        
 
-        const newScale = clamp(this.camera.scale + (scale.delta * zoomModifier), scale.min, scale.max);
+        const newScale = lodash.clamp(this.camera.scale + (scale.delta * zoomModifier), scale.min, scale.max);
         const scaleDelta = newScale - this.camera.scale;
 
         this.adjustCamera(targetX, targetY, scaleDelta);
@@ -279,7 +299,25 @@ class Simulation extends Component<SimulationProps, { mouseDragging: boolean, zo
 
         return (this.props.sim.camera.moveDelta / 1000) * this.timeDelta * this.camera.scale;
     }
+
+    protected getZoomModifierClass() {
+
+        switch(this.state.zoomModifier) {
+
+            case 0: return this.props.classes.grab;
+            case 1: return this.props.classes.zoomIn;
+            case -1: return this.props.classes.zoomOut;
+        }
+
+        return "";
+    }
     
+    protected getClasses() {
+
+        return [this.props.classes.parent, this.getZoomModifierClass(), 
+            { [this.props.classes.grabbing]: this.state.mouseDragging }]
+    }
+
     // mutator methods
 
     protected moveToAreaCenter() {
@@ -290,8 +328,8 @@ class Simulation extends Component<SimulationProps, { mouseDragging: boolean, zo
         const area = this.props.sim.area;
         // --- shorthands
 
-        camera.x = (- p5.windowWidth / 2) + area.x / 2;
-        camera.y = (- p5.windowHeight / 2) + area.y / 2 ;
+        camera.x = (- p5.windowWidth / 2) + area.width / 2;
+        camera.y = (- p5.windowHeight / 2) + area.height / 2 ;
     }
 
     protected showZoomCursor(zoomModifier: number): void {
@@ -311,6 +349,20 @@ class Simulation extends Component<SimulationProps, { mouseDragging: boolean, zo
 
         this.camera.x += x;
         this.camera.y += y;
+    
+        this.clampCameraToArea()
+    }
+
+    protected clampCameraToArea() {
+
+        // --- shorthands
+        const area = this.props.sim.area;
+        const p5 = this.p5;
+        const margin = 150;
+        // --- shorthands
+
+        this.camera.x = lodash.clamp(this.camera.x, - p5.windowWidth + margin, area.width - margin);
+        this.camera.y = lodash.clamp(this.camera.y, - p5.windowHeight + margin, area.height - margin);
     }
 
     // update methods
@@ -376,7 +428,7 @@ class Simulation extends Component<SimulationProps, { mouseDragging: boolean, zo
     protected drawBackground(): void {
         
         // --- shorthands 
-        const styler = stylers[this.props.theme];
+        const styler = simStylers[this.props.theme];
         // --- shorthands
         
         styler.background(this.p5);
@@ -397,12 +449,12 @@ class Simulation extends Component<SimulationProps, { mouseDragging: boolean, zo
         // --- shorthands 
         const p5 = this.p5;
         const area = this.props.sim.area;
-        const styler = stylers[this.props.theme];
+        const styler = simStylers[this.props.theme];
         // --- shorthands
 
         styler.area(p5);
         
-        p5.rect(0, 0, area.x, area.y)
+        p5.rect(0, 0, area.width, area.height)
     }
 
     protected drawGrid(): void {
@@ -414,14 +466,14 @@ class Simulation extends Component<SimulationProps, { mouseDragging: boolean, zo
 
         if(!grid.draw) return;
 
-        this.drawGridLines({ intensity: grid.intensity, boundary: area.x,
+        this.drawGridLines({ intensity: grid.intensity, boundary: area.width,
                              highlight: grid.highlight,
-                             getCoordinates: (x: number) => ({ x1: x, y1: 0, x2: x, y2: area.y })
+                             getCoordinates: (x: number) => ({ x1: x, y1: 0, x2: x, y2: area.height })
         });
 
-        this.drawGridLines({ intensity: grid.intensity, boundary: area.y,
+        this.drawGridLines({ intensity: grid.intensity, boundary: area.height,
                              highlight: grid.highlight,
-                             getCoordinates: (y: number) => ({ x1: 0, y1: y, x2: area.x, y2: y })
+                             getCoordinates: (y: number) => ({ x1: 0, y1: y, x2: area.width, y2: y })
         });
 
     }
@@ -430,7 +482,7 @@ class Simulation extends Component<SimulationProps, { mouseDragging: boolean, zo
 
         // --- shorthands 
         const p5 = this.p5;
-        const styler = stylers[this.props.theme]; 
+        const styler = simStylers[this.props.theme]; 
         // --- shorthands
 
         styler.grid(this.p5);
@@ -456,23 +508,23 @@ class Simulation extends Component<SimulationProps, { mouseDragging: boolean, zo
         // --- shorthands
         const p5 = this.p5;
         const area = this.props.sim.area;
-        const styler = stylers[this.props.theme];
+        const styler = simStylers[this.props.theme];
         // --- shorthands
 
         styler.boundingBox(p5);
         
-        p5.rect(0, 0, area.x, area.y)
+        p5.rect(0, 0, area.width, area.height)
     }
 
     protected drawFPS(): void {
 
         // --- shorthands
         const p5 = this.p5;
+        const styler = simStylers[this.props.theme];
         // --- shorthands
 
         p5.textAlign(p5.RIGHT);
-        p5.textSize(15);
-        p5.fill(255);
+        styler.fps(p5);
         p5.text(`FPS: ${this.fps}`, p5.windowWidth - 10, p5.windowHeight - 10);
     }
 
@@ -491,14 +543,13 @@ class Simulation extends Component<SimulationProps, { mouseDragging: boolean, zo
 
     public /* react */ render(): JSX.Element {
 
-        return <P5Sketch id={this.props.parentID} 
-                        classNames={classNames(this.props.parentClasses, 
-                                    {   "dragging": this.state.mouseDragging,  
-                                        "zoom-in": this.state.zoomModifier === 1,
-                                        "zoom-out": this.state.zoomModifier === -1,
-                                })}
+
+
+        return <P5Sketch
+                        classNames={this.getClasses()}
+                        tabIndex={0}
                         setup={this.setup}
-                        draw={this.loop} 
+                        loop={this.loop} 
                         windowResized={this.windowResizedHandler}
                         onKeyDown={this.keyDownHandler}
                         onKeyUp={this.keyUpHandler}
@@ -513,4 +564,4 @@ class Simulation extends Component<SimulationProps, { mouseDragging: boolean, zo
 
 export type SimulationBindings = typeof Simulation.bindingList[number];
 
-export default connect(Simulation.stateToProps)(Simulation);
+export default connect(Simulation.stateToProps)(withStyles(Simulation.styles)(Simulation));
