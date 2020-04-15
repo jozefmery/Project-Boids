@@ -16,6 +16,9 @@ import { SimZoomTarget } from "../components/Simulation";
 // import key binding types
 import { SimulationBindings } from "../components/Simulation";
 
+// import utility types
+import { Dimensions2D } from "../types";
+
 // gather all possible key binding into a single type
 export type Bindings = SimulationBindings;
 
@@ -25,11 +28,7 @@ export type StateShape = {
 
         running: boolean;
 
-        area: {
-
-            x: number;
-            y: number;
-        };
+        area: Dimensions2D;
 
         camera: {
 
@@ -78,8 +77,8 @@ const defaultState: StateShape =  {
         
         area: {
 
-            x: 500, 
-            y: 500 
+            width: 500, 
+            height: 500 
         },
         
         camera: {
