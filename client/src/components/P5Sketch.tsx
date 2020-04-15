@@ -14,7 +14,6 @@ import P5 from "p5";
 import ClassNames from "classnames";
 
 type P5Callback = ((p5: P5) => any) | void | undefined;
-type P5EmptyCallback = (() => any) | void | undefined;
 
 type P5EventHandlers = {
 
@@ -22,7 +21,7 @@ type P5EventHandlers = {
     setup?: P5Callback;
     loop?: P5Callback;
     cleanup?: P5Callback;
-    windowResized?: P5EmptyCallback
+    windowResized?: P5Callback
 };
 
 type P5SketchProps = {
@@ -71,7 +70,7 @@ function useP5({ preload, setup, loop, windowResized, cleanup }: P5EventHandlers
                 p5.current.remove();
             }
         }
-
+    // eslint-disable-next-line
     }, [parent]);
 
     useEffect(() => {
@@ -86,7 +85,13 @@ function useP5({ preload, setup, loop, windowResized, cleanup }: P5EventHandlers
                 }
             } 
             
-            p5.current.windowResized = windowResized as () => any;
+            p5.current.windowResized = () => {
+
+                if(windowResized && p5.current) {
+
+                    windowResized(p5.current);
+                }
+            } 
         }
         
     }, [loop, windowResized, parent]);
@@ -99,6 +104,7 @@ export default function P5Sketch({ classNames = "", preload, setup, loop, cleanu
     // force re-rendering after initial render and
     // provide parent to p5 to create a canvas
     const setInitialRender = useState(false)[1];
+    // eslint-disable-next-line
     useEffect(() => setInitialRender(true), []);
 
     // provide p5 with event handlers and parent
