@@ -9,37 +9,30 @@
  */
 
 // import react
-import React, { Component } from "react";
+import React, { useRef, useEffect, useState, useCallback } from "react";
 
 // import utilities
 import lodash from "lodash";
+
+// import p5
+import P5Sketch from "./P5Sketch";
 import P5 from "p5";
 
-// import custom components
-import P5Sketch from "./P5Sketch";
-
 // import react-redux
-import { connect } from "react-redux";
+import { useSelector } from "react-redux";
  
 // import stylers
-import { withStyles, WithStyles } from "@material-ui/core/styles";
-import { simStylers } from "../stylers";
+import { makeStyles } from "@material-ui/core/styles";
+import { simStylers, SimStylerList } from "../stylers";
 
 // import hotkeys
 import { HotKeyContext } from "../hotkeys";
 
 // import type information
 import { StateShape } from "../state/defaultState";
+import { Position2D, Dimensions2D } from "../types"
 
-interface GridLineOptions {
-
-    intensity: number;
-    boundary: number;
-    highlight: number;
-    getCoordinates: (_: number) => { x1: number, x2: number, y1: number, y2: number };
-};
-
-type SimulationProps = Pick<StateShape, "sim" | "theme" | "keyboard"> & WithStyles<typeof Simulation.styles>
+/// Type definitions
 
 export enum SimZoomTarget {
 
@@ -47,445 +40,416 @@ export enum SimZoomTarget {
     CENTER
 };
 
-class Simulation extends Component<SimulationProps, { mouseDragging: boolean, zoomModifier: number }> {
+type GridLineOptions = {
 
-    /// Public static members
+    intensity: number;
+    boundary: number;
+    highlight: number;
+    getCoordinates: (_: number) => { x1: number, x2: number, y1: number, y2: number };
+};
 
-    public static readonly bindingList = [
+/// State hooks and methods
 
-        "moveCameraLeft",
-        "moveCameraUp",      
-        "moveCameraRight",   
-        "moveCameraDown"
+function useDimensions() {
 
-    ] as const;
-        
-    public static styles = {
+    const dimensions = useRef<Dimensions2D>({ width: 0, height: 0 });
 
-        parent: {
+    return dimensions;
+}
 
-            // fill parent
-            position: "absolute",
-            top: "0",
-            right: "0",
-            bottom: "0",
-            left: "0",
-        },
+function useDimensionsMethods({ dimensions }: SimState) {
 
-        zoomIn: {
+    const setDimensions = useCallback((newDimensions: Dimensions2D) => {
 
-            cursor: "zoom-in"
-        },
+        dimensions.current = lodash.cloneDeep(newDimensions);
 
-        zoomOut: {
+    }, [dimensions]);
 
-            cursor: "zoom-out"
-        },
+    return { setDimensions };
+}
 
-        grab: {
+function useTime() {
 
-            cursor: "grab"
-        },
+    // assume 60 FPS for the first iteration
+    const delta = useRef(1000 / 60);
 
-        grabbing: {
+    const stamp = useRef(new Date().getTime());
 
-            cursor: "grabbing"
-        }
+    return {
 
-    } as const;
-
-    /// Public static methods
-    
-    public static stateToProps = ({ sim, theme, keyboard }: StateShape) => ({ sim, theme, keyboard });
-
-    /// Protected members
-
-    // references will be initialized in setup
-    protected p5: P5 = null as any;
-
-    protected timeStamp: number;
-    protected timeDelta: number;
-
-    protected hotkeys: HotKeyContext;
-
-    protected camera: { x: number, 
-                        y: number, 
-                        scale: number };
-
-    protected mouse: { lastX: number, lastY: number };
-
-    protected timeouts: {
-
-        // add index signature to enable looping
-        [index: string]: number;
-        zooming: number;
-        updateFPS: number;
+        delta,
+        stamp
     };
+}
 
-    protected fps: number;
-    
-    protected bindings: {
+function useTimeMethods({ time }: SimState) {
 
-        [binding in SimulationBindings]: () => void;
-        
-    } = {} as any;
+    const updateTime = useCallback(() => {
 
-    /// Constructor function
+        const newStamp = new Date().getTime();
+        time.delta.current = newStamp - time.stamp.current;
+        time.stamp.current = newStamp;
 
-    public constructor(props: SimulationProps) {
+    }, [time.delta, time.stamp]);
 
-        super(props);
+    return { updateTime };
+}
 
-        this.state = {
-            mouseDragging: false,
-            zoomModifier: 0
-        };
+function useCamera() {
 
-        // setup timing variables
-        this.timeStamp = new Date().getTime();
-        this.timeDelta = 16.7;
+    const target = useRef<Position2D>({ x: 0, y: 0 });
+    const scale  = useRef(1.0);
 
-        this.hotkeys = new HotKeyContext();
+    return {
 
-        this.camera = { x: 0, y: 0, scale: 1.0 };
-
-        this.mouse = {
-
-            lastX: 0,
-            lastY: 0
-        };
-
-        this.timeouts = {
-
-            zooming: 0,
-            updateFPS: 0
-        };
-
-        this.fps = 0;
-
-        this.setupHotkeys();
-        this.setupKeyBindings();
-
-        // initiate fps update loop
-        this.updateFPS();
+        target,
+        scale
     }
+}
 
-    /// Protected methods
+function useCameraMethods({ camera, dimensions }: SimState) {
 
-    // setup methods
+    const scaleSettings = useSelector((state: StateShape) => state.sim.camera.scale);
+    const area = useSelector((state: StateShape) => state.sim.area);
 
-    protected setupHotkeys(): void {
+    const clampToArea = useCallback(() => {
 
-    }
+        const target = camera.target.current;
+        const margin = 150;
 
-    protected setupKeyBindings(): void {
+        target.x = lodash.clamp(target.x, - dimensions.current.width  + margin, area.width  - margin);
+        target.y = lodash.clamp(target.y, - dimensions.current.height + margin, area.height - margin);
 
-        this.bindings.moveCameraLeft = () => this.moveCamera(-this.getCameraMoveDelta(), 0);
-        this.bindings.moveCameraUp = () => this.moveCamera(0, -this.getCameraMoveDelta());
-        this.bindings.moveCameraRight = () => this.moveCamera(this.getCameraMoveDelta(), 0);;
-        this.bindings.moveCameraDown = () => this.moveCamera(0, this.getCameraMoveDelta());
-    }
+    }, [camera.target, dimensions, area.width, area.height]);
 
-    protected /* p5 */ setup = (p5: P5): void => {
+    const moveCamera = useCallback((delta: Position2D) => {
 
-        // setup references
-        this.p5 = p5;
+        camera.target.current.x += delta.x;
+        camera.target.current.y += delta.y;
 
-        this.windowResizedHandler();
+        clampToArea();
 
-        this.moveToAreaCenter();
-    }
+    }, [camera.target, clampToArea]);
 
-    // event handler methods
+    const adjustPosition = useCallback((target: Position2D, scaleDelta: number) => {
 
-    protected windowResizedHandler = (): void => {
+        const currentTarget = camera.target.current;
+        const currentScale = camera.scale.current;
 
-        // resize canvas when parent div is resized
-        this.p5.resizeCanvas(this.p5.windowWidth, this.p5.windowHeight);
-    }
+        const positionDelta: Position2D = {
 
-    protected keyDownHandler = (event: React.KeyboardEvent): void => {
-
-        if(event.repeat) return;
-        
-        this.hotkeys.onKeyChanged(event.nativeEvent, true);
-    }
-
-    protected keyUpHandler = (event: React.KeyboardEvent): void => {
-
-        this.hotkeys.onKeyChanged(event.nativeEvent, false)
-    }
-
-    protected mouseDownHandler = (event: React.MouseEvent): void => {
-
-        this.setState({ mouseDragging: true });
-        this.mouse.lastX = event.clientX;
-        this.mouse.lastY = event.clientY;
-    }
-    
-    protected mouseUpHandler = (event: React.MouseEvent): void => {
-        
-        this.setState({ mouseDragging: false });
-    }
-
-    protected mouseMoveHandler = (event: React.MouseEvent): void => {
-
-        if(this.state.mouseDragging) {
-
-            this.mouseDragHandler(event);
+            x: ((target.x + currentTarget.x) / currentScale) * scaleDelta,
+            y: ((target.y + currentTarget.y) / currentScale) * scaleDelta
         }
-    }
 
-    protected mouseDragHandler = (event: React.MouseEvent): void => {
+        moveCamera(positionDelta);
 
-        const dx = this.mouse.lastX - event.clientX;
-        const dy = this.mouse.lastY - event.clientY;
+    }, [camera.scale, camera.target, moveCamera]);
 
-        this.moveCamera(dx, dy);
+    const changeCameraScale = useCallback((modifier: number, mousePosition: Position2D) => {
 
-        this.mouse.lastX = event.clientX;
-        this.mouse.lastY = event.clientY;
-    }
+        if(!scaleSettings.enabled) return;
 
-    protected mouseLeaveHandler = (event: React.MouseEvent): void => {
+        let target: Position2D = { x: 0, y: 0 };
 
-        this.setState({ mouseDragging: false });
-    }
-
-    protected mouseWheelHandler = (event: React.WheelEvent): void => {
-
-        // --- shorthands
-        const scale = this.props.sim.camera.scale;
-        const { clientX, clientY, deltaY } = event;
-        // --- shorthands
-
-        if(!scale.enabled) return;
-
-        let targetX, targetY = 0;
-
-        switch(scale.target) {
+        switch(scaleSettings.target) {
 
             case SimZoomTarget.CURSOR:
 
-                targetX = clientX;
-                targetY = clientY;
+                target = lodash.cloneDeep(mousePosition);
                 break;
             
             case SimZoomTarget.CENTER:
 
-                targetX = this.p5.windowWidth / 2;
-                targetY = this.p5.windowHeight / 2;
+                target = {
+
+                    x: dimensions.current.width / 2,
+                    y: dimensions.current.height / 2,
+                };
+                break;
         }
 
-        // ignore non-standard value
-        // wheel-up = negative value - should increase zoom
-        // wheel-down = positive value - should decrease zoom
-        // invert sign to achieve desired behavior
-        const zoomModifier = -Math.sign(deltaY);
+        const newScale = lodash.clamp(camera.scale.current + (scaleSettings.delta * modifier), 
+                                        scaleSettings.min, scaleSettings.max);
+
+        const scaleDelta = newScale - camera.scale.current;
+
+        adjustPosition(target, scaleDelta);
+
+        camera.scale.current= newScale;
+
+    }, [adjustPosition, 
+        scaleSettings.delta, 
+        scaleSettings.min, 
+        scaleSettings.max, 
+        scaleSettings.enabled, 
+        scaleSettings.target,
+        dimensions,
+        camera.scale]);
+
+    const centerCameraToArea = useCallback(() => {
+
+        const target = camera.target.current;
+
+        target.x = (- dimensions.current.width / 2) + area.width / 2;
+        target.y = (- dimensions.current.height / 2) + area.height / 2 ;
+
+    }, [camera.target, area.width, area.height, dimensions]);
+
+    return {
+
+        moveCamera,
+        changeCameraScale,
+        centerCameraToArea
+    };
+}
+
+function useMouse() {
+
+    const dragging = useRef(false);
+    const lastPosition = useRef<Position2D>({ x: 0, y: 0 });
+
+    return { 
         
-        this.showZoomCursor(zoomModifier);        
+        dragging,
+        lastPosition
+    };
+}
 
-        const newScale = lodash.clamp(this.camera.scale + (scale.delta * zoomModifier), scale.min, scale.max);
-        const scaleDelta = newScale - this.camera.scale;
+function useMouseMethods({ mouse }: SimState) {
 
-        this.adjustCamera(targetX, targetY, scaleDelta);
+    const setMouseDragging = useCallback((dragging: boolean) => {
 
-        this.camera.scale = newScale;
-    }
+        mouse.dragging.current = dragging;
 
-    // query methods
+    }, [mouse.dragging]);
 
-    protected getCameraMoveDelta(): number {
+    const setMouseLastPosition = useCallback((position: Position2D) => {
 
-        return (this.props.sim.camera.moveDelta / 1000) * this.timeDelta * this.camera.scale;
-    }
+        mouse.lastPosition.current = lodash.cloneDeep(position);
 
-    protected getZoomModifierClass() {
+    }, [mouse.lastPosition]);
 
-        switch(this.state.zoomModifier) {
+    return {
 
-            case 0: return this.props.classes.grab;
-            case 1: return this.props.classes.zoomIn;
-            case -1: return this.props.classes.zoomOut;
+        setMouseDragging,
+        setMouseLastPosition
+    };
+}
+
+function useFps({ delta }: ReturnType<typeof useTime>) {
+
+    // assume 60 FPS
+    const fps = useRef(60);
+
+    const intervalID = useRef(0);
+
+    const update = useCallback(() => {
+
+        fps.current = 1000 / delta.current;
+
+    }, [delta]);
+
+    // start update loop
+    useEffect(() => {
+
+        intervalID.current = window.setInterval(update, 500);
+        
+        return () => {
+
+            window.clearInterval(intervalID.current);
         }
 
-        return "";
-    }
+    }, [update]);
+
+    return fps;
+}
+
+function useHotkeys() {
+
+    const context = useRef(new HotKeyContext(500, true));
+
+    const cleanupContext = useCallback(() => {
+
+        context.current.clearBlurHandler();
+
+    }, [context]);
+
+    useEffect(() => {
+
+        return cleanupContext;
+
+    }, [cleanupContext]);
+
+    return context;
+}
+
+function useSimState() {
+
+    const dimensions = useDimensions();
+    const time = useTime();
+    const camera = useCamera();
+    const mouse = useMouse();
+    const fps = useFps(time);
+    const hotkeys = useHotkeys();
+
+    return {
+
+        dimensions,
+        time,
+        camera,
+        mouse,
+        fps,
+        hotkeys
+    };
+}
+
+type SimState = ReturnType<typeof useSimState>;
+
+/// Styler hooks
+
+function useCanvasStylers(styler: SimStylerList) {
+
+    const theme = useSelector((state: StateShape) => state.theme);
+
+    return useCallback((p5: P5) => {
+
+        simStylers[theme][styler](p5);
+
+    }, [theme, styler]);
+}
+
+/// Keyboard hooks
+
+const bindingList = [
+
+    "moveCameraLeft",
+    "moveCameraUp",      
+    "moveCameraRight",   
+    "moveCameraDown"
+
+] as const;
+
+export type SimulationBindings = typeof bindingList[number];
+
+function useBindings(state: SimState) {
+
+    const moveDelta = useSelector((state: StateShape) => state.sim.camera.moveDelta);
+    const bindingCombinations = useSelector((state: StateShape) => state.keyboard.bindings);
+
+    const { moveCamera } = useCameraMethods(state);
     
-    protected getClasses() {
+    const getMoveDelta = useCallback(() => {
 
-        return [this.props.classes.parent, this.getZoomModifierClass(), 
-            { [this.props.classes.grabbing]: this.state.mouseDragging }]
-    }
+        return (moveDelta / 1000) * state.time.delta.current * state.camera.scale.current; 
 
-    // mutator methods
+    }, [moveDelta]);
 
-    protected moveToAreaCenter() {
+    type Bindings = { [binding in SimulationBindings]: () => any };
 
-        // --- shorthands
-        const camera = this.camera;
-        const p5 = this.p5;
-        const area = this.props.sim.area;
-        // --- shorthands
+    const bindingCallbacks = useRef<Bindings>({
 
-        camera.x = (- p5.windowWidth / 2) + area.width / 2;
-        camera.y = (- p5.windowHeight / 2) + area.height / 2 ;
-    }
+        moveCameraUp:       () => moveCamera({ x: 0, y: -getMoveDelta() }),
+        moveCameraRight:    () => moveCamera({ x: getMoveDelta(), y: 0 }),
+        moveCameraDown:     () => moveCamera({ x: 0, y: getMoveDelta() }),
+        moveCameraLeft:     () => moveCamera({ x: -getMoveDelta(), y: 0 })
+    });
 
-    protected showZoomCursor(zoomModifier: number): void {
+    return useCallback(() => {
+ 
+        for(const binding of bindingList) {
 
-        this.setState({ ...this.state, zoomModifier });
-        clearTimeout(this.timeouts.zooming);
-        this.timeouts.zooming = setTimeout(() => this.setState({ ...this.state, zoomModifier: 0 }), 400) as any;
-    }
+            const combination = bindingCombinations[binding];
+            // console.log(combination);
 
-    protected adjustCamera(targetX: number, targetY: number, scaleDelta: number): void {
+            if(state.hotkeys.current.isCombinationPressed(combination)) {
 
-        this.moveCamera(((targetX + this.camera.x) / this.camera.scale) * scaleDelta, 
-                        ((targetY + this.camera.y) / this.camera.scale) * scaleDelta);
-    }
-
-    protected moveCamera(x: number, y: number): void {
-
-        this.camera.x += x;
-        this.camera.y += y;
-    
-        this.clampCameraToArea()
-    }
-
-    protected clampCameraToArea() {
-
-        // --- shorthands
-        const area = this.props.sim.area;
-        const p5 = this.p5;
-        const margin = 150;
-        // --- shorthands
-
-        this.camera.x = lodash.clamp(this.camera.x, - p5.windowWidth + margin, area.width - margin);
-        this.camera.y = lodash.clamp(this.camera.y, - p5.windowHeight + margin, area.height - margin);
-    }
-
-    // update methods
-
-    protected updateFPS(): void {
-
-        // update fps once every second
-        this.timeouts.updateFPS = window.setTimeout(() => this.updateFPS(), 500);
-
-        this.fps = Math.round(1000 / this.timeDelta);
-    }
-
-    protected updateTimeData(): void {
-
-        const last = this.timeStamp;
-        this.timeStamp = new Date().getTime();
-        this.timeDelta = this.timeStamp - last;
-    }
-
-    protected runKeyBindings(): void {
-
-        // --- shorthands
-        const bindings = this.props.keyboard.bindings;
-        // --- shorthands
-
-        for(const action of Simulation.bindingList) {
-
-            const combination = bindings[action];
-
-            if(this.hotkeys.isCombinationPressed(combination)) {
-
-                this.bindings[action]();
+            bindingCallbacks.current[binding]();
             }
         }
-    }
 
-    protected update(): void {
+    }, [bindingCombinations, state.hotkeys, bindingCallbacks]);
+}
 
-        this.updateTimeData();
-        this.runKeyBindings();
-    }
+/// Setup hooks
 
-    protected /* p5 */ loop = (): void => {
+function useSetup(state: SimState) {
 
-        this.update();
-        this.draw();
-    }
-
-    // drawing
-
-    protected draw(): void {
-
-        this.p5.push();
-        this.drawBackground();
-        this.applyTransform();
-        this.drawArea();
-        this.drawGrid();
-        this.drawBoundingBox();
-        this.p5.pop();
-        this.drawFPS();
-    }
+    const { setDimensions } = useDimensionsMethods(state);
+    const { centerCameraToArea } = useCameraMethods(state);
     
-    protected drawBackground(): void {
+    return useCallback((p5: P5) => {
+
+        p5.resizeCanvas(p5.windowWidth, p5.windowHeight);
+        setDimensions({ width: p5.windowWidth, height: p5.windowHeight });
+
+        centerCameraToArea();
+
+    }, [setDimensions, centerCameraToArea]);
+}
+
+/// Draw & Update hooks
+
+function useUpdate(state: SimState) {
+
+    const { updateTime } = useTimeMethods(state);
+    const runBindings = useBindings(state);
+
+    return useCallback(() => {
+
+        updateTime();
+        runBindings();
+
+    }, [updateTime, runBindings]);
+}
+
+function useDrawBackground() {
+
+    const styler = useCanvasStylers("background");
+
+    return useCallback((p5: P5) => {
+
+        styler(p5);
         
-        // --- shorthands 
-        const styler = simStylers[this.props.theme];
-        // --- shorthands
-        
-        styler.background(this.p5);
-    }
+    }, [styler]);
+}
+
+function useTransform(state: SimState) {
     
-    protected applyTransform(): void {
+    return useCallback((p5: P5) => {
 
-        // --- shorthands 
-        const p5 = this.p5;
-        // --- shorthands
+        const target = state.camera.target.current;
+        const scale = state.camera.scale.current;
 
-        p5.translate(-this.camera.x, -this.camera.y);
-        this.p5.scale(this.camera.scale);
-    }
-    
-    protected drawArea(): void {
+        p5.translate(-target.x, -target.y);
+        p5.scale(scale);
 
-        // --- shorthands 
-        const p5 = this.p5;
-        const area = this.props.sim.area;
-        const styler = simStylers[this.props.theme];
-        // --- shorthands
+    }, [state.camera.target, state.camera.scale]);
+}
 
-        styler.area(p5);
+function useDrawArea() {
+
+    const styler = useCanvasStylers("area");
+
+    const area = useSelector((state: StateShape) => state.sim.area);
+
+    return useCallback((p5: P5) => {
+
+        styler(p5);
         
         p5.rect(0, 0, area.width, area.height)
-    }
 
-    protected drawGrid(): void {
+    }, [styler, area.height, area.width]);
+}
 
-        // --- shorthands 
-        const grid = this.props.sim.grid;
-        const area = this.props.sim.area;
-        // --- shorthands
+function useDrawGridLines() {
 
-        if(!grid.draw) return;
+    const gridStyler = useCanvasStylers("grid");
+    const highlightStyler = useCanvasStylers("gridHighlight");
+    
+    return useCallback((p5: P5, options: GridLineOptions) => {
 
-        this.drawGridLines({ intensity: grid.intensity, boundary: area.width,
-                             highlight: grid.highlight,
-                             getCoordinates: (x: number) => ({ x1: x, y1: 0, x2: x, y2: area.height })
-        });
-
-        this.drawGridLines({ intensity: grid.intensity, boundary: area.height,
-                             highlight: grid.highlight,
-                             getCoordinates: (y: number) => ({ x1: 0, y1: y, x2: area.width, y2: y })
-        });
-
-    }
-
-    protected drawGridLines(options: GridLineOptions): void {
-
-        // --- shorthands 
-        const p5 = this.p5;
-        const styler = simStylers[this.props.theme]; 
-        // --- shorthands
-
-        styler.grid(this.p5);
+        gridStyler(p5);
 
         for(let i = 0; i * options.intensity < options.boundary; i++) {
             
@@ -493,7 +457,7 @@ class Simulation extends Component<SimulationProps, { mouseDragging: boolean, zo
 
             if(options.highlight && (i % options.highlight === 0)) {
                 
-                styler.gridHighlight(p5);
+                highlightStyler(p5);
             }
             
             let coord = options.getCoordinates(i * options.intensity);
@@ -501,67 +465,214 @@ class Simulation extends Component<SimulationProps, { mouseDragging: boolean, zo
             
             p5.pop();
         }
-    }
 
-    protected drawBoundingBox(): void {
+    }, [gridStyler, highlightStyler]);
+}
 
-        // --- shorthands
-        const p5 = this.p5;
-        const area = this.props.sim.area;
-        const styler = simStylers[this.props.theme];
-        // --- shorthands
+function useDrawGrid() {
 
-        styler.boundingBox(p5);
-        
-        p5.rect(0, 0, area.width, area.height)
-    }
+    const grid = useSelector((state: StateShape) => state.sim.grid);
+    const area = useSelector((state: StateShape) => state.sim.area);
 
-    protected drawFPS(): void {
+    const drawGridLines = useDrawGridLines();
+    
+    return useCallback((p5: P5) => {
 
-        // --- shorthands
-        const p5 = this.p5;
-        const styler = simStylers[this.props.theme];
-        // --- shorthands
+        if(!grid.draw) return;
+
+        drawGridLines(p5, { intensity: grid.intensity, boundary: area.width,
+                            highlight: grid.highlight,
+                            getCoordinates: (x: number) => ({ x1: x, y1: 0, x2: x, y2: area.height }) });
+
+        drawGridLines(p5, { intensity: grid.intensity, boundary: area.height,
+                            highlight: grid.highlight,
+                            getCoordinates: (y: number) => ({ x1: 0, y1: y, x2: area.width, y2: y }) });
+
+    }, [drawGridLines, area.width, area.height, grid.draw, grid.highlight, grid.intensity]);
+}
+
+function useDrawBoundary() {
+
+    const styler = useCanvasStylers("boundingBox");
+    const area = useSelector((state: StateShape) => state.sim.area);
+    
+    return useCallback((p5: P5) => {
+
+        styler(p5);
+
+        p5.rect(0, 0, area.width, area.height);
+
+    }, [styler, area.height, area.width]);
+}
+
+function useDrawFPS(state: SimState) {
+
+    const styler = useCanvasStylers("fps");
+
+    return useCallback((p5: P5) => {
 
         p5.textAlign(p5.RIGHT);
-        styler.fps(p5);
-        p5.text(`FPS: ${this.fps}`, p5.windowWidth - 10, p5.windowHeight - 10);
-    }
+        styler(p5);
+        p5.text(`FPS: ${state.fps.current.toFixed(2)}`, p5.windowWidth - 10, p5.windowHeight - 10);
 
-    /// Public methods
+    }, [state.fps, styler]);
+}
 
-    public componentWillUnmount(): void {
+function useDraw(state: SimState) {
 
-        this.hotkeys.clearBlurHandler();
+    const drawBackground = useDrawBackground();
+    const transform = useTransform(state);
+    const drawArea = useDrawArea();
+    const drawGrid = useDrawGrid();
+    const drawBoundary = useDrawBoundary();
+    const drawFPS = useDrawFPS(state);
 
-        // clear all timeouts
-        for(const timeout in this.timeouts) {
+    return useCallback((p5: P5) => {
 
-            window.clearTimeout(this.timeouts[timeout]);
+        p5.push();
+        drawBackground(p5);
+        transform(p5);
+        drawArea(p5);
+        drawGrid(p5);
+        drawBoundary(p5);
+        p5.pop();
+        drawFPS(p5);
+
+    }, [drawBackground, transform, drawArea, drawGrid, drawBoundary, drawFPS]);
+}
+
+function useLoop(state: SimState) {
+    
+    const update = useUpdate(state);
+    const draw = useDraw(state);
+
+    return useCallback((p5: P5) => {
+
+        update();
+        draw(p5);
+
+    }, [update, draw]);
+}
+
+/// Event handlers hook
+
+function useEventHandlers(state: SimState) {
+
+    const { setDimensions } = useDimensionsMethods(state);
+    const { setMouseDragging, setMouseLastPosition } = useMouseMethods(state);
+    const { moveCamera, changeCameraScale } = useCameraMethods(state);
+
+    const windowResized = useCallback((p5: P5) => {
+
+        // resize canvas when parent div is resized
+        p5.resizeCanvas(p5.windowWidth, p5.windowHeight);
+        setDimensions({ width: p5.windowWidth, height: p5.windowHeight });
+    
+    }, [setDimensions]);
+
+    const onKeyDown = useCallback((event: React.KeyboardEvent): void => {
+
+        if(event.repeat) return;
+        
+        state.hotkeys.current.onKeyChanged(event.nativeEvent, true);
+
+    }, [state.hotkeys]);
+
+    const onKeyUp = useCallback((event: React.KeyboardEvent): void => {
+
+        state.hotkeys.current.onKeyChanged(event.nativeEvent, false);
+
+    }, [state.hotkeys]);
+
+    const onMouseDown = useCallback((event: React.MouseEvent): void => {
+
+        setMouseDragging(true);
+        setMouseLastPosition({ x: event.clientX, y: event.clientY });
+
+    }, [setMouseDragging, setMouseLastPosition]);
+    
+    const onMouseUp = useCallback((_: React.MouseEvent): void => {
+        
+        setMouseDragging(false);
+
+    }, [setMouseDragging]);
+
+    const onMouseDrag = useCallback((event: React.MouseEvent): void => {
+
+        const lastPosition = state.mouse.lastPosition.current;
+
+        const dx = lastPosition.x - event.clientX;
+        const dy = lastPosition.y - event.clientY;
+
+        moveCamera({ x: dx, y: dy });
+
+        setMouseLastPosition({ x: event.clientX, y: event.clientY });
+
+    }, [moveCamera, setMouseLastPosition, state.mouse.lastPosition]);
+
+    const onMouseMove = useCallback((event: React.MouseEvent): void => {
+
+        if(state.mouse.dragging.current) {
+
+            onMouseDrag(event);
         }
-    }
 
-    public /* react */ render(): JSX.Element {
+    }, [onMouseDrag, state.mouse.dragging]);
 
+    const onMouseLeave = useCallback((event: React.MouseEvent): void => {
 
+        setMouseDragging(false);
+    
+    }, [setMouseDragging]);
 
-        return <P5Sketch
-                        classNames={this.getClasses()}
-                        tabIndex={0}
-                        setup={this.setup}
-                        loop={this.loop} 
-                        windowResized={this.windowResizedHandler}
-                        onKeyDown={this.keyDownHandler}
-                        onKeyUp={this.keyUpHandler}
-                        onMouseDown={this.mouseDownHandler}
-                        onMouseUp={this.mouseUpHandler}
-                        onMouseMove={this.mouseMoveHandler}
-                        onMouseLeave={this.mouseLeaveHandler}
-                        onWheel={this.mouseWheelHandler}
-                        />;
+    const onWheel = useCallback(({ deltaY, clientX, clientY }: React.WheelEvent): void => {
+
+        // ignore non-standard value
+        // wheel-up = negative value - should increase zoom
+        // wheel-down = positive value - should decrease zoom
+        // invert sign to achieve desired behavior
+        const zoomModifier = -Math.sign(deltaY);
+        changeCameraScale(zoomModifier, { x: clientX, y: clientY });
+
+    }, [changeCameraScale]);
+
+    return {
+
+        windowResized,
+        onKeyDown,
+        onKeyUp,
+        onMouseDown,
+        onMouseUp,
+        onMouseMove,
+        onMouseLeave,
+        onWheel
+    };
+}
+
+/// Simulation hook
+
+function useSimulation() {
+
+    const state = useSimState();
+
+    const setup = useSetup(state);
+    const loop = useLoop(state);
+
+    const eventHandlers = useEventHandlers(state);
+
+    return {
+    
+        loop,
+        setup,
+        ...eventHandlers
     }
 }
 
-export type SimulationBindings = typeof Simulation.bindingList[number];
+/// Component defintion
 
-export default connect(Simulation.stateToProps)(withStyles(Simulation.styles)(Simulation));
+export default function() {
+
+    const { ...eventHandlers } = useSimulation();
+
+    return <P5Sketch {...eventHandlers} tabIndex={0} />;
+}
