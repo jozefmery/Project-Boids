@@ -22,8 +22,8 @@ import P5 from "p5";
 import { useSelector } from "react-redux";
  
 // import stylers
-import { makeStyles } from "@material-ui/core/styles";
-import { simStylers, SimStylerList } from "../stylers";
+import { makeStyles, Theme } from "@material-ui/core/styles";
+import { simStylers, SimStylerList, Style } from "../stylers";
 
 // import hotkeys
 import { HotKeyContext } from "../hotkeys";
@@ -100,10 +100,29 @@ function useCamera() {
     const target = useRef<Position2D>({ x: 0, y: 0 });
     const scale  = useRef(1.0);
 
+    // use state to enable using in styles
+    const [zoomModifier, setModifier] = useState(0);
+
+    const timeout = useRef(0);
+
+    const resetZoomModifier = useCallback(() => setModifier(0), []);
+
+    // use effect is not sufficient, because timeout needs to be cleared
+    // whenever zoomModifier is written to and not only on change
+    const setZoomModifier = useCallback((modifier: number) => {
+
+        setModifier(modifier);
+        window.clearTimeout(timeout.current);
+        timeout.current = window.setTimeout(resetZoomModifier, 500);
+
+    }, [resetZoomModifier]);
+
     return {
 
         target,
-        scale
+        scale,
+        zoomModifier,
+        setZoomModifier
     }
 }
 
@@ -178,6 +197,8 @@ function useCameraMethods({ camera, dimensions }: SimState) {
 
         camera.scale.current= newScale;
 
+        camera.setZoomModifier(modifier);
+
     }, [adjustPosition, 
         scaleSettings.delta, 
         scaleSettings.min, 
@@ -185,7 +206,8 @@ function useCameraMethods({ camera, dimensions }: SimState) {
         scaleSettings.enabled, 
         scaleSettings.target,
         dimensions,
-        camera.scale]);
+        camera
+    ]);
 
     const centerCameraToArea = useCallback(() => {
 
@@ -206,23 +228,19 @@ function useCameraMethods({ camera, dimensions }: SimState) {
 
 function useMouse() {
 
-    const dragging = useRef(false);
+    // use state to enable usage in styles
+    const [dragging, setDragging] = useState(false);
     const lastPosition = useRef<Position2D>({ x: 0, y: 0 });
 
     return { 
         
         dragging,
+        setDragging,
         lastPosition
     };
 }
 
 function useMouseMethods({ mouse }: SimState) {
-
-    const setMouseDragging = useCallback((dragging: boolean) => {
-
-        mouse.dragging.current = dragging;
-
-    }, [mouse.dragging]);
 
     const setMouseLastPosition = useCallback((position: Position2D) => {
 
@@ -232,7 +250,6 @@ function useMouseMethods({ mouse }: SimState) {
 
     return {
 
-        setMouseDragging,
         setMouseLastPosition
     };
 }
@@ -319,6 +336,34 @@ function useCanvasStylers(styler: SimStylerList) {
     }, [theme, styler]);
 }
 
+const parentStyle = Style.create({
+
+    // fill parent
+    position: "absolute",
+    top: "0",
+    right: "0",
+    bottom: "0",
+    left: "0",
+
+    cursor: ({ mouse, camera }: SimState) => {
+
+        switch(camera.zoomModifier) {
+
+            case 1: return "zoom-in";
+            case -1: return "zoom-out";
+        }
+
+        if(mouse.dragging) return "grabbing";
+
+        return "grab";
+    }
+});
+
+const useStyles = makeStyles(({ theme }: Theme) => ({
+
+    parent: parentStyle.compose(theme)
+}));
+
 /// Keyboard hooks
 
 const bindingList = [
@@ -343,7 +388,7 @@ function useBindings(state: SimState) {
 
         return (moveDelta / 1000) * state.time.delta.current * state.camera.scale.current; 
 
-    }, [moveDelta]);
+    }, [moveDelta, state.time.delta, state.camera.scale]);
 
     type Bindings = { [binding in SimulationBindings]: () => any };
 
@@ -360,7 +405,6 @@ function useBindings(state: SimState) {
         for(const binding of bindingList) {
 
             const combination = bindingCombinations[binding];
-            // console.log(combination);
 
             if(state.hotkeys.current.isCombinationPressed(combination)) {
 
@@ -559,7 +603,7 @@ function useLoop(state: SimState) {
 function useEventHandlers(state: SimState) {
 
     const { setDimensions } = useDimensionsMethods(state);
-    const { setMouseDragging, setMouseLastPosition } = useMouseMethods(state);
+    const { setMouseLastPosition } = useMouseMethods(state);
     const { moveCamera, changeCameraScale } = useCameraMethods(state);
 
     const windowResized = useCallback((p5: P5) => {
@@ -586,16 +630,17 @@ function useEventHandlers(state: SimState) {
 
     const onMouseDown = useCallback((event: React.MouseEvent): void => {
 
-        setMouseDragging(true);
+        state.mouse.setDragging(true);
+
         setMouseLastPosition({ x: event.clientX, y: event.clientY });
 
-    }, [setMouseDragging, setMouseLastPosition]);
+    }, [state.mouse, setMouseLastPosition]);
     
     const onMouseUp = useCallback((_: React.MouseEvent): void => {
         
-        setMouseDragging(false);
+        state.mouse.setDragging(false);
 
-    }, [setMouseDragging]);
+    }, [state.mouse]);
 
     const onMouseDrag = useCallback((event: React.MouseEvent): void => {
 
@@ -612,18 +657,18 @@ function useEventHandlers(state: SimState) {
 
     const onMouseMove = useCallback((event: React.MouseEvent): void => {
 
-        if(state.mouse.dragging.current) {
+        if(state.mouse.dragging) {
 
             onMouseDrag(event);
         }
 
     }, [onMouseDrag, state.mouse.dragging]);
 
-    const onMouseLeave = useCallback((event: React.MouseEvent): void => {
+    const onMouseLeave = useCallback((_: React.MouseEvent): void => {
 
-        setMouseDragging(false);
+        state.mouse.setDragging(false);
     
-    }, [setMouseDragging]);
+    }, [state.mouse]);
 
     const onWheel = useCallback(({ deltaY, clientX, clientY }: React.WheelEvent): void => {
 
@@ -660,10 +705,13 @@ function useSimulation() {
 
     const eventHandlers = useEventHandlers(state);
 
+    const classes = useStyles(state);
+
     return {
     
         loop,
         setup,
+        classes,
         ...eventHandlers
     }
 }
@@ -672,7 +720,7 @@ function useSimulation() {
 
 export default function() {
 
-    const { ...eventHandlers } = useSimulation();
+    const { classes, ...eventHandlers } = useSimulation();
 
-    return <P5Sketch {...eventHandlers} tabIndex={0} />;
+    return <P5Sketch classNames={classes.parent} {...eventHandlers} tabIndex={0} />;
 }
