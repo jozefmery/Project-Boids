@@ -54,7 +54,7 @@ declare module '@material-ui/core/styles/createMuiTheme' {
  * 
  * List of properties every styler requires.
  */
-type SimStylerList =    "background"
+export type SimStylerList =    "background"
                     |   "area"
                     |   "grid"
                     |   "gridHighlight" 
@@ -159,149 +159,140 @@ type ThemedStyleDefinition = {
 
 type NoUndefinedField<T> = { [P in keyof T]-?: NonNullable<T[P]> };
 
-type GlobalStyle = "UIPanel" 
-                    | "ColorTransition" 
-                    | "ControlButton" 
-                    | "VerticalFlexBox" 
-                    | "TopBarButton"
-                    | "SimpleTooltip";
-
 export class Style {
 
-    /// Protected static members
+    /// Public static members
 
-    protected static globalThemedStyles: { [component in GlobalStyle]: Style } = {
+    public static readonly verticalFlexBox = Style.create({
 
-        VerticalFlexBox: Style.create({
+        display: "flex",
+        flexFlow: "row nowrap",
+        alignItems: "center"
+    });
 
-            display: "flex",
-            flexFlow: "row nowrap",
-            alignItems: "center"
-        }),
+    public static readonly colorTransition = Style.create({
 
-        ColorTransition: Style.create({
-
-            transition: "background-color .3s linear, color .3s linear, border-color .3s linear",
-        }),
+        transition: "background-color .3s linear, color .3s linear, border-color .3s linear",
+    });
         
-        UIPanel: Style.create({
+    public static readonly UIPanel= Style.create({
             
-            borderWidth: "1px",
-        }, 
-        {
+        borderWidth: "1px",
     
-            [ColorTheme.DARK]: {
-                
-                
-                borderColor: "#801313",
-
-                boxShadow: "0px 0px 10px rgba(255,255,255,0.1)",
-                backgroundColor: "#292929"
-            },
-        
-            [ColorTheme.LIGHT]: {
-                
-                borderColor: "#801313",
-
-                boxShadow: "0px 0px 10px rgba(255,255,255,0.1)",
-                backgroundColor: "#292929"
-            }
-        }),
-
-        TopBarButton: Style.create({
-
-            minWidth: "0px", // override default
-            padding: "10px",
-            borderRadius: "50%",
-            margin: "10px 3px",
-
-            "& svg": {
-
-                fontSize: "30px"
-            }
-        }, 
-        {
+    }, {
     
-            [ColorTheme.DARK]: {
-                
-                color: "#cecece",
-
-                "&:hover": {
-    
-                    backgroundColor: "#1d1d1d"
-                }
-            },
-        
-            [ColorTheme.LIGHT]: {
-                
-                color: "#cecece",
-
-                "&:hover": {
-    
-                    backgroundColor: "#1d1d1d"
-                }
-            }
-        }),
-
-        ControlButton: Style.create({
-
-            // spacing
-            padding: "5px",
-    
-            // style
-            borderRadius: "3px",
+        [ColorTheme.DARK]: {
             
-            // icon style
-            "& svg": {
+            
+            borderColor: "#801313",
+
+            boxShadow: "0px 0px 10px rgba(255,255,255,0.1)",
+            backgroundColor: "#292929"
+        },
     
-                fontSize: "45px"
+        [ColorTheme.LIGHT]: {
+            
+            borderColor: "#801313",
+
+            boxShadow: "0px 0px 10px rgba(255,255,255,0.1)",
+            backgroundColor: "#292929"
+        }
+    });
+
+    public static readonly topBarButton = Style.create({
+
+        minWidth: "0px", // override default
+        padding: "10px",
+        borderRadius: "50%",
+        margin: "10px 3px",
+
+        "& svg": {
+
+            fontSize: "30px"
+        }
+    
+    }, {
+    
+        [ColorTheme.DARK]: {
+            
+            color: "#cecece",
+
+            "&:hover": {
+
+                backgroundColor: "#1d1d1d"
             }
         },
-        {
     
-            [ColorTheme.DARK]: {
-    
-                color: "#cecece",
-                border: "1px #a8a8a8 solid",
-    
-                "&:hover": {
-    
-                    backgroundColor: "#1d1d1d"
-                }
-            },
+        [ColorTheme.LIGHT]: {
+            
+            color: "#cecece",
 
-            [ColorTheme.LIGHT]: {
-    
-                color: "#cecece",
-                border: "1px #a8a8a8 solid",
-    
-                "&:hover": {
-    
-                    backgroundColor: "#1d1d1d"
-                }
+            "&:hover": {
+
+                backgroundColor: "#1d1d1d"
             }
-        }),
+        }
+    });
 
-        "SimpleTooltip": Style.create({
+    public static readonly controlButton = Style.create({
 
-            padding: "5px 10px",
-            fontSize: "15px",
-            boxShadow: "0px 0px 5px black"
+        // spacing
+        padding: "5px",
+
+        // style
+        borderRadius: "3px",
+        
+        // icon style
+        "& svg": {
+
+            fontSize: "45px"
+        }
+    
+    }, {
+    
+        [ColorTheme.DARK]: {
+
+            color: "#cecece",
+            border: "1px #a8a8a8 solid",
+
+            "&:hover": {
+
+                backgroundColor: "#1d1d1d"
+            }
         },
-        {
-            [ColorTheme.DARK]: {
 
-                color: "black",
-                backgroundColor: "white"
+        [ColorTheme.LIGHT]: {
 
-            },
-            [ColorTheme.LIGHT]: {
+            color: "#cecece",
+            border: "1px #a8a8a8 solid",
 
-                color: "white",
-                backgroundColor: "black"
-            },
-        })
-    };
+            "&:hover": {
+
+                backgroundColor: "#1d1d1d"
+            }
+        }
+    });
+
+    public static readonly simpleTooltip = Style.create({
+
+        padding: "5px 10px",
+        fontSize: "15px",
+        boxShadow: "0px 0px 5px black"
+    
+    }, {
+
+        [ColorTheme.DARK]: {
+
+            color: "black",
+            backgroundColor: "white"
+
+        },
+        [ColorTheme.LIGHT]: {
+
+            color: "white",
+            backgroundColor: "black"
+        },
+    });
 
     /// Protected members
 
@@ -313,28 +304,28 @@ export class Style {
         [ColorTheme.DARK]: {}
     };
 
-    protected globalStyles: Array<GlobalStyle> = [];
+    protected baseStyles: Array<Style> = [];
 
     /// Constructor function
 
     protected constructor(sharedProperties:     Readonly<StyleDefinition>, 
                             themedProperties:   Readonly<ThemedStyleDefinition>, 
-                            globalStyles:       Readonly<Array<GlobalStyle>> | GlobalStyle) {
+                            baseStyles:         Readonly<Array<Style>> | Style) {
 
         this.setSharedCSS(sharedProperties);
         this.setThemedCSS(themedProperties);
-        this.setGlobalStyles(globalStyles)
+        this.setBaseStyles(baseStyles)
     }
 
     /// Public static methods
 
-    public static create(sharedProperties?: StyleDefinition, 
-                            themedProperties?: Readonly<ThemedStyleDefinition>, 
-                            globalStyles: Readonly<Array<GlobalStyle>> | GlobalStyle = []): Style {
+    public static create(sharedProperties: StyleDefinition = {}, 
+                            themedProperties: Readonly<ThemedStyleDefinition> = {}, 
+                            baseStyles: Readonly<Array<Style>> | Style = []): Style {
 
         return new Style(sharedProperties ? sharedProperties : {}, 
                         themedProperties ? themedProperties : {},
-                        globalStyles);
+                        baseStyles);
     }
 
     /// Public methods
@@ -354,21 +345,21 @@ export class Style {
         }, themedProperties);
     }
 
-    public setGlobalStyles(globalStyles: Readonly<Array<GlobalStyle>> | GlobalStyle): void {
+    public setBaseStyles(baseStyles: Readonly<Array<Style>> | Style): void {
 
-        if(typeof globalStyles === "string") {
+        if(baseStyles instanceof Style) {
 
-            this.globalStyles = [ globalStyles ];
+            this.baseStyles = [ baseStyles ];
 
         } else {
 
-            this.globalStyles = [ ...globalStyles ];
+            this.baseStyles = [ ...baseStyles ];
         }
     }
 
-    public clearGlobalStyles(): void {
+    public clearBaseStyles(): void {
 
-        this.globalStyles = [];
+        this.setBaseStyles([]);
     }
 
     public clearSharedCSS(): void {
@@ -383,8 +374,8 @@ export class Style {
 
     public compose(theme: ColorTheme): StyleDefinition {
 
-        const globals = this.globalStyles.map(global => Style.globalThemedStyles[global].compose(theme));
+        const baseStyles = this.baseStyles.map(base => base.compose(theme));
 
-        return lodash.merge({}, ...globals, this.shared, this.themed[theme])
+        return lodash.merge({}, ...baseStyles, this.shared, this.themed[theme])
     }
 };
