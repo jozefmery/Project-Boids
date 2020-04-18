@@ -79,7 +79,7 @@ function useTooltip() {
 
     // get data from redux state
     const simRunning = useSelector((state: StateShape) => state.sim.running);
-    const selectedLanguage = useSelector((state: StateShape) => state.language);
+    const selectedLanguage = useSelector((state: StateShape) => state.global.language);
 
     // select strings based on selected language
     const languageStrings = languageData[selectedLanguage];
