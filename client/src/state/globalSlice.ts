@@ -39,11 +39,14 @@ const globalSlice = createSlice({
         setGlobals: (_, { payload: globals }: PayloadAction<typeof global>) => globals,
 
         // theme
-        setTheme: (state, { payload: theme }: PayloadAction<typeof global.theme>) => { state.theme = theme }, 
-        toggleTheme: (state) => { state.theme = themeInverter[state.theme] },
+        setTheme: (state, { payload: theme }: PayloadAction<typeof global.theme>) => { state.theme = theme; }, 
+        toggleTheme: (state) => { state.theme = themeInverter[state.theme]; },
 
         // language
-        setLanguage: (state, { payload: language }: PayloadAction<typeof global.language>) => { state.language = language }
+        setLanguage: (state, { payload: language }: PayloadAction<typeof global.language>) => { state.language = language; },
+
+        // dimensions
+        setDimensions: (state, { payload: dimensions }: PayloadAction<typeof global.dimensions>) => { state.dimensions = dimensions; }
     }
 });
 
@@ -52,7 +55,8 @@ export const {
     setGlobals,
     setTheme,
     toggleTheme,
-    setLanguage
+    setLanguage,
+    setDimensions
 
 } = globalSlice.actions;
 
