@@ -53,21 +53,21 @@ const UIPanelStyle: Style = Style.create({
     borderStyle: "none",
     borderBottomStyle: "solid"
 
-}, {}, ["UIPanel", "ColorTransition", "VerticalFlexBox"]);
+}, {}, [Style.UIPanel, Style.colorTransition, Style.verticalFlexBox]);
 
 const buttonStyle: Style = Style.create({
 
     
-}, undefined, ["TopBarButton", "ColorTransition"]);
+}, undefined, [Style.topBarButton, Style.colorTransition]);
 
-const tooltipStyle: Style = Style.create(undefined, undefined, "SimpleTooltip");
+const tooltipStyle: Style = Style.create(undefined, undefined, Style.simpleTooltip);
 
 const langSelectorStyle: Style = Style.create({
 
     borderRadius: "10px",
     padding: "5px 10px"
 
-}, undefined, ["TopBarButton", "ColorTransition"]);
+}, undefined, [Style.topBarButton, Style.colorTransition]);
 
 const useTopBarStyles = makeStyles(({ theme }: Theme) => ({
 

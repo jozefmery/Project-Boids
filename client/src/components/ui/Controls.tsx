@@ -50,11 +50,11 @@ const UIPanelStyle: Style = Style.create({
     borderRadius: "3px 3px 0 0",
     borderStyle: "solid solid none solid"
 
-}, {}, ["UIPanel", "VerticalFlexBox", "ColorTransition"]);
+}, {}, [Style.UIPanel, Style.verticalFlexBox, Style.colorTransition]);
 
-const buttonStyle: Style = Style.create({}, {}, ["ControlButton", "ColorTransition"]);
+const buttonStyle: Style = Style.create({}, {}, [Style.controlButton, Style.colorTransition]);
 
-const tooltipStyle: Style = Style.create(undefined, undefined, "SimpleTooltip");
+const tooltipStyle: Style = Style.create(undefined, undefined, Style.simpleTooltip);
 
 const useControlStyles = makeStyles(({ theme }: Theme) => ({
 
