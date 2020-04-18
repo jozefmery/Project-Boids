@@ -11,18 +11,24 @@
 // import enums
 import { ColorTheme } from "../stylers";
 import { Languages } from "../lang/all";
-import { SimZoomTarget } from "../components/Simulation";
 
-// import key binding types
-import { SimulationBindings } from "../components/Simulation";
-
-// import utility types
-import { Dimensions2D } from "../types";
+// import type information
+import { Dimensions2D, Position2D } from "../types";
+import { SimulationBindings, SimZoomTarget } from "../components/SimulationDefs";
 
 // gather all possible key binding into a single type
 export type Bindings = SimulationBindings;
 
 export type StateShape = {
+
+    global: {
+
+        language: Languages;
+
+        theme: ColorTheme;
+
+        dimensions: Dimensions2D;
+    };
 
     sim: {
 
@@ -34,6 +40,7 @@ export type StateShape = {
 
             scale: {
 
+                current: number;
                 min: number;
                 max: number;
                 delta: number;
@@ -42,6 +49,10 @@ export type StateShape = {
             }
 
             moveDelta: number;
+
+            target: Position2D;
+
+            minVisibleArea: number;
         }
 
         grid: {
@@ -52,24 +63,25 @@ export type StateShape = {
         }
     };
 
-    language: Languages;
-
-    theme: ColorTheme;
-
     keyboard: {
 
         bindings: {
 
             [binding in Bindings]: string;
         }
-
-        // hotkeys: {
-
-        // }
     }
 };
 
 const defaultState: StateShape =  {
+
+    global: {
+
+        language: Languages.EN,
+
+        theme: ColorTheme.DARK,
+
+        dimensions: { width: 0, height: 0 }
+    },
 
     sim: {
 
@@ -85,6 +97,7 @@ const defaultState: StateShape =  {
 
             scale: {
                 
+                current: 1.0,
                 min: 0.5,
                 max: 1.5,
                 delta: 0.05,
@@ -92,7 +105,11 @@ const defaultState: StateShape =  {
                 target: SimZoomTarget.CURSOR
             },
             
-            moveDelta: 250 
+            moveDelta: 250,
+
+            target: { x: 0, y: 0 },
+
+            minVisibleArea: 150
         },
     
         grid: {
@@ -103,10 +120,6 @@ const defaultState: StateShape =  {
         }
     },
 
-    language: Languages.EN,
-
-    theme: ColorTheme.DARK,
-
     keyboard: {
 
         bindings: {
@@ -115,12 +128,7 @@ const defaultState: StateShape =  {
             "moveCameraUp":     "w",
             "moveCameraRight":  "d",
             "moveCameraDown":   "s",
-        },
-
-        // hotkeys: {
-
-
-        // }
+        }
     }
 }
 
