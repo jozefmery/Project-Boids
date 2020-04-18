@@ -33,7 +33,7 @@ import { StateShape } from "../state/defaultState";
 
 function useSetTitle() {
 
-    const currentLanguage = useSelector(({ language }: StateShape) => language);
+    const currentLanguage = useSelector((state: StateShape) => state.global.language);
 
     useEffect(() => {
 
@@ -44,7 +44,7 @@ function useSetTitle() {
 
 function useMUItheme() {
 
-    const theme = useSelector(({ theme }: StateShape) => theme);
+    const theme = useSelector((state: StateShape) => state.global.theme);
     return createMuiTheme({ theme });
 }
 
