@@ -17,14 +17,13 @@ import defaultState from "./defaultState";
 
 // import reducers
 import sim from "./simSlice";
-import language from "./languageSlice";
-import theme from "./themeSlice";
+import global from "./globalSlice";
 import keyboard from "./keyboardSlice";
 
 const reduxStateStore = configureStore({
     
     // merge slice reducers into a root reducer
-    reducer: { sim, language, theme, keyboard },
+    reducer: { sim, global, keyboard },
     // enable extension for debugging
     devTools: true,
     // load default state
