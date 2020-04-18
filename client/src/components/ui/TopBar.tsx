@@ -13,8 +13,7 @@ import React, { useState } from "react";
 
 // import redux utilities and slices
 import { useSelector, useDispatch } from "react-redux";
-import { toggleTheme } from "../../state/themeSlice";
-import { setLanguage } from "../../state/languageSlice";
+import { toggleTheme, setLanguage } from "../../state/globalSlice";
 
 // import UI elements
 import Button from "@material-ui/core/Button";
@@ -84,8 +83,8 @@ const useLangSelectorStyles = makeStyles(({ theme }: Theme) => ({
 function useContent() {
 
     // get data from redux state
-    const theme = useSelector((state: StateShape) => state.theme);
-    const selectedLanguage = useSelector((state: StateShape) => state.language);
+    const theme = useSelector((state: StateShape) => state.global.theme);
+    const selectedLanguage = useSelector((state: StateShape) => state.global.language);
 
     // select strings based on selected language
     const languageStrings = languageData[selectedLanguage];
@@ -103,8 +102,8 @@ function useContent() {
 function useTooltip() {
 
     // get data from redux state
-    const theme = useSelector((state: StateShape) => state.theme);
-    const selectedLanguage = useSelector((state: StateShape) => state.language);
+    const theme = useSelector((state: StateShape) => state.global.theme);
+    const selectedLanguage = useSelector((state: StateShape) => state.global.language);
 
     // select strings based on selected language
     const languageStrings = languageData[selectedLanguage];
