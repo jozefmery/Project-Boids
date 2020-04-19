@@ -186,16 +186,16 @@ export class Style {
             
             borderColor: "#801313",
 
-            boxShadow: "0px 0px 10px rgba(255,255,255,0.1)",
+            boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.4)",
             backgroundColor: "#292929"
         },
     
         [ColorTheme.LIGHT]: {
             
-            borderColor: "#801313",
+            borderColor: "black",
 
-            boxShadow: "0px 0px 10px rgba(255,255,255,0.1)",
-            backgroundColor: "#292929"
+            boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.2)",
+            backgroundColor: "#8bbcff"
         }
     });
 
@@ -225,11 +225,11 @@ export class Style {
     
         [ColorTheme.LIGHT]: {
             
-            color: "#cecece",
+            color: "black",
 
             "&:hover": {
 
-                backgroundColor: "#1d1d1d"
+                backgroundColor: "#b9d5ff"
             }
         }
     });
@@ -263,17 +263,17 @@ export class Style {
 
         [ColorTheme.LIGHT]: {
 
-            color: "#cecece",
-            border: "1px #a8a8a8 solid",
+            color: "black",
+            border: "1px black solid",
 
             "&:hover": {
 
-                backgroundColor: "#1d1d1d"
+                backgroundColor: "#b9d5ff"
             }
         }
     });
 
-    public static readonly simpleTooltip = Style.create({
+    public static readonly tooltip = Style.create({
 
         padding: "5px 10px",
         fontSize: "15px",
@@ -287,12 +287,58 @@ export class Style {
             backgroundColor: "white"
 
         },
+
         [ColorTheme.LIGHT]: {
 
             color: "white",
             backgroundColor: "black"
-        },
+        }
     });
+
+    public static menu = Style.create({}, {
+
+        [ColorTheme.DARK]: {
+
+            color: "#cecece",
+            backgroundColor: "#313131",
+        },
+
+        [ColorTheme.LIGHT]: {
+
+            color: "black",
+            backgroundColor: "white"
+        }
+    });
+
+    public static menuItem = Style.create({}, {
+
+        [ColorTheme.DARK]: {
+
+            "&:focus, &:focus:hover": {
+
+                backgroundColor: "#464646",
+            },
+
+            "&:hover": {
+
+                backgroundColor: "#666666",
+            }
+        },
+
+        [ColorTheme.LIGHT]: {
+
+            "&:focus, &:focus:hover": {
+
+                backgroundColor: "#c9c9c9",
+            },
+
+            "&:hover": {
+
+                backgroundColor: "#e6e6e6",
+            }
+        }
+    });
+
 
     /// Protected members
 
