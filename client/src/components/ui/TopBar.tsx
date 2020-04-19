@@ -26,6 +26,9 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
 
+// import hooks
+import { useLanguageString } from "../../hooks/UseLanguageString";
+
 // import stylers
 import { makeStyles, Theme } from "@material-ui/core/styles";
 import { Style, ColorTheme } from "../../stylers";
@@ -84,10 +87,9 @@ function useContent() {
 
     // get data from redux state
     const theme = useSelector((state: StateShape) => state.global.theme);
-    const selectedLanguage = useSelector((state: StateShape) => state.global.language);
 
-    // select strings based on selected language
-    const languageStrings = languageData[selectedLanguage];
+    // get strings
+    const languageName = useLanguageString("languageName");
     
     // helper
     const themeIsDark = theme === ColorTheme.DARK;
@@ -95,7 +97,7 @@ function useContent() {
     return {
 
         themeToggler: themeIsDark ? <LightIcon /> : <DarkIcon />,
-        languageSelector: languageStrings.languageName
+        languageSelector: languageName
     }
 }
 
@@ -103,18 +105,19 @@ function useTooltip() {
 
     // get data from redux state
     const theme = useSelector((state: StateShape) => state.global.theme);
-    const selectedLanguage = useSelector((state: StateShape) => state.global.language);
-
-    // select strings based on selected language
-    const languageStrings = languageData[selectedLanguage];
+    
+    // get strings
+    const setLightTheme = useLanguageString("setLightTheme");
+    const setDarkTheme = useLanguageString("setDarkTheme");
+    const chooseLanguage = useLanguageString("chooseLanguage");
     
     // helper
     const themeIsDark = theme === ColorTheme.DARK;
 
     return {
 
-        themeToggler: themeIsDark ? languageStrings.setLightTheme : languageStrings.setDarkTheme,
-        languageSelector: languageStrings.chooseLanguage
+        themeToggler: themeIsDark ? setLightTheme : setDarkTheme,
+        languageSelector: chooseLanguage
     }
 }
 

@@ -17,6 +17,9 @@ import { useSelector } from "react-redux";
 // import font
 import "typeface-roboto";
 
+// import hooks
+import { useLanguageString } from "../hooks/UseLanguageString";
+
 // import custom components
 import Simulation from "./Simulation";
 import Controls from "./ui/Controls";
@@ -25,21 +28,18 @@ import TopBar from "./ui/TopBar";
 // import stylers
 import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
 
-// import language data
-import languageData from "../lang/all";
-
 // import type information
 import { StateShape } from "../state/defaultState";
 
 function useSetTitle() {
 
-    const currentLanguage = useSelector((state: StateShape) => state.global.language);
+    const title = useLanguageString("title");
 
     useEffect(() => {
 
-        document.title = languageData[currentLanguage].title;
+        document.title = title;
         
-    }, [currentLanguage]);
+    }, [title]);
 }
 
 function useMUItheme() {

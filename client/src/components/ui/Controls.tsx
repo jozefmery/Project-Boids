@@ -22,15 +22,15 @@ import Zoom from "@material-ui/core/Zoom";
 import PlayIcon from "@material-ui/icons/PlayArrow";
 import PauseIcon from "@material-ui/icons/Pause";
 
+// import hooks
+import { useLanguageString } from "../../hooks/UseLanguageString";
+
 // import stylers
 import { makeStyles, Theme } from "@material-ui/core/styles";
 import { Style } from "../../stylers";
 
 // import type information
 import { StateShape } from "../../state/defaultState";
-
-// import language data
-import languageData from "../../lang/all";
 
 // define styles
 const UIPanelStyle: Style = Style.create({
@@ -79,14 +79,14 @@ function useTooltip() {
 
     // get data from redux state
     const simRunning = useSelector((state: StateShape) => state.sim.running);
-    const selectedLanguage = useSelector((state: StateShape) => state.global.language);
-
-    // select strings based on selected language
-    const languageStrings = languageData[selectedLanguage];
+    
+    // get strings
+    const play = useLanguageString("play");
+    const pause = useLanguageString("pause");
 
     return {
 
-        playToggler: simRunning ? languageStrings.pause : languageStrings.play
+        playToggler: simRunning ? pause : play
     }
 }
 
