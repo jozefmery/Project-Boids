@@ -19,7 +19,8 @@ const data: LanguageDefinition = {
     setDarkTheme: "Switch to dark theme",
     setLightTheme: "Switch to light theme",
     chooseLanguage: "Choose language",
-    languageName: "ENGLISH"
+    languageName: "ENGLISH",
+    centerToArea: "Move camera to area center"
 };
 
 export default data;

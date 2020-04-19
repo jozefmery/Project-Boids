@@ -25,6 +25,7 @@ export type LanguageDefinition = {
     setLightTheme: string;
     chooseLanguage: string;
     languageName: string;
+    centerToArea: string;
 };
 
 /**

@@ -19,7 +19,8 @@ const data: LanguageDefinition = {
     setDarkTheme: "Prepnúť na tmavý motív",
     setLightTheme: "Prepnúť na svetlý motív",
     chooseLanguage: "Vybrať jazyk",
-    languageName: "SLOVENČINA"
+    languageName: "SLOVENČINA",
+    centerToArea: "Presunúť kameru na stred plochy"
 };
 
 export default data;
