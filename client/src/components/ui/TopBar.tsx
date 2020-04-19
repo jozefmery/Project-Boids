@@ -62,14 +62,7 @@ const buttonStyle: Style = Style.create({
     
 }, undefined, [Style.topBarButton, Style.colorTransition]);
 
-const tooltipStyle: Style = Style.create(undefined, undefined, Style.simpleTooltip);
-
-const langSelectorStyle: Style = Style.create({
-
-    borderRadius: "10px",
-    padding: "5px 10px"
-
-}, undefined, [Style.topBarButton, Style.colorTransition]);
+const tooltipStyle: Style = Style.create(undefined, undefined, Style.tooltip);
 
 const useTopBarStyles = makeStyles(({ theme }: Theme) => ({
 
@@ -78,9 +71,22 @@ const useTopBarStyles = makeStyles(({ theme }: Theme) => ({
     tooltip: tooltipStyle.compose(theme)
 }));
 
+const langSelectorStyle: Style = Style.create({
+
+    borderRadius: "10px",
+    padding: "5px 10px"
+
+}, undefined, [Style.topBarButton, Style.colorTransition]);
+
+const langSelectorMenu: Style = Style.create({}, {}, [Style.menu]);
+
+const langSelectorMenuItem: Style = Style.create({}, {}, [Style.menuItem]);
+
 const useLangSelectorStyles = makeStyles(({ theme }: Theme) => ({
 
-    langSelector: langSelectorStyle.compose(theme)
+    langSelector: langSelectorStyle.compose(theme),
+    menu: langSelectorMenu.compose(theme),
+    menuItem: langSelectorMenuItem.compose(theme)
 }));
 
 function useContent() {
@@ -123,6 +129,9 @@ function useTooltip() {
 
 function LanguageSelector() {
 
+    // get state from redux
+    const selectedLanguage = useSelector((state: StateShape) => state.global.language);
+
     // use hooks
     const classes = useLangSelectorStyles();
     const { tooltip: tooltipClass } = useTopBarStyles();
@@ -157,7 +166,8 @@ function LanguageSelector() {
             <Menu anchorEl={menuAnchor} 
                 keepMounted 
                 open={Boolean(menuAnchor)}
-                onClose={closeMenu}>
+                onClose={closeMenu}
+                classes={{ paper: classes.menu }}>
 
                 {Object.values(Languages).map(language => 
                 
@@ -165,7 +175,9 @@ function LanguageSelector() {
                                 
                                     dispatch(setLanguage(language));
                                     closeMenu();
-                    }}>
+                                }}
+                        selected={selectedLanguage === language}
+                        classes={{ root: classes.menuItem }}>
 
                         {languageData[language].languageName}
                     </MenuItem>
