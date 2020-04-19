@@ -13,7 +13,7 @@ import React from "react";
 
 // import redux utilities and slices
 import { useSelector, useDispatch } from "react-redux";
-import { toggleSimRunning } from "../../state/simSlice";
+import { toggleSimRunning, centerCameraToArea } from "../../state/simSlice";
 
 // import UI elements
 import Button from "@material-ui/core/Button";
@@ -21,6 +21,7 @@ import Tooltip from "@material-ui/core/Tooltip";
 import Zoom from "@material-ui/core/Zoom";
 import PlayIcon from "@material-ui/icons/PlayArrow";
 import PauseIcon from "@material-ui/icons/Pause";
+import CenterToArea from '@material-ui/icons/FilterCenterFocus';
 
 // import hooks
 import { useLanguageString } from "../../hooks/UseLanguageString";
@@ -52,7 +53,14 @@ const UIPanelStyle: Style = Style.create({
 
 }, {}, [Style.UIPanel, Style.verticalFlexBox, Style.colorTransition]);
 
-const buttonStyle: Style = Style.create({}, {}, [Style.controlButton, Style.colorTransition]);
+const buttonStyle: Style = Style.create({
+
+    "&:not(:last-child)": {
+
+        marginRight: "15px"
+    }
+
+}, {}, [Style.controlButton, Style.colorTransition]);
 
 const tooltipStyle: Style = Style.create(undefined, undefined, Style.simpleTooltip);
 
@@ -71,7 +79,8 @@ function useIcon() {
 
     return {
 
-        playToggler: simRunning ? <PauseIcon /> : <PlayIcon />
+        playToggler: simRunning ? <PauseIcon /> : <PlayIcon />,
+        centerToArea: <CenterToArea />
     }
 }
 
@@ -83,10 +92,12 @@ function useTooltip() {
     // get strings
     const play = useLanguageString("play");
     const pause = useLanguageString("pause");
+    const centerToArea = useLanguageString("centerToArea");
 
     return {
 
-        playToggler: simRunning ? pause : play
+        playToggler: simRunning ? pause : play,
+        centerToArea
     }
 }
 
@@ -109,6 +120,14 @@ export default function Controls() {
                     classes={{ tooltip: classes.tooltip }}>
                 <Button className={classes.button} onClick={() => dispatch(toggleSimRunning()) }>
                     {icons.playToggler}
+                </Button>
+            </Tooltip>
+            <Tooltip title={tooltips.centerToArea} 
+                    placement="top" 
+                    TransitionComponent={Zoom}
+                    classes={{ tooltip: classes.tooltip }}>
+                <Button className={classes.button} onClick={() => dispatch(centerCameraToArea()) }>
+                    {icons.centerToArea}
                 </Button>
             </Tooltip>
         </div>);
