@@ -62,7 +62,7 @@ const buttonStyle: Style = Style.create({
 
 }, {}, [Style.controlButton, Style.colorTransition]);
 
-const tooltipStyle: Style = Style.create(undefined, undefined, Style.simpleTooltip);
+const tooltipStyle: Style = Style.create(undefined, undefined, Style.tooltip);
 
 const useControlStyles = makeStyles(({ theme }: Theme) => ({
 
