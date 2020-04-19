@@ -9,9 +9,9 @@
  */
 
 // import interface
-import { ILanguageDefinition } from "./all";
+import { LanguageDefinition } from "./all";
 
-const data: ILanguageDefinition = {
+const data: LanguageDefinition = {
 
     title: "Predator-Prey Simulation",
     play: "Play",
