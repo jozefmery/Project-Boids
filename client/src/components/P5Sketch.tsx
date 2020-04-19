@@ -70,6 +70,10 @@ function useP5({ preload, setup, loop, windowResized, cleanup }: P5EventHandlers
                 p5.current.remove();
             }
         }
+    // omit preload, setup from dependency list, 
+    // because they are run only once
+    // cleanup can't be changed because it would 
+    // delete the p5 instance
     // eslint-disable-next-line
     }, [parent]);
 
@@ -104,8 +108,8 @@ export default function P5Sketch({ classNames = "", preload, setup, loop, cleanu
     // force re-rendering after initial render and
     // provide parent to p5 to create a canvas
     const setInitialRender = useState(false)[1];
-    // eslint-disable-next-line
-    useEffect(() => setInitialRender(true), []);
+   
+    useEffect(() => setInitialRender(true), [setInitialRender]);
 
     // provide p5 with event handlers and parent
     useP5({ preload, setup, loop, windowResized, cleanup }, parent.current);
