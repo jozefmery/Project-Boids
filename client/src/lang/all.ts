@@ -16,7 +16,7 @@ import sk from "./sk";
  * 
  * Defines the shape of any given language.
  */
-export interface ILanguageDefinition {
+export type LanguageDefinition = {
 
     title: string;
     play: string;
@@ -26,6 +26,12 @@ export interface ILanguageDefinition {
     chooseLanguage: string;
     languageName: string;
 };
+
+/**
+ * 
+ * Defines available language strings as a union type.
+ */
+export type LanguageStrings = keyof LanguageDefinition;
 
 /**
  * 
