@@ -28,7 +28,7 @@ import { makeStyles, Theme } from "@material-ui/core/styles";
 import { simStylers, SimStylerList, Style } from "../stylers";
 
 // import hotkeys and bindings
-import { HotKeyContext } from "../hotkeys";
+import { HotKeyContext } from "@dodmeister/hotkeys";
 
 // import type information
 import { StateShape } from "../state/defaultState";
