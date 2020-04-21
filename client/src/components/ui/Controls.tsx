@@ -34,7 +34,7 @@ import { Style } from "../../stylers";
 import { StateShape } from "../../state/defaultState";
 
 // define styles
-const UIPanelStyle: Style = Style.create({
+const UIPanelStyle = Style.create({
 
     // position
     position: "fixed",
@@ -53,7 +53,7 @@ const UIPanelStyle: Style = Style.create({
 
 }, {}, [Style.UIPanel, Style.verticalFlexBox, Style.colorTransition]);
 
-const buttonStyle: Style = Style.create({
+const buttonStyle = Style.create({
 
     "&:not(:last-child)": {
 
@@ -62,7 +62,7 @@ const buttonStyle: Style = Style.create({
 
 }, {}, [Style.controlButton, Style.colorTransition]);
 
-const tooltipStyle: Style = Style.create(undefined, undefined, Style.tooltip);
+const tooltipStyle = Style.create(undefined, undefined, Style.tooltip);
 
 const useControlStyles = makeStyles(({ theme }: Theme) => ({
 
