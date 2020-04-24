@@ -4,80 +4,15 @@
  * Author: Jozef Méry <xmeryj00@stud.fit.vutbr.cz>
  * Date: 29.1.2020
  * License: none
- * Description: Defines the shape of the whole application state with default values.
+ * Description: Defines the fault values for the app state.
  * 
  */
 
-// import enums
+// import type information 
+import { StateShape } from "./types";
 import { ColorTheme } from "../stylers";
 import { Languages } from "../lang/all";
-
-// import type information
-import { Dimensions2D, Position2D } from "../types";
-import { SimulationBindings, SimZoomTarget } from "../components/SimulationDefs";
-
-// gather all possible key binding into a single type
-export type Bindings = SimulationBindings;
-
-export type StateShape = {
-
-    global: {
-
-        language: Languages;
-
-        theme: ColorTheme;
-
-        dimensions: Dimensions2D;
-    };
-
-    sim: {
-
-        speed: {
-
-            running: boolean;
-            current: number;
-            min: number;
-            max: number;
-            delta: number;
-        };
-
-        area: Dimensions2D;
-
-        camera: {
-
-            scale: {
-
-                current: number;
-                min: number;
-                max: number;
-                delta: number;
-                enabled: boolean;
-                target: SimZoomTarget;
-            }
-
-            moveDelta: number;
-
-            target: Position2D;
-
-            minVisibleArea: number;
-        }
-
-        grid: {
-
-            draw: boolean;
-            intensity: number;
-            highlight: number;
-        }
-    };
-
-    keyboard: {
-
-        bindings: {
-
-            [binding in Bindings]: string;
-        }
-    }
-};
+import { SimZoomTarget } from "../components/SimulationTypes";
 
 const defaultState: StateShape =  {
 
