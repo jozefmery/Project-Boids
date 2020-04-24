@@ -32,7 +32,14 @@ export type StateShape = {
 
     sim: {
 
-        running: boolean;
+        speed: {
+
+            running: boolean;
+            current: number;
+            min: number;
+            max: number;
+            delta: number;
+        };
 
         area: Dimensions2D;
 
@@ -85,12 +92,19 @@ const defaultState: StateShape =  {
 
     sim: {
 
-        running: false,    
+        speed: {
+
+            running: false,
+            current: 1.0,
+            min: 0.5,
+            max: 2.0,
+            delta: 0.1
+        },
         
         area: {
 
-            width: 500, 
-            height: 500 
+            width: 1000, 
+            height: 1000 
         },
         
         camera: {
@@ -98,8 +112,8 @@ const defaultState: StateShape =  {
             scale: {
                 
                 current: 1.0,
-                min: 0.5,
-                max: 1.5,
+                min: 0.1,
+                max: 10,
                 delta: 0.05,
                 enabled: true,
                 target: SimZoomTarget.CURSOR
