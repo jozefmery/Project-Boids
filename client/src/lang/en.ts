@@ -20,7 +20,13 @@ const data: LanguageDefinition = {
     setLightTheme: "Switch to light theme",
     chooseLanguage: "Choose language",
     languageName: "ENGLISH",
-    centerToArea: "Move camera to area center"
+    centerToArea: "Move camera to area center",
+    currentSpeed: "Current speed",
+    increaseSpeed: "Increase speed",
+    decreaseSpeed: "Decrease speed",
+    currentScale: "Current scale",
+    zoomIn: "Zoom in",
+    zoomOut: "Zoom out"
 };
 
 export default data;

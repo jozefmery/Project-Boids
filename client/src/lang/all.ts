@@ -26,6 +26,12 @@ export type LanguageDefinition = {
     chooseLanguage: string;
     languageName: string;
     centerToArea: string;
+    currentSpeed: string;
+    increaseSpeed: string;
+    decreaseSpeed: string;
+    currentScale: string;
+    zoomIn: string;
+    zoomOut: string;
 };
 
 /**
