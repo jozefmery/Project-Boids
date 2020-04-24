@@ -15,7 +15,7 @@ import { useSelector } from "react-redux";
 import languageData, { LanguageStrings } from "../lang/all";
 
 // import type information
-import { StateShape } from "../state/defaultState";
+import { StateShape } from "../state/types";
 
 export function useLanguageString(str: LanguageStrings) {
 
