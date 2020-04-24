@@ -34,49 +34,62 @@ import { makeStyles, Theme } from "@material-ui/core/styles";
 import { Style, ColorTheme } from "../../stylers";
 
 // import type information
-import { StateShape } from "../../state/defaultState";
+import { StateShape } from "../../state/types";
 
 // import language data
 import languageData, { Languages } from "../../lang/all";
 
-// define styles
-const UIPanelStyle: Style = Style.create({
+/// Shared styles
 
-    justifyContent: "flex-end",
-    paddingRight: "10px",
+const buttonStyle = Style.create({}, undefined, [Style.topBarButton, Style.colorTransition]);
 
-    position: "fixed",
-    // stretch vertically
-    top: "0px",
-    left: "0px",
-    right: "0px",
+const tooltipStyle = Style.create(undefined, undefined, Style.tooltip);
 
-    // style
-    borderStyle: "none",
-    borderBottomStyle: "solid"
+const useSharedStyles = makeStyles(({ theme }: Theme) => ({
 
-}, {}, [Style.UIPanel, Style.colorTransition, Style.verticalFlexBox]);
-
-const buttonStyle: Style = Style.create({
-
-    
-}, undefined, [Style.topBarButton, Style.colorTransition]);
-
-const tooltipStyle: Style = Style.create(undefined, undefined, Style.tooltip);
-
-const useTopBarStyles = makeStyles(({ theme }: Theme) => ({
-
-    panel: UIPanelStyle.compose(theme),
     button: buttonStyle.compose(theme),
     tooltip: tooltipStyle.compose(theme)
 }));
 
+/// Title
+
+const titleStyle = Style.create({
+
+    margin: "3px",
+    marginRight: "auto",
+
+    fontSize: "20px"
+
+}, {}, [Style.textColor, Style.colorTransition]);
+
+const useTitleStyle = makeStyles(({ theme }: Theme) => ({
+
+    title: titleStyle.compose(theme)
+
+}));
+
+function Title() {
+
+    // get styles
+    const classes = useTitleStyle();
+
+    // get language strings
+    const title = useLanguageString("title");
+
+    return  <div className={classes.title}>
+                {title}
+            </div>;
+}
+
 const langSelectorStyle: Style = Style.create({
 
     borderRadius: "10px",
-    padding: "5px 10px"
+    padding: "5px 10px",
+    fontSize: "15px"
 
 }, undefined, [Style.topBarButton, Style.colorTransition]);
+
+/// Language selector
 
 const langSelectorMenu: Style = Style.create({}, {}, [Style.menu]);
 
@@ -87,60 +100,27 @@ const useLangSelectorStyles = makeStyles(({ theme }: Theme) => ({
     langSelector: langSelectorStyle.compose(theme),
     menu: langSelectorMenu.compose(theme),
     menuItem: langSelectorMenuItem.compose(theme)
+
 }));
-
-function useContent() {
-
-    // get data from redux state
-    const theme = useSelector((state: StateShape) => state.global.theme);
-
-    // get strings
-    const languageName = useLanguageString("languageName");
-    
-    // helper
-    const themeIsDark = theme === ColorTheme.DARK;
-
-    return {
-
-        themeToggler: themeIsDark ? <LightIcon /> : <DarkIcon />,
-        languageSelector: languageName
-    }
-}
-
-function useTooltip() {
-
-    // get data from redux state
-    const theme = useSelector((state: StateShape) => state.global.theme);
-    
-    // get strings
-    const setLightTheme = useLanguageString("setLightTheme");
-    const setDarkTheme = useLanguageString("setDarkTheme");
-    const chooseLanguage = useLanguageString("chooseLanguage");
-    
-    // helper
-    const themeIsDark = theme === ColorTheme.DARK;
-
-    return {
-
-        themeToggler: themeIsDark ? setLightTheme : setDarkTheme,
-        languageSelector: chooseLanguage
-    }
-}
 
 function LanguageSelector() {
 
-    // get state from redux
+    // get dispatch and state from redux
     const selectedLanguage = useSelector((state: StateShape) => state.global.language);
-
-    // use hooks
-    const classes = useLangSelectorStyles();
-    const { tooltip: tooltipClass } = useTopBarStyles();
-    const tooltips = useTooltip();
-    const content = useContent();
     const dispatch = useDispatch();
 
+    // get styles
+    const { tooltip } = useSharedStyles();
+    const classes = useLangSelectorStyles();
+
+    // get language strings
+    const chooseLanguage = useLanguageString("chooseLanguage");
+    const languageName = useLanguageString("languageName");
+
+    // menu state
     const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
 
+    // menu togglers
     const openMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
 
         setMenuAnchor(event.currentTarget);
@@ -152,15 +132,15 @@ function LanguageSelector() {
     }
 
     return <>
-            <Tooltip title={tooltips.languageSelector} 
+            <Tooltip title={chooseLanguage} 
                         placement="bottom" 
                         TransitionComponent={Zoom}
-                        classes={{ tooltip: tooltipClass }}>
+                        classes={{ tooltip }}>
                 <Button className={classes.langSelector} 
                         startIcon={<LanguageIcon/>} 
                         endIcon={<ExpandMoreIcon/>}
                         onClick={openMenu}>
-                    {content.languageSelector}
+                    {languageName}
                 </Button>
             </Tooltip>
             <Menu anchorEl={menuAnchor} 
@@ -168,7 +148,6 @@ function LanguageSelector() {
                 open={Boolean(menuAnchor)}
                 onClose={closeMenu}
                 classes={{ paper: classes.menu }}>
-
                 {Object.values(Languages).map(language => 
                 
                     <MenuItem key={language} onClick={() => {
@@ -182,30 +161,72 @@ function LanguageSelector() {
                         {languageData[language].languageName}
                     </MenuItem>
                 )}
-
             </Menu>
         </>;
 }
 
-export default function TopBar() {
+/// Theme toggler
 
-    // use hooks
-    const classes = useTopBarStyles();
+function ThemeToggler() {
+
+    // get dispatch and state from redux
+    const theme = useSelector((state: StateShape) => state.global.theme);
     const dispatch = useDispatch();
-    const tooltips = useTooltip();
-    const content = useContent();
+
+    // get styles
+    const { tooltip, ...classes } = useSharedStyles();
+
+    // get language strings
+    const setLightTheme = useLanguageString("setLightTheme");
+    const setDarkTheme = useLanguageString("setDarkTheme");
+
+    // helpers
+    const themeIsDark = theme === ColorTheme.DARK;
+
+    return <Tooltip title={themeIsDark ? setLightTheme : setDarkTheme} 
+                    placement="bottom" 
+                    TransitionComponent={Zoom}
+                    classes={{ tooltip }}>
+                <Button className={classes.button} onClick={() => dispatch(toggleTheme()) }>
+                    {themeIsDark ? <LightIcon /> : <DarkIcon />}
+                </Button>
+            </Tooltip>
+}
+
+/// Top Bar 
+
+const panelStyle = Style.create({
+
+    justifyContent: "flex-end",
+    padding: "0px 10px",
+
+    position: "fixed",
+    // stretch vertically
+    top: "0px",
+    left: "0px",
+    right: "0px",
+
+    // style
+    borderStyle: "none",
+    borderBottomStyle: "solid"
+
+}, {}, [Style.panel, Style.colorTransition, Style.verticalFlexBox]);
+
+const useTopBarStyles = makeStyles(({ theme }: Theme) => ({
+
+    panel: panelStyle.compose(theme)
+
+}));
+
+export default function() {
+
+    // get styles
+    const classes = useTopBarStyles();
 
     return (
         <div className={classes.panel}>
-
+            <Title />
             <LanguageSelector />
-            <Tooltip title={tooltips.themeToggler} 
-                    placement="bottom" 
-                    TransitionComponent={Zoom}
-                    classes={{ tooltip: classes.tooltip }}>
-                <Button className={classes.button} onClick={() => dispatch(toggleTheme()) }>
-                    {content.themeToggler}
-                </Button>
-            </Tooltip>
+            <ThemeToggler />
         </div>);
 }
