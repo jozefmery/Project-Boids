@@ -19,3 +19,5 @@ export type Dimensions2D = {
     width: number;
     height: number;
 };
+
+export type Function = (...args: Array<any>) => any;
