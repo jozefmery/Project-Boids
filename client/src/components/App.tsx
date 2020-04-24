@@ -29,7 +29,7 @@ import TopBar from "./ui/TopBar";
 import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
 
 // import type information
-import { StateShape } from "../state/defaultState";
+import { StateShape } from "../state/types";
 
 function useSetTitle() {
 
