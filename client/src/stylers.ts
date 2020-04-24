@@ -175,37 +175,55 @@ export class Style {
         transition: "background-color .3s linear, color .3s linear, border-color .3s linear",
     });
         
-    public static readonly UIPanel= Style.create({
+    public static readonly panelBackground = Style.create({}, {
+
+        [ColorTheme.DARK]: { backgroundColor: "#292929" },
+    
+        [ColorTheme.LIGHT]: { backgroundColor: "#8bbcff" }
+    });
+
+    public static readonly panel = Style.create({
             
-        borderWidth: "1px",
+        borderWidth: "1px"
     
     }, {
     
         [ColorTheme.DARK]: {
             
-            
             borderColor: "#801313",
 
-            boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.4)",
-            backgroundColor: "#292929"
+            boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.4)"
         },
     
         [ColorTheme.LIGHT]: {
             
             borderColor: "black",
 
-            boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.2)",
-            backgroundColor: "#8bbcff"
+            boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.2)"
         }
+
+    }, Style.panelBackground);
+
+    public static readonly textColor = Style.create({}, {
+
+        [ColorTheme.DARK]: { color: "#cecece" },
+    
+        [ColorTheme.LIGHT]: { color: "black" }
     });
 
     public static readonly topBarButton = Style.create({
 
-        minWidth: "0px", // override default
-        padding: "10px",
+        // override default
+        minWidth: "0px", 
+
+        // border
         borderRadius: "50%",
+        
+        // spacing
+        padding: "10px",
         margin: "10px 3px",
 
+        // icon
         "& svg": {
 
             fontSize: "30px"
@@ -214,8 +232,6 @@ export class Style {
     }, {
     
         [ColorTheme.DARK]: {
-            
-            color: "#cecece",
 
             "&:hover": {
 
@@ -224,35 +240,36 @@ export class Style {
         },
     
         [ColorTheme.LIGHT]: {
-            
-            color: "black",
 
             "&:hover": {
 
                 backgroundColor: "#b9d5ff"
             }
         }
-    });
+
+    }, Style.textColor);
 
     public static readonly controlButton = Style.create({
 
-        // spacing
-        padding: "5px",
-
-        // style
+        // override default
+        minWidth: "0px",
+        
+        // border
         borderRadius: "3px",
         
-        // icon style
-        "& svg": {
+        // spacing
+        padding: "5px",
+        
+        // icon
+        "& *": {
 
-            fontSize: "45px"
+            fontSize: "20px"
         }
     
     }, {
     
         [ColorTheme.DARK]: {
 
-            color: "#cecece",
             border: "1px #a8a8a8 solid",
 
             "&:hover": {
@@ -263,7 +280,6 @@ export class Style {
 
         [ColorTheme.LIGHT]: {
 
-            color: "black",
             border: "1px black solid",
 
             "&:hover": {
@@ -271,7 +287,8 @@ export class Style {
                 backgroundColor: "#b9d5ff"
             }
         }
-    });
+
+    }, Style.textColor);
 
     public static readonly tooltip = Style.create({
 
@@ -310,7 +327,11 @@ export class Style {
         }
     });
 
-    public static menuItem = Style.create({}, {
+    public static menuItem = Style.create({
+
+        fontSize: "15px"
+
+    }, {
 
         [ColorTheme.DARK]: {
 
