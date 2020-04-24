@@ -9,17 +9,18 @@
  */
 
 // import redux toolkit
-import { createSlice, PayloadAction, ThunkAction, Action } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 // import utiltites
 import lodash from "lodash";
 
 // import default state
-import defaultState, { StateShape } from "./defaultState";
+import defaultState from "./defaultState";
 
 // import types
 import { Position2D } from "../types";
-import { SimZoomTarget } from "../components/SimulationDefs";
+import { SimZoomTarget } from "../components/SimulationTypes";
+import { StateShape, Thunk } from "./types";
 
 // create shorthand
 const simState = defaultState.sim;
@@ -35,151 +36,154 @@ const simSlice = createSlice({
         // whole state
         setSimSettings: (_, { payload: state }: PayloadAction<typeof simState>) => state,
         
-        // running
-        setSimRunning: (state, { payload: running }: PayloadAction<typeof simState.running>) => 
-            { state.running = running; },
-        toggleSimRunning: (state) => { state.running = !state.running; },
+        // speed
+        setSimSpeedSettings: (state, { payload: speed }: PayloadAction<typeof simState.speed>) => {
+            
+            state.speed = speed;
+        },
+
+        setSimRunning: (state, { payload: running }: PayloadAction<typeof simState.speed.running>) => {
+            
+            state.speed.running = running;
+        },
+
+        toggleSimRunning: (state) => {
+            state.speed.running = !state.speed.running;
+        },
+
+        setSpeed: (state, { payload: speed }: PayloadAction<typeof simState.speed.current>) => {
+            
+            state.speed.current = speed;
+        },
+
+        increaseSpeed: (state) => { 
+            
+            const speed = state.speed;
+
+            speed.current = lodash.clamp(speed.current + speed.delta, speed.min, speed.max);
+        },
+
+        decreaseSpeed: (state) => { 
+            
+            const speed = state.speed;
+
+            speed.current = lodash.clamp(speed.current - speed.delta, speed.min, speed.max);
+        },
+
+        setMinSpeed: (state, { payload: minSpeed }: PayloadAction<typeof simState.speed.min>) => {
+            
+            state.speed.min = minSpeed;
+        },
+
+        setMaxSpeed: (state, { payload: maxSpeed }: PayloadAction<typeof simState.speed.max>) => {
+            
+            state.speed.max = maxSpeed;
+        },
+
+        setSpeedDelta: (state, { payload: delta }: PayloadAction<typeof simState.speed.delta>) => {
+            
+            state.speed.delta = delta;
+        },
         
         // area
-        setSimArea: (state, { payload: area }: PayloadAction<typeof simState.area>) => { state.area = area; },
+        setSimArea: (state, { payload: area }: PayloadAction<typeof simState.area>) => {
+            
+            state.area = area;
+        },
 
         // camera
-        setCameraSettings: (state, { payload: camera }: PayloadAction<typeof simState.camera>) => { state.camera = camera; },
+        setCameraSettings: (state, { payload: camera }: PayloadAction<typeof simState.camera>) => {
+            
+            state.camera = camera;
+        },
 
-        setCameraCurrentScale: (state, { payload: scale }: PayloadAction<typeof simState.camera.scale.current>) => 
-            { state.camera.scale.current = scale; },
-        setCameraMinScale: (state, { payload: min }: PayloadAction<typeof simState.camera.scale.min>) => 
-            { state.camera.scale.min = min; },
-        setCameraMaxScale: (state, { payload: max }: PayloadAction<typeof simState.camera.scale.max>) => 
-            { state.camera.scale.max = max; },
-        setCameraScaleDelta: (state, { payload: delta }: PayloadAction<typeof simState.camera.scale.delta>) => 
-            { state.camera.scale.delta = delta; },
-        setCameraScaleEnabled: (state, { payload: enable }: PayloadAction<typeof simState.camera.scale.enabled>) => 
-            { state.camera.scale.enabled = enable; },
-        setCameraScaleTarget: (state, { payload: target}: PayloadAction<typeof simState.camera.scale.target>) => 
-            { state.camera.scale.target = target; },
-        setCameraMoveDelta: (state, { payload: delta }: PayloadAction<typeof simState.camera.moveDelta>) => 
-            { state.camera.moveDelta = delta; },
-        setCameraTarget: (state, { payload: target }: PayloadAction<Position2D>) => 
-            { state.camera.target = target; },
-        setMinVisibleArea: (state, { payload: minVisibleArea }: PayloadAction<number>) => 
-            { state.camera.minVisibleArea = minVisibleArea; },
+        setCameraCurrentScale: (state, { payload: scale }: PayloadAction<typeof simState.camera.scale.current>) => {
+            
+            state.camera.scale.current = scale;
+        },
+
+        setCameraMinScale: (state, { payload: min }: PayloadAction<typeof simState.camera.scale.min>) => {
+            
+            state.camera.scale.min = min;
+        },
+
+        setCameraMaxScale: (state, { payload: max }: PayloadAction<typeof simState.camera.scale.max>) => {
+            
+            state.camera.scale.max = max;
+        },
+
+        setCameraScaleDelta: (state, { payload: delta }: PayloadAction<typeof simState.camera.scale.delta>) => {
+            
+            state.camera.scale.delta = delta;
+        },
+
+        setCameraScaleEnabled: (state, { payload: enable }: PayloadAction<typeof simState.camera.scale.enabled>) => {
+            
+            state.camera.scale.enabled = enable;
+        },
+
+        setCameraScaleTarget: (state, { payload: target}: PayloadAction<typeof simState.camera.scale.target>) => {
+
+            state.camera.scale.target = target;
+        },
+
+        setCameraMoveDelta: (state, { payload: delta }: PayloadAction<typeof simState.camera.moveDelta>) => {
+            
+            state.camera.moveDelta = delta;
+        },
+
+        setCameraTarget: (state, { payload: target }: PayloadAction<Position2D>) => {
+            
+            state.camera.target = target;
+        },
+
+        setMinVisibleArea: (state, { payload: minVisibleArea }: PayloadAction<number>) => {
+            
+            state.camera.minVisibleArea = minVisibleArea;
+        },
                               
         // grid
-        setGridSettings: (state, { payload: grid }: PayloadAction<typeof simState.grid>) => 
-            { state.grid = grid; },
+        setGridSettings: (state, { payload: grid }: PayloadAction<typeof simState.grid>) => {
+            
+            state.grid = grid;
+        },
 
-        setGridDraw: (state, { payload: draw }: PayloadAction<typeof simState.grid.draw>) => 
-            { state.grid.draw = draw; },
-        toggleGridDraw: (state) => 
-            { state.grid.draw = !state.grid.draw; },
-        setGridIntensity: (state, { payload: intensity }: PayloadAction<typeof simState.grid.intensity>) => 
-            { state.grid.intensity = intensity; },
-        setGridHighlight: (state, { payload: highlight }: PayloadAction<typeof simState.grid.highlight>) => 
-            { state.grid.highlight = highlight; },        
+        setGridDraw: (state, { payload: draw }: PayloadAction<typeof simState.grid.draw>) => {
+            
+            state.grid.draw = draw;
+        },
+
+        toggleGridDraw: (state) => {
+            
+            state.grid.draw = !state.grid.draw;
+        },
+
+        setGridIntensity: (state, { payload: intensity }: PayloadAction<typeof simState.grid.intensity>) => {
+            
+            state.grid.intensity = intensity;
+        },
+
+        setGridHighlight: (state, { payload: highlight }: PayloadAction<typeof simState.grid.highlight>) => {
+            
+            state.grid.highlight = highlight;
+        },        
     }
 });
 
-export const moveCamera = (delta: Position2D): ThunkAction<void, StateShape, unknown, Action<string>> => 
-    
-    (dispatch, getState) => {
-
-        const state = getState();
-
-        const currentTarget = state.sim.camera.target;
-        const area = state.sim.area;
-        const minVisibleArea = state.sim.camera.minVisibleArea;
-        const dimensions = state.global.dimensions;
-
-        const target = {
-
-            x: lodash.clamp(currentTarget.x + delta.x, - dimensions.width  + minVisibleArea, area.width  - minVisibleArea),
-            y: lodash.clamp(currentTarget.y + delta.y, - dimensions.height + minVisibleArea, area.height - minVisibleArea)
-        };
-
-        dispatch(simSlice.actions.setCameraTarget(target));
-    }
-
-export const centerCameraToArea = (): ThunkAction<void, StateShape, unknown, Action<string>> => 
-    
-    (dispatch, getState) => {
-
-        const state = getState();
-
-        const area = state.sim.area;
-        const dimensions = state.global.dimensions;
-
-        const target = {
-
-            x: (- dimensions.width / 2) + area.width / 2,
-            y: (- dimensions.height / 2) + area.height / 2
-        };
-
-        dispatch(simSlice.actions.setCameraTarget(target));
-    }
-
-const adjustPosition = (target: Position2D, scaleDelta: number): ThunkAction<void, StateShape, unknown, Action<string>> => 
-
-    (dispatch, getState) => {
-
-        const state = getState();
-        const currentTarget = state.sim.camera.target;
-        const currentScale = state.sim.camera.scale.current;
-
-        const positionDelta: Position2D = {
-
-            x: ((target.x + currentTarget.x) / currentScale) * scaleDelta,
-            y: ((target.y + currentTarget.y) / currentScale) * scaleDelta
-        }
-
-        dispatch(moveCamera(positionDelta));
-    }
-
-
-export const changeCameraScale = (modifier: number, mousePosition: Position2D): ThunkAction<void, StateShape, unknown, Action<string>> => 
-
-    (dispatch, getState) => {
-
-        const state = getState();
-        const scaleSettings = state.sim.camera.scale;
-        const dimensions = state.global.dimensions;
-
-        if(!scaleSettings.enabled) return;
-
-        let target: Position2D = { x: 0, y: 0 };
-
-        switch(scaleSettings.target) {
-
-            case SimZoomTarget.CURSOR:
-
-                target = lodash.cloneDeep(mousePosition);
-                break;
-            
-            case SimZoomTarget.CENTER:
-
-                target = {
-
-                    x: dimensions.width / 2,
-                    y: dimensions.height / 2,
-                };
-                break;
-        }
-
-        const newScale = lodash.clamp(scaleSettings.current + (scaleSettings.delta * modifier), 
-                                        scaleSettings.min, scaleSettings.max);
-
-        const scaleDelta = newScale - scaleSettings.current;
-
-        dispatch(adjustPosition(target, scaleDelta));
-
-        dispatch(simSlice.actions.setCameraCurrentScale(newScale));
-    }
+const actions = simSlice.actions;
 
 export const { 
 
     setSimSettings,
+    setSimSpeedSettings,
     setSimRunning,
     toggleSimRunning,
+    setSpeed,
+    increaseSpeed,
+    decreaseSpeed,
+    setMinSpeed,
+    setMaxSpeed,
+    setSpeedDelta,
     setSimArea,
     setCameraSettings,
     setCameraMinScale,
@@ -194,6 +198,120 @@ export const {
     setGridIntensity,
     setGridHighlight
             
-} = simSlice.actions;
+} = actions;
+
+function getClampedToArea(target: Position2D, state: StateShape): Position2D {
+
+    // state shorthands
+    const dimensions = state.global.dimensions;
+    const scale = state.sim.camera.scale.current;
+
+    // account for current scale
+    const scaledMinVisible = state.sim.camera.minVisibleArea * scale;
+    const scaledArea = {
+
+        width: state.sim.area.width * scale,
+        height: state.sim.area.height * scale,
+    };
+
+    // area top-left corner is at 0, 0
+
+    return {
+
+        x: lodash.clamp(target.x, - dimensions.width  + scaledMinVisible, scaledArea.width - scaledMinVisible),
+        y: lodash.clamp(target.y, - dimensions.height + scaledMinVisible, scaledArea.height - scaledMinVisible)
+    }
+}
+
+export const moveCamera = (delta: Position2D): Thunk => (dispatch, getState) => {
+
+    // state shorthands
+    const state = getState();
+    const current = state.sim.camera.target;
+
+    const target = {
+
+        x: current.x + delta.x,
+        y: current.y + delta.y
+    };
+
+    dispatch(actions.setCameraTarget(getClampedToArea(target, state)));
+}
+
+export const centerCameraToArea = (): Thunk => (dispatch, getState) => {
+
+    // state shorthands
+    const state = getState();
+    const scale = state.sim.camera.scale.current;
+    const dimensions = state.global.dimensions;
+
+    // account for current scale
+    const scaledArea = {
+
+        width: state.sim.area.width * scale,
+        height: state.sim.area.height * scale,
+    };
+
+    // calculate area center
+    const target = {
+
+        x: (- dimensions.width / 2) + scaledArea.width / 2,
+        y: (- dimensions.height / 2) + scaledArea.height / 2
+    };
+
+    console.log(target);
+
+    // no need for clamping
+    dispatch(actions.setCameraTarget(target));
+}
+
+const adjustPosition = (target: Position2D, scaleDelta: number, currentScale: number): Thunk => (dispatch, getState) => {
+
+    // state shorthands
+    const state = getState();
+    const currentTarget = state.sim.camera.target;
+
+    const positionDelta: Position2D = {
+
+        x: ((target.x + currentTarget.x) / currentScale) * scaleDelta,
+        y: ((target.y + currentTarget.y) / currentScale) * scaleDelta
+    }
+
+    dispatch(moveCamera(positionDelta));
+}
+
+export const changeCameraScale = (modifier: number, mousePosition?: Position2D): Thunk => (dispatch, getState) => {
+    
+    // state shorthands
+    const state = getState();
+    const scaleSettings = state.sim.camera.scale;
+    const dimensions = state.global.dimensions;
+
+    if(!scaleSettings.enabled) return;
+
+    let target: Position2D = { x: 0, y: 0 };
+
+    if(mousePosition && scaleSettings.target === SimZoomTarget.CURSOR) {
+
+        target = lodash.cloneDeep(mousePosition);
+    
+    } else {
+
+        target = {
+
+            x: dimensions.width / 2,
+            y: dimensions.height / 2,
+        };
+    }
+
+    const newScale = lodash.clamp(scaleSettings.current + (scaleSettings.delta * modifier), 
+                                    scaleSettings.min, scaleSettings.max);
+
+    const scaleDelta = newScale - scaleSettings.current;
+
+    // update scale first to make sure clamping is correct
+    dispatch(actions.setCameraCurrentScale(newScale));
+    dispatch(adjustPosition(target, scaleDelta, scaleSettings.current));
+}
 
 export default simSlice.reducer;
