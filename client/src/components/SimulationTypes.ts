@@ -14,7 +14,7 @@ export enum SimZoomTarget {
     CENTER
 };
 
-export const simulationBindings = [
+export const simulationBindingList = [
 
     "moveCameraLeft",
     "moveCameraUp",      
@@ -23,4 +23,4 @@ export const simulationBindings = [
 
 ] as const;
 
-export type SimulationBindings = typeof simulationBindings[number];
+export type SimulationBindings = typeof simulationBindingList[number];
