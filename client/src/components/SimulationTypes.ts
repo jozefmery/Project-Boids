@@ -1,5 +1,5 @@
 /**
- * File: SimulationDefs.ts
+ * File: SimulationTypes.ts
  * 
  * Author: Jozef Méry <xmeryj00@stud.fit.vutbr.cz>
  * Date: 18.4.2020
