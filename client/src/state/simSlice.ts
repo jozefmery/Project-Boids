@@ -214,12 +214,15 @@ function getClampedToArea(target: Position2D, state: StateShape): Position2D {
         height: state.sim.area.height * scale,
     };
 
-    // area top-left corner is at 0, 0
-
     return {
 
-        x: lodash.clamp(target.x, - dimensions.width  + scaledMinVisible, scaledArea.width - scaledMinVisible),
-        y: lodash.clamp(target.y, - dimensions.height + scaledMinVisible, scaledArea.height - scaledMinVisible)
+        x: lodash.clamp(target.x, 
+            -dimensions.width / 2 + scaledMinVisible, 
+            scaledArea.width - scaledMinVisible + dimensions.width / 2),
+
+        y: lodash.clamp(target.y, 
+            -dimensions.height / 2 + scaledMinVisible, 
+            scaledArea.height - scaledMinVisible + dimensions.height / 2)
     }
 }
 
@@ -255,8 +258,8 @@ export const centerCameraToArea = (): Thunk => (dispatch, getState) => {
     // calculate area center
     const target = {
 
-        x: (- dimensions.width / 2) + scaledArea.width / 2,
-        y: (- dimensions.height / 2) + scaledArea.height / 2
+        x: scaledArea.width / 2,
+        y: scaledArea.height / 2
     };
 
     // no need for clamping
@@ -268,17 +271,18 @@ const adjustPosition = (target: Position2D, scaleDelta: number, currentScale: nu
     // state shorthands
     const state = getState();
     const currentTarget = state.sim.camera.target;
+    const dimensions = state.global.dimensions;
 
     const positionDelta: Position2D = {
 
-        x: ((target.x + currentTarget.x) / currentScale) * scaleDelta,
-        y: ((target.y + currentTarget.y) / currentScale) * scaleDelta
+        x: ((target.x + currentTarget.x - dimensions.width / 2) / currentScale) * scaleDelta,
+        y: ((target.y + currentTarget.y - dimensions.height / 2) / currentScale) * scaleDelta
     }
 
     dispatch(moveCamera(positionDelta));
 }
 
-export const changeCameraScale = (modifier: number, mousePosition?: Position2D): Thunk => (dispatch, getState) => {
+export const setCameraScale = (scale: number, mousePosition?: Position2D): Thunk => (dispatch, getState) => {
     
     // state shorthands
     const state = getState();
@@ -302,14 +306,22 @@ export const changeCameraScale = (modifier: number, mousePosition?: Position2D):
         };
     }
 
-    const newScale = lodash.clamp(scaleSettings.current + (scaleSettings.delta * modifier), 
-                                    scaleSettings.min, scaleSettings.max);
+    const newScale = lodash.clamp(scale, scaleSettings.min, scaleSettings.max);
 
     const scaleDelta = newScale - scaleSettings.current;
 
     // update scale first to make sure clamping is correct
     dispatch(actions.setCameraCurrentScale(newScale));
     dispatch(adjustPosition(target, scaleDelta, scaleSettings.current));
+}
+
+export const changeCameraScale = (modifier: number, mousePosition?: Position2D): Thunk => (dispatch, getState) => {
+    
+    // state shorthands
+    const state = getState();
+    const { current, delta } = state.sim.camera.scale;
+
+    dispatch(setCameraScale(current + delta * modifier, mousePosition));
 }
 
 export default simSlice.reducer;

@@ -360,7 +360,7 @@ function useTransform() {
     
     return useCallback((p5: P5) => {
 
-        p5.translate(-target.x, -target.y);
+        p5.translate(-target.x + p5.windowWidth / 2, -target.y + p5.windowHeight / 2);
         p5.scale(scale);
 
     }, [target, scale]);
