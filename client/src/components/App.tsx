@@ -25,6 +25,9 @@ import Simulation from "./Simulation";
 import Controls from "./ui/Controls";
 import TopBar from "./ui/TopBar";
 
+// import hotkey context provider
+import { KeyCaptureContext } from "./Hotkeys";
+
 // import stylers
 import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
 
@@ -54,9 +57,11 @@ export default function App() {
 
     return (
         <ThemeProvider theme={useMUItheme()}>
-            <Simulation /> 
-            <TopBar />
-            <Controls />
+            <KeyCaptureContext>
+                <Simulation /> 
+                <TopBar />
+                <Controls />
+            </KeyCaptureContext>
         </ThemeProvider>
     );
 }
