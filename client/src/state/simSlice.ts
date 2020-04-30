@@ -259,8 +259,6 @@ export const centerCameraToArea = (): Thunk => (dispatch, getState) => {
         y: (- dimensions.height / 2) + scaledArea.height / 2
     };
 
-    console.log(target);
-
     // no need for clamping
     dispatch(actions.setCameraTarget(target));
 }
