@@ -9,7 +9,7 @@
  */
 
 // import react
-import React, { useRef, useEffect, useState, useCallback } from "react";
+import React, { useRef, useEffect, useState, useCallback, useContext } from "react";
 
 // import utilities
 import lodash from "lodash";
@@ -27,13 +27,16 @@ import { setDimensions } from "../state/globalSlice";
 import { makeStyles, Theme } from "@material-ui/core/styles";
 import { simStylers, SimStylerList, Style } from "../stylers";
 
-// import hotkeys and bindings
-import { HotKeyContext } from "@dodmeister/hotkeys";
+// import entities
+import { Context as EntityContext } from "../entities/entity";
+
+// import hotkey context
+import { HotkeyContext } from "./Hotkeys";
 
 // import type information
-import { StateShape } from "../state/defaultState";
+import { StateShape } from "../state/types";
 import { Position2D } from "../types"
-import { simulationBindings, SimulationBindings } from "./SimulationDefs";
+import { simulationBindingList, SimulationBindings } from "./SimulationTypes";
 
 /// Type definitions
 
@@ -45,38 +48,46 @@ type GridLineOptions = {
     getCoordinates: (_: number) => { x1: number, x2: number, y1: number, y2: number };
 };
 
-/// State hooks and methods
+/// State hooks
 
 function useTime() {
 
-    // assume 60 FPS for the first iteration
-    const delta = useRef(1000 / 60);
+    // default to invalid stamp and delta
+    const delta = useRef(0);
+    const stamp = useRef(0);
 
-    const stamp = useRef(new Date().getTime());
+    const update = useCallback(() => {
+
+        const newStamp = new Date().getTime();
+
+        // check if stamp is valid
+        // first iteration will have 0 time delta
+        // to make sure first delta is not too big
+        if(stamp.current) {
+
+            delta.current = newStamp - stamp.current;
+            
+        } else {
+            
+            delta.current = 0;
+        }
+
+        stamp.current = newStamp;
+
+    }, [delta, stamp]);
 
     return {
 
         delta,
-        stamp
+        stamp,
+        update
     };
-}
-
-function useTimeMethods({ time }: SimState) {
-
-    const updateTime = useCallback(() => {
-
-        const newStamp = new Date().getTime();
-        time.delta.current = newStamp - time.stamp.current;
-        time.stamp.current = newStamp;
-
-    }, [time.delta, time.stamp]);
-
-    return { updateTime };
 }
 
 function useCamera() {
 
-    // use state to enable using in styles
+    // use state to enable using in styles and triggering
+    // rerendering
     const [zoomModifier, setModifier] = useState(0);
 
     const timeout = useRef(0);
@@ -102,29 +113,24 @@ function useCamera() {
 
 function useMouse() {
 
-    // use state to enable usage in styles
+    // use state to enable using in styles and triggering
+    // rerendering
     const [dragging, setDragging] = useState(false);
+    // initial last position doesn't matter
     const lastPosition = useRef<Position2D>({ x: 0, y: 0 });
+
+    const setLastPosition = useCallback((position: Position2D) => {
+
+        lastPosition.current = lodash.cloneDeep(position);
+
+    }, [lastPosition]);
 
     return { 
         
         dragging,
         setDragging,
-        lastPosition
-    };
-}
-
-function useMouseMethods({ mouse }: SimState) {
-
-    const setMouseLastPosition = useCallback((position: Position2D) => {
-
-        mouse.lastPosition.current = lodash.cloneDeep(position);
-
-    }, [mouse.lastPosition]);
-
-    return {
-
-        setMouseLastPosition
+        lastPosition,
+        setLastPosition
     };
 }
 
@@ -156,23 +162,22 @@ function useFps({ delta }: ReturnType<typeof useTime>) {
     return fps;
 }
 
-function useHotkeys() {
+function useEntities() {
 
-    const context = useRef(new HotKeyContext(500, true));
+    const area = useSelector((state: StateShape) => state.sim.area);
 
-    const cleanupContext = useCallback(() => {
-
-        context.current.clearBlurHandler();
-
-    }, [context]);
+    const context = useRef(new EntityContext(area));
 
     useEffect(() => {
 
-        return cleanupContext;
+        context.current.setArea(area);
 
-    }, [cleanupContext]);
+    }, [area]);
 
-    return context;
+    return {
+        
+        context
+    };
 }
 
 function useSimState() {
@@ -181,7 +186,7 @@ function useSimState() {
     const camera = useCamera();
     const mouse = useMouse();
     const fps = useFps(time);
-    const hotkeys = useHotkeys();
+    const entities = useEntities();
 
     return {
 
@@ -189,13 +194,13 @@ function useSimState() {
         camera,
         mouse,
         fps,
-        hotkeys
+        entities
     };
 }
 
 type SimState = ReturnType<typeof useSimState>;
 
-/// Styler hooks
+/// Styles & style hooks
 
 function useCanvasStylers(styler: SimStylerList) {
 
@@ -240,20 +245,24 @@ const useStyles = makeStyles(({ theme }: Theme) => ({
 
 function useBindings(state: SimState) {
 
+    // get hotkey context
+    const hotkeys = useContext(HotkeyContext);
+
+    // get redux state and dispatch
+    const dispatch = useDispatch();
+
     const moveDelta = useSelector((state: StateShape) => state.sim.camera.moveDelta);
     const bindingCombinations = useSelector((state: StateShape) => state.keyboard.bindings);
-
     const scale = useSelector((state: StateShape) => state.sim.camera.scale.current);
 
-    const dispatch = useDispatch();
-    
+
     const getMoveDelta = useCallback(() => {
 
         return (moveDelta / 1000) * state.time.delta.current * scale; 
 
     }, [moveDelta, state.time.delta, scale]);
 
-    type Bindings = { [binding in SimulationBindings]: () => any };
+    type Bindings = { [binding in SimulationBindings]: () => unknown };
 
     const bindingCallbacks = useRef<Bindings>({
 
@@ -268,22 +277,22 @@ function useBindings(state: SimState) {
 
     return useCallback(() => {
  
-        for(const binding of simulationBindings) {
+        for(const binding of simulationBindingList) {
 
             const combination = bindingCombinations[binding];
 
-            if(state.hotkeys.current.isCombinationPressed(combination)) {
+            if(hotkeys.isCombinationPressed(combination)) {
 
                 bindingCallbacks.current[binding]();
             }
         }
 
-    }, [bindingCombinations, state.hotkeys, bindingCallbacks]);
+    }, [bindingCombinations, bindingCallbacks, hotkeys]);
 }
 
 /// Setup hooks
 
-function useSetup() {
+function useSetup(state: SimState) {
 
     const dispatch = useDispatch();
     
@@ -294,22 +303,43 @@ function useSetup() {
 
         dispatch(centerCameraToArea());
 
-    }, [dispatch]);
+        state.entities.context.current.add(0);
+
+    }, [dispatch, state.entities.context]);
 }
 
 /// Draw & Update hooks
 
+function useUpdateEntities(state: SimState) {
+
+    // get redux state
+    const speedModifier = useSelector((state: StateShape) => state.sim.speed.current);
+    const simRunning = useSelector((state: StateShape) => state.sim.speed.running);
+
+    return useCallback((p5: P5) => {
+
+        if(simRunning) {
+
+            const scaledDelta = state.time.delta.current * speedModifier;
+            
+            state.entities.context.current.updateAll(scaledDelta);
+        }
+
+    }, [state.entities.context, state.time.delta, speedModifier, simRunning]);
+} 
+
 function useUpdate(state: SimState) {
 
-    const { updateTime } = useTimeMethods(state);
     const runBindings = useBindings(state);
+    const updateEntities = useUpdateEntities(state);
 
-    return useCallback(() => {
+    return useCallback((p5: P5) => {
 
-        updateTime();
+        state.time.update();
         runBindings();
+        updateEntities(p5);
 
-    }, [updateTime, runBindings]);
+    }, [state.time, runBindings, updateEntities]);
 }
 
 function useDrawBackground() {
@@ -414,6 +444,15 @@ function useDrawBoundary() {
     }, [styler, area.height, area.width]);
 }
 
+function useDrawEntities(state: SimState) {
+
+    return useCallback((p5: P5) => {
+
+        state.entities.context.current.drawAll(p5);
+
+    }, [state.entities]);
+}
+
 function useDrawFPS(state: SimState) {
 
     const styler = useCanvasStylers("fps");
@@ -434,6 +473,7 @@ function useDraw(state: SimState) {
     const drawArea = useDrawArea();
     const drawGrid = useDrawGrid();
     const drawBoundary = useDrawBoundary();
+    const drawEntities = useDrawEntities(state);
     const drawFPS = useDrawFPS(state);
 
     return useCallback((p5: P5) => {
@@ -444,10 +484,17 @@ function useDraw(state: SimState) {
         drawArea(p5);
         drawGrid(p5);
         drawBoundary(p5);
+        drawEntities(p5);
         p5.pop();
         drawFPS(p5);
 
-    }, [drawBackground, transform, drawArea, drawGrid, drawBoundary, drawFPS]);
+    }, [drawBackground, 
+        transform, 
+        drawArea, 
+        drawGrid, 
+        drawBoundary, 
+        drawEntities,
+        drawFPS]);
 }
 
 function useLoop(state: SimState) {
@@ -457,7 +504,7 @@ function useLoop(state: SimState) {
 
     return useCallback((p5: P5) => {
 
-        update();
+        update(p5);
         draw(p5);
 
     }, [update, draw]);
@@ -467,7 +514,6 @@ function useLoop(state: SimState) {
 
 function useEventHandlers(state: SimState) {
 
-    const { setMouseLastPosition } = useMouseMethods(state);
     const dispatch = useDispatch();
 
     const windowResized = useCallback((p5: P5) => {
@@ -478,27 +524,13 @@ function useEventHandlers(state: SimState) {
     
     }, [dispatch]);
 
-    const onKeyDown = useCallback((event: React.KeyboardEvent): void => {
-
-        if(event.repeat) return;
-        
-        state.hotkeys.current.onKeyChanged(event.nativeEvent, true);
-
-    }, [state.hotkeys]);
-
-    const onKeyUp = useCallback((event: React.KeyboardEvent): void => {
-
-        state.hotkeys.current.onKeyChanged(event.nativeEvent, false);
-
-    }, [state.hotkeys]);
-
     const onMouseDown = useCallback((event: React.MouseEvent): void => {
 
         state.mouse.setDragging(true);
 
-        setMouseLastPosition({ x: event.clientX, y: event.clientY });
+        state.mouse.setLastPosition({ x: event.clientX, y: event.clientY });
 
-    }, [state.mouse, setMouseLastPosition]);
+    }, [state.mouse]);
     
     const onMouseUp = useCallback((_: React.MouseEvent): void => {
         
@@ -515,9 +547,9 @@ function useEventHandlers(state: SimState) {
 
         dispatch(moveCamera({ x: dx, y: dy }));
 
-        setMouseLastPosition({ x: event.clientX, y: event.clientY });
+        state.mouse.setLastPosition({ x: event.clientX, y: event.clientY });
 
-    }, [setMouseLastPosition, state.mouse.lastPosition, dispatch]);
+    }, [state.mouse, dispatch]);
 
     const onMouseMove = useCallback((event: React.MouseEvent): void => {
 
@@ -549,8 +581,6 @@ function useEventHandlers(state: SimState) {
     return {
 
         windowResized,
-        onKeyDown,
-        onKeyUp,
         onMouseDown,
         onMouseUp,
         onMouseMove,
@@ -565,7 +595,7 @@ function useSimulation() {
 
     const state = useSimState();
 
-    const setup = useSetup();
+    const setup = useSetup(state);
     const loop = useLoop(state);
 
     const eventHandlers = useEventHandlers(state);
