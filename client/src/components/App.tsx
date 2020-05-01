@@ -55,9 +55,11 @@ export default function App() {
 
     useSetTitle();
 
+    const hotkeys = useSelector((state: StateShape) => state.hotkeys);
+
     return (
         <ThemeProvider theme={useMUItheme()}>
-            <KeyCaptureContext>
+            <KeyCaptureContext hotkeys={hotkeys}>
                 <Simulation /> 
                 <TopBar />
                 <Controls />
