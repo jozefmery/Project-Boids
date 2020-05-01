@@ -69,15 +69,10 @@ const defaultState: StateShape =  {
         }
     },
 
-    keyboard: {
+    hotkeys: {
 
-        bindings: {
-
-            "moveCameraLeft":   "a",
-            "moveCameraUp":     "w",
-            "moveCameraRight":  "d",
-            "moveCameraDown":   "s",
-        }
+        toggleTheme: "alt+t",
+        cycleLanguages: "alt+l",
     }
 }
 
