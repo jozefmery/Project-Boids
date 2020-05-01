@@ -1,4 +1,13 @@
-// TODO string with hotkeys header
+/**
+ * File: UseStringWithHotkey.ts
+ * 
+ * Author: Jozef Méry <xmeryj00@stud.fit.vutbr.cz>
+ * Date: 2.5.2020
+ * License: none
+ * Description: Defines a hook for using localized language strings in combination
+ *              with a hotkey
+ * 
+ */
 
 // import redux utilities 
 import { useSelector } from "react-redux";
@@ -18,7 +27,6 @@ function format(str: string, sequences: string | Array<string>): string {
 
     let sequenceArray: Array<string>;
 
-
     if(typeof sequences === "string") {
 
         sequenceArray = [sequences];
@@ -29,12 +37,14 @@ function format(str: string, sequences: string | Array<string>): string {
     }
 
     const sequenceString = 
-        sequenceArray.map(sequence => sequence.split(" "))
-        .map(combinations => combinations.map(combination => combination.split("+")
-        .map(key => lodash.capitalize(key))
-        .join(" + ")))
-        .join(" ")
+        sequenceArray.map(sequence => sequence.split(" "))      // split sequence to a combination array
+        .map(combinations => combinations.map(combination =>    
+        combination.split("+")                                  // split each combination to keys
+        .map(key => lodash.capitalize(key))                     // capitalize each key
+        .join(" + ")))                                          // rejoin keys
+        .join(" ")                                              // rejoin combinations
 
+    // format strings 
     if(sequenceString.length) {
         
         return `${str} [${sequenceString}]`;
