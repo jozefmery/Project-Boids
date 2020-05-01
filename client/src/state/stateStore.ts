@@ -20,7 +20,7 @@ import sim from "./simSlice";
 import global from "./globalSlice";
 import hotkeys from "./hotkeysSlice";
 
-const reduxStateStore = configureStore({
+export default configureStore({
     
     // merge slice reducers into a root reducer
     reducer: { sim, global, hotkeys },
@@ -29,5 +29,3 @@ const reduxStateStore = configureStore({
     // load default state
     preloadedState: defaultState
 });
-
-export default reduxStateStore;
