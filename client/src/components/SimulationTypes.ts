@@ -13,14 +13,3 @@ export enum SimZoomTarget {
     CURSOR,
     CENTER
 };
-
-export const simulationBindingList = [
-
-    "moveCameraLeft",
-    "moveCameraUp",      
-    "moveCameraRight",   
-    "moveCameraDown"
-
-] as const;
-
-export type SimulationBindings = typeof simulationBindingList[number];
