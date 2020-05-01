@@ -9,15 +9,19 @@
  */
 
 // import type information
-import { ThunkAction, Action } from "@reduxjs/toolkit";
+import { ThunkAction, Action as ReduxAction } from "@reduxjs/toolkit";
 
 import { Dimensions2D, Position2D } from "../types";
-import { SimulationBindings, SimZoomTarget } from "../components/SimulationTypes";
+import { SimZoomTarget } from "../components/SimulationTypes";
 import { ColorTheme } from "../stylers";
 import { Languages } from "../lang/all";
+import { Action } from "../actions";
 
-// gather all possible key binding into a single type
-export type Bindings = SimulationBindings;
+
+export type ActionHotkeys = {
+
+    [action in Action]?: string | Array<string>;
+};
 
 export type StateShape = {
 
@@ -70,13 +74,7 @@ export type StateShape = {
         }
     };
 
-    keyboard: {
-
-        bindings: {
-
-            [binding in Bindings]: string;
-        }
-    }
+    hotkeys: ActionHotkeys;
 };
 
-export type Thunk = ThunkAction<void, StateShape, unknown, Action<string>>;
+export type Thunk = ThunkAction<void, StateShape, unknown, ReduxAction<string>>;
