@@ -21,3 +21,9 @@ export type Dimensions2D = {
 };
 
 export type Function = (...args: Array<any>) => any;
+
+export type Class = {
+
+    new (...args: any[]): any;
+    [index: string]: any;
+};
