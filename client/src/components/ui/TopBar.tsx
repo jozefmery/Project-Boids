@@ -11,9 +11,11 @@
 // import react
 import React, { useState } from "react";
 
-// import redux utilities and slices
-import { useSelector, useDispatch } from "react-redux";
-import { toggleTheme, setLanguage } from "../../state/globalSlice";
+// import redux utilities
+import { useSelector } from "react-redux";
+
+// import action
+import { useAction } from "../../actions";
 
 // import UI elements
 import Button from "@material-ui/core/Button";
@@ -28,6 +30,7 @@ import MenuItem from "@material-ui/core/MenuItem";
 
 // import hooks
 import { useLanguageString } from "../../hooks/UseLanguageString";
+import { useStringWithHotkeys } from "../../hooks/UseStringWithHotkey";
 
 // import stylers
 import { makeStyles, Theme } from "@material-ui/core/styles";
@@ -105,16 +108,18 @@ const useLangSelectorStyles = makeStyles(({ theme }: Theme) => ({
 
 function LanguageSelector() {
 
-    // get dispatch and state from redux
+    // get actions
+    const setLanguage = useAction("setLanguage");
+
+    // get state from redux
     const selectedLanguage = useSelector((state: StateShape) => state.global.language);
-    const dispatch = useDispatch();
 
     // get styles
     const { tooltip } = useSharedStyles();
     const classes = useLangSelectorStyles();
 
     // get language strings
-    const chooseLanguage = useLanguageString("chooseLanguage");
+    const chooseLanguage = useStringWithHotkeys("chooseLanguage", "cycleLanguages");
     const languageName = useLanguageString("languageName");
 
     // menu state
@@ -152,7 +157,7 @@ function LanguageSelector() {
                 
                     <MenuItem key={language} onClick={() => {
                                 
-                                    dispatch(setLanguage(language));
+                                    setLanguage(language);
                                     closeMenu();
                                 }}
                         selected={selectedLanguage === language}
@@ -169,16 +174,18 @@ function LanguageSelector() {
 
 function ThemeToggler() {
 
-    // get dispatch and state from redux
+    // get actions
+    const toggleTheme = useAction("toggleTheme");
+
+    // get state from redux
     const theme = useSelector((state: StateShape) => state.global.theme);
-    const dispatch = useDispatch();
 
     // get styles
     const { tooltip, ...classes } = useSharedStyles();
 
     // get language strings
-    const setLightTheme = useLanguageString("setLightTheme");
-    const setDarkTheme = useLanguageString("setDarkTheme");
+    const setLightTheme = useStringWithHotkeys("setLightTheme", "toggleTheme");
+    const setDarkTheme = useStringWithHotkeys("setDarkTheme", "toggleTheme");
 
     // helpers
     const themeIsDark = theme === ColorTheme.DARK;
@@ -187,7 +194,7 @@ function ThemeToggler() {
                     placement="bottom" 
                     TransitionComponent={Zoom}
                     classes={{ tooltip }}>
-                <Button className={classes.button} onClick={() => dispatch(toggleTheme()) }>
+                <Button className={classes.button} onClick={() => toggleTheme() }>
                     {themeIsDark ? <LightIcon /> : <DarkIcon />}
                 </Button>
             </Tooltip>
