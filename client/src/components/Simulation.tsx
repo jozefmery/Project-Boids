@@ -36,7 +36,6 @@ import { HotkeyContext } from "./Hotkeys";
 // import type information
 import { StateShape } from "../state/types";
 import { Position2D } from "../types"
-import { simulationBindingList, SimulationBindings } from "./SimulationTypes";
 
 /// Type definitions
 
@@ -241,54 +240,52 @@ const useStyles = makeStyles(({ theme }: Theme) => ({
     parent: parentStyle.compose(theme)
 }));
 
-/// Keyboard hooks
+// function useBindings(state: SimState) {
 
-function useBindings(state: SimState) {
+//     // get hotkey context
+//     const hotkeys = useContext(HotkeyContext);
 
-    // get hotkey context
-    const hotkeys = useContext(HotkeyContext);
+//     // get redux state and dispatch
+//     const dispatch = useDispatch();
 
-    // get redux state and dispatch
-    const dispatch = useDispatch();
-
-    const moveDelta = useSelector((state: StateShape) => state.sim.camera.moveDelta);
-    const bindingCombinations = useSelector((state: StateShape) => state.keyboard.bindings);
-    const scale = useSelector((state: StateShape) => state.sim.camera.scale.current);
+//     const moveDelta = useSelector((state: StateShape) => state.sim.camera.moveDelta);
+//     const bindingCombinations = useSelector((state: StateShape) => state.keyboard.bindings);
+//     const scale = useSelector((state: StateShape) => state.sim.camera.scale.current);
 
 
-    const getMoveDelta = useCallback(() => {
+//     const getMoveDelta = useCallback(() => {
 
-        return (moveDelta / 1000) * state.time.delta.current * scale; 
+//         return (moveDelta / 1000) * state.time.delta.current * scale; 
 
-    }, [moveDelta, state.time.delta, scale]);
+//     }, [moveDelta, state.time.delta, scale]);
 
-    type Bindings = { [binding in SimulationBindings]: () => unknown };
+//     type Bindings = { [binding in SimulationBindings]: () => unknown };
 
-    const bindingCallbacks = useRef<Bindings>({
+//     const bindingCallbacks = useRef<Bindings>({
 
-        moveCameraUp: () => dispatch(moveCamera({ x: 0, y: -getMoveDelta() })),
+//         moveCameraUp: () => dispatch(moveCamera({ x: 0, y: -getMoveDelta() })),
 
-        moveCameraRight: () => dispatch(moveCamera({ x: getMoveDelta(), y: 0 })),
+//         moveCameraRight: () => dispatch(moveCamera({ x: getMoveDelta(), y: 0 })),
 
-        moveCameraDown: () => dispatch(moveCamera({ x: 0, y: getMoveDelta() })),
+//         moveCameraDown: () => dispatch(moveCamera({ x: 0, y: getMoveDelta() })),
 
-        moveCameraLeft: () => dispatch(moveCamera({ x: -getMoveDelta(), y: 0 }))
-    });
+//         moveCameraLeft: () => dispatch(moveCamera({ x: -getMoveDelta(), y: 0 }))
+//     });
 
-    return useCallback(() => {
+//     return useCallback(() => {
  
-        for(const binding of simulationBindingList) {
+//         for(const binding of simulationBindingList) {
 
-            const combination = bindingCombinations[binding];
+//             const combination = bindingCombinations[binding];
 
-            if(hotkeys.isCombinationPressed(combination)) {
+//             if(hotkeys.isCombinationPressed(combination)) {
 
-                bindingCallbacks.current[binding]();
-            }
-        }
+//                 bindingCallbacks.current[binding]();
+//             }
+//         }
 
-    }, [bindingCombinations, bindingCallbacks, hotkeys]);
-}
+//     }, [bindingCombinations, bindingCallbacks, hotkeys]);
+// }
 
 /// Setup hooks
 
@@ -330,16 +327,14 @@ function useUpdateEntities(state: SimState) {
 
 function useUpdate(state: SimState) {
 
-    const runBindings = useBindings(state);
     const updateEntities = useUpdateEntities(state);
 
     return useCallback((p5: P5) => {
 
         state.time.update();
-        runBindings();
         updateEntities(p5);
 
-    }, [state.time, runBindings, updateEntities]);
+    }, [state.time, updateEntities]);
 }
 
 function useDrawBackground() {
