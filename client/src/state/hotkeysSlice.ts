@@ -4,11 +4,9 @@
  * Author: Jozef Méry <xmeryj00@stud.fit.vutbr.cz>
  * Date: 1.4.2020
  * License: none
- * Description:
+ * Description: Defines actions for changing hotkeys.
  * 
  */
-
-// TODO add desc
 
 // import redux toolkit
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
