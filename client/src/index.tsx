@@ -16,7 +16,7 @@ import ReactDOM from "react-dom";
 import { Provider as ReduxStateProvider } from "react-redux";
 
 // import redux store
-import { reduxStateStore } from "./state/stateStore";
+import reduxStateStore from "./state/stateStore";
 
 // import styles
 import "./css/index.scss";
