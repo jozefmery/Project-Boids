@@ -246,7 +246,6 @@ export const centerCameraToArea = (): Thunk => (dispatch, getState) => {
     // state shorthands
     const state = getState();
     const scale = state.sim.camera.scale.current;
-    const dimensions = state.global.dimensions;
 
     // account for current scale
     const scaledArea = {
