@@ -14,7 +14,7 @@ import React, { useState } from "react";
 // import redux utilities
 import { useSelector } from "react-redux";
 
-// import action
+// import actions
 import { useAction } from "../../actions";
 
 // import UI elements
