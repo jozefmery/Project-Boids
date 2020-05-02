@@ -34,15 +34,16 @@ function format(str: string, sequences: string | Array<string>): string {
     } else {
 
         sequenceArray = sequences;
-    }
+    }                                                 
 
+    // assume valid keys without redundant spaces or characters
     const sequenceString = 
-        sequenceArray.map(sequence => sequence.split(" "))      // split sequence to a combination array
-        .map(combinations => combinations.map(combination =>    
-        combination.split("+")                                  // split each combination to keys
-        .map(key => lodash.capitalize(key))                     // capitalize each key
-        .join(" + ")))                                          // rejoin keys
-        .join(" ")                                              // rejoin combinations
+        sequenceArray.map(sequence => sequence.split(" ")   // split sequence to a combination array
+        .map(combination => combination.split("+")          // split each combination to keys
+        .map(key => lodash.capitalize(key))                 // capitalize each key
+        .join("+"))                                         // rejoin keys
+        .join(" "))                                         // rejoin combinations
+        .join(", ");                                        // join sequences to a single string
 
     // format strings 
     if(sequenceString.length) {
