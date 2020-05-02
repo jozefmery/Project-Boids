@@ -16,7 +16,9 @@ import defaultState from "./defaultState";
 
 // import type information
 import { Action } from "../actions";
+import { ActionHotkeys } from "./types";
 
+type ActionHotkey = NonNullable<ActionHotkeys[Action]>;
 
 // shorthand
 const hotkeys = defaultState.hotkeys;
@@ -32,9 +34,9 @@ const hotkeysSlice = createSlice({
         // whole state
         setHotkeys: (_, { payload: settings }: PayloadAction<typeof hotkeys>) => settings,
 
-        setHotkey: (state, { payload }: PayloadAction<{ action: Action, sequences: string | Array<string> }>) => {
+        setHotkey: (state, { payload }: PayloadAction<{ action: Action, settings: ActionHotkey }>) => {
 
-            state[payload.action] = payload.sequences;
+            state[payload.action] = payload.settings;
         }
     }
 });
