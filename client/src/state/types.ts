@@ -11,16 +11,23 @@
 // import type information
 import { ThunkAction, Action as ReduxAction } from "@reduxjs/toolkit";
 
+import { EventType } from "@dodmeister/hotkeys";
 import { Dimensions2D, Position2D } from "../types";
 import { SimZoomTarget } from "../components/SimulationTypes";
 import { ColorTheme } from "../stylers";
 import { Languages } from "../lang/all";
 import { Action } from "../actions";
 
+type Sequences = string | Array<string>;
 
 export type ActionHotkeys = {
 
-    [action in Action]?: string | Array<string>;
+    [action in Action]?: {
+
+        sequences: Sequences;
+        eventType?: EventType;
+        preventDefault?: boolean;
+    };
 };
 
 export type StateShape = {
