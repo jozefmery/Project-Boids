@@ -26,6 +26,8 @@ export type ActionHotkeys = {
 
         sequences: Sequences;
         eventType?: EventType;
+        enabled?: boolean;
+        exactMatch?: boolean;
         preventDefault?: boolean;
     };
 };
