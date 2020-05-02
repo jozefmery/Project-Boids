@@ -13,6 +13,18 @@ import {
 
 } from "./state/globalSlice";
 
+import {
+
+    toggleSimRunning,
+    increaseSpeed,
+    decreaseSpeed,
+
+    centerCameraToArea,
+    changeCameraScale
+
+
+} from "./state/simSlice";
+
 // import type information
 import { StateShape } from "./state/types";
 import { Languages } from "./lang/all";
@@ -59,11 +71,83 @@ function useCycleLanguages() {
     }, [dispatch, current, languageList]);
 }
 
+function useToggleSimRunning() {
+
+    const dispatch = useDispatch();
+
+    return useCallback(() => {
+
+        dispatch(toggleSimRunning());
+
+    }, [dispatch]);
+}
+
+function useIncreaseSimSpeed() {
+
+    const dispatch = useDispatch();
+
+    return useCallback(() => {
+
+        dispatch(increaseSpeed());
+
+    }, [dispatch]);
+}
+
+function useDecreaseSimSpeed() {
+
+    const dispatch = useDispatch();
+
+    return useCallback(() => {
+
+        dispatch(decreaseSpeed());
+
+    }, [dispatch]);
+}
+
+function useCenterCameraToArea() {
+
+    const dispatch = useDispatch();
+
+    return useCallback(() => {
+
+        dispatch(centerCameraToArea());
+
+    }, [dispatch]);
+}
+
+function useZoomIn() {
+
+    const dispatch = useDispatch();
+
+    return useCallback(() => {
+
+        dispatch(changeCameraScale(1));
+
+    }, [dispatch]);
+}
+
+function useZoomOut() {
+
+    const dispatch = useDispatch();
+
+    return useCallback(() => {
+
+        dispatch(changeCameraScale(-1));
+
+    }, [dispatch]);
+}
+
 export const actionList = [
 
     "toggleTheme",
     "setLanguage",
-    "cycleLanguages"
+    "cycleLanguages",
+    "toggleSimRunning",
+    "increaseSimSpeed",
+    "decreaseSimSpeed",
+    "centerCameraToArea",
+    "zoomIn",
+    "zoomOut",
 
 ] as const;
 
@@ -76,12 +160,24 @@ function useActionMap(): ActionMap {
     const toggleTheme = useToggleTheme();
     const setLanguage = useSetLanguage();
     const cycleLanguages = useCycleLanguages();
+    const toggleSimRunning = useToggleSimRunning();
+    const increaseSimSpeed = useIncreaseSimSpeed();
+    const decreaseSimSpeed = useDecreaseSimSpeed();
+    const centerCameraToArea = useCenterCameraToArea();
+    const zoomIn = useZoomIn();
+    const zoomOut = useZoomOut();
 
     return {
 
         toggleTheme,
         setLanguage,
-        cycleLanguages
+        cycleLanguages,
+        toggleSimRunning,
+        increaseSimSpeed,
+        decreaseSimSpeed,
+        centerCameraToArea,
+        zoomIn,
+        zoomOut
     };
 }
 
