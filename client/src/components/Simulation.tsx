@@ -9,7 +9,7 @@
  */
 
 // import react
-import React, { useRef, useEffect, useState, useCallback, useContext } from "react";
+import React, { useRef, useEffect, useState, useCallback } from "react";
 
 // import utilities
 import lodash from "lodash";
@@ -29,9 +29,6 @@ import { simStylers, SimStylerList, Style } from "../stylers";
 
 // import entities
 import { Context as EntityContext } from "../entities/entity";
-
-// import hotkey context
-import { HotkeyContext } from "./Hotkeys";
 
 // import type information
 import { StateShape } from "../state/types";
