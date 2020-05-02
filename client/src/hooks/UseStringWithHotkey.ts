@@ -41,7 +41,7 @@ function format(str: string, sequences: string | Array<string>): string {
         sequenceArray.map(sequence => sequence.split(" ")   // split sequence to a combination array
         .map(combination => combination.split("+")          // split each combination to keys
         .map(key => lodash.capitalize(key))                 // capitalize each key
-        .join("+"))                                         // rejoin keys
+        .join(" + "))                                       // rejoin keys
         .join(" "))                                         // rejoin combinations
         .join(", ");                                        // join sequences to a single string
 
