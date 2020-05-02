@@ -60,11 +60,11 @@ export function useStringWithHotkeys(str: LanguageStrings, action: Action): stri
 
     const languageString = useLanguageString(str);
 
-    const sequences = hotkeys[action];
+    const settings = hotkeys[action];
 
-    if(sequences) {
+    if(settings) {
 
-        return format(languageString, sequences);
+        return format(languageString, settings.sequences);
     }
 
     return languageString;
