@@ -360,7 +360,6 @@ export class Style {
         }
     });
 
-
     /// Protected members
 
     // members are initialized in ctor using methods 
