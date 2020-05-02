@@ -11,9 +11,11 @@
 // import react
 import React from "react";
 
-// import redux utilities and slices
-import { useSelector, useDispatch } from "react-redux";
-import { toggleSimRunning, centerCameraToArea, increaseSpeed, decreaseSpeed, changeCameraScale } from "../../state/simSlice";
+// import redux utilities
+import { useSelector } from "react-redux";
+
+// import actions
+import { useAction } from "../../actions";
 
 // import UI elements
 import Button from "@material-ui/core/Button";
@@ -31,6 +33,7 @@ import ZoomOutIcon from '@material-ui/icons/ZoomOut';
 
 // import hooks
 import { useLanguageString } from "../../hooks/UseLanguageString";
+import { useStringWithHotkeys } from "../../hooks/UseStringWithHotkey";
 
 // import stylers
 import { makeStyles, Theme } from "@material-ui/core/styles";
@@ -186,17 +189,21 @@ function TextDisplay({ text, tooltip }: TextDisplayProps) {
 
 function SpeedControls() {
 
-    // get state and dispatch from redux
-    const dispatch = useDispatch();
+    // get actions
+    const [ increaseSimSpeed, 
+            decreaseSimSpeed, 
+            toggleSimRunning] = useAction(["increaseSimSpeed", "decreaseSimSpeed", "toggleSimRunning"]);
+
+    // get state from redux
     const simRunning = useSelector((state: StateShape) => state.sim.speed.running);
     const currentSpeed = useSelector((state: StateShape) => state.sim.speed.current);
 
     // get tooltips strings
     const tooltips = {
 
-        toggler: useLanguageString(simRunning ? "pause" : "play"),
-        increaseSpeed: useLanguageString("increaseSpeed"),
-        decreaseSpeed: useLanguageString("decreaseSpeed"),
+        toggler: useStringWithHotkeys(simRunning ? "pause" : "play", "toggleSimRunning"),
+        increaseSpeed: useStringWithHotkeys("increaseSpeed", "increaseSimSpeed"),
+        decreaseSpeed: useStringWithHotkeys("decreaseSpeed", "decreaseSimSpeed"),
         currentSpeed: useLanguageString("currentSpeed")
     };
 
@@ -211,30 +218,32 @@ function SpeedControls() {
 
     return (
         <ControlGroup icon={<SpeedIcon />}>
-            <ControlButton tooltip={tooltips.increaseSpeed} content={content.increaseSpeed} callback={() => dispatch(increaseSpeed())} />
-            <ControlButton tooltip={tooltips.decreaseSpeed} content={content.decreaseSpeed} callback={() => dispatch(decreaseSpeed())} />
-            <ControlButton tooltip={tooltips.toggler} content={content.toggler} callback={() => dispatch(toggleSimRunning())} />
+            <ControlButton tooltip={tooltips.increaseSpeed} content={content.increaseSpeed} callback={() => increaseSimSpeed()} />
+            <ControlButton tooltip={tooltips.decreaseSpeed} content={content.decreaseSpeed} callback={() => decreaseSimSpeed()} />
+            <ControlButton tooltip={tooltips.toggler} content={content.toggler} callback={() => toggleSimRunning()} />
             <TextDisplay tooltip={tooltips.currentSpeed} text={content.currentSpeed} />
         </ControlGroup>);
 }
 
 function CameraControls() {
 
-    // get state and dispatch from redux
-    const dispatch = useDispatch();
+    // get actions
+    const [zoomIn, zoomOut, centerCameraToArea] = useAction(["zoomIn", "zoomOut", "centerCameraToArea"]);
+
+    // get state from redux
     const scale = useSelector((state: StateShape) => state.sim.camera.scale.current);
 
     // get language strings
-    const centerToArea = useLanguageString("centerToArea");
-    const zoomIn = useLanguageString("zoomIn");
-    const zoomOut = useLanguageString("zoomOut");
+    const zoomInTooltip = useStringWithHotkeys("zoomIn", "zoomIn");
+    const zoomOutTooltip = useStringWithHotkeys("zoomOut", "zoomOut");
+    const centerToAreaTooltip = useStringWithHotkeys("centerCameraToArea", "centerCameraToArea");
     const currentScale = useLanguageString("currentScale");
 
     return (
         <ControlGroup icon={<VideocamIcon />}>
-            <ControlButton tooltip={zoomIn} content={<ZoomInIcon />} callback={() => dispatch(changeCameraScale(1))} />
-            <ControlButton tooltip={zoomOut} content={<ZoomOutIcon />} callback={() => dispatch(changeCameraScale(-1))} />
-            <ControlButton tooltip={centerToArea} content={<CenterToArea />} callback={() => dispatch(centerCameraToArea())} />
+            <ControlButton tooltip={zoomInTooltip} content={<ZoomInIcon />} callback={() => zoomIn()} />
+            <ControlButton tooltip={zoomOutTooltip} content={<ZoomOutIcon />} callback={() => zoomOut()} />
+            <ControlButton tooltip={centerToAreaTooltip} content={<CenterToArea />} callback={() => centerCameraToArea()} />
             <TextDisplay tooltip={currentScale} text={`x${scale.toFixed(2)}`} />
         </ControlGroup>);
 }
