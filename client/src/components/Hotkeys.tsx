@@ -19,6 +19,8 @@ import Context from "@dodmeister/hotkeys";
 
 // import type information
 import { ActionHotkeys } from "../state/types";
+import { RemoveUndefinedDeep } from "../types";
+import { EventType } from "@dodmeister/hotkeys";
 
 export const HotkeyContext = React.createContext<Context>(null as any);
 
@@ -29,6 +31,41 @@ type KeyCaptureContextProps = {
     hotkeys?: ActionHotkeys;
 };
 
+
+type ActionHotkey = RemoveUndefinedDeep<NonNullable<ActionHotkeys[Action]>>;
+
+function fillHotkeySettings(partialSettings: ActionHotkeys[Action]): ActionHotkey {
+
+    // default settings
+    const settings: ActionHotkey = {
+
+        sequences: [],
+        eventType: EventType.KEYDOWN,
+        preventDefault: false
+    };
+
+    if(partialSettings) {
+
+        // fill in options if the are available
+
+        const { sequences, eventType, preventDefault } = partialSettings;
+
+        settings.sequences = sequences;
+        
+        if(eventType) {
+
+            settings.eventType = eventType;
+        }
+
+        if(preventDefault) {
+
+            settings.preventDefault = preventDefault;
+        }
+    }
+
+    return settings;
+}
+
 export function KeyCaptureContext({ children, tabIndex = 0, hotkeys = {} }: KeyCaptureContextProps) {
 
     const context = useRef(new Context());
@@ -37,34 +74,36 @@ export function KeyCaptureContext({ children, tabIndex = 0, hotkeys = {} }: KeyC
 
     useEffect(() => {
 
-        let action: Action;
+        let actionName: Action;
 
-        for(action in hotkeys) {
+        for(actionName in hotkeys) {
 
-            let sequences: string | Array<string>;
+            // fill missing hotkey settings
+            const { sequences, eventType, preventDefault } = fillHotkeySettings(hotkeys[actionName]);
 
-            if(hotkeys[action] !== undefined) {
+            const handle = context.current.get(actionName);
 
-                // safety check provided above
-                // safely cast to sequence definitions
-                sequences = hotkeys[action] as string | Array<string>;
+            const action = actionMap[actionName];
 
-            } else {
-                
-                sequences = [];
+            const callback = () => {
+
+                action();
+                return preventDefault;
             }
-
-            const handle = context.current.get(action);
 
             if(handle) {
 
                 // update sequences and callbacks
                 handle.setSequences(sequences);
-                handle.setCallback(actionMap[action]);
+                handle.setCallback(callback);
+                handle.setEventType(eventType)
 
             } else {
 
-                context.current.add({ sequences, callback: actionMap[action], id: action });
+                context.current.add({   sequences, 
+                                        callback, 
+                                        id: actionName,
+                                        eventType });
             }
         }
 
