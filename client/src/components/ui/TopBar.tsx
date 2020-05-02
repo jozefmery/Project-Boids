@@ -44,9 +44,9 @@ import languageData, { Languages } from "../../lang/all";
 
 /// Shared styles
 
-const buttonStyle = Style.create({}, undefined, [Style.topBarButton, Style.colorTransition]);
+const buttonStyle = Style.create({}, {}, [Style.topBarButton, Style.colorTransition]);
 
-const tooltipStyle = Style.create(undefined, undefined, Style.tooltip);
+const tooltipStyle = Style.create({}, {}, [Style.tooltip, Style.colorTransition]);
 
 const useSharedStyles = makeStyles(({ theme }: Theme) => ({
 
@@ -90,13 +90,13 @@ const langSelectorStyle: Style = Style.create({
     padding: "5px 10px",
     fontSize: "15px"
 
-}, undefined, [Style.topBarButton, Style.colorTransition]);
+}, {}, [Style.topBarButton, Style.colorTransition]);
 
 /// Language selector
 
-const langSelectorMenu: Style = Style.create({}, {}, [Style.menu]);
+const langSelectorMenu: Style = Style.create({}, {}, Style.menu);
 
-const langSelectorMenuItem: Style = Style.create({}, {}, [Style.menuItem]);
+const langSelectorMenuItem: Style = Style.create({}, {}, Style.menuItem);
 
 const useLangSelectorStyles = makeStyles(({ theme }: Theme) => ({
 
