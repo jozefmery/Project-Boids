@@ -20,7 +20,7 @@ const data: LanguageDefinition = {
     setLightTheme: "Prepnúť na svetlý motív",
     chooseLanguage: "Vybrať jazyk",
     languageName: "SLOVENČINA",
-    centerToArea: "Presunúť kameru na stred plochy",
+    centerCameraToArea: "Presunúť kameru na stred plochy",
     currentSpeed: "Aktuálna rýchlosť",
     increaseSpeed: "Zvýšiť rýchlosť",
     decreaseSpeed: "Znížiť rýchlosť",
