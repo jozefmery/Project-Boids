@@ -73,6 +73,14 @@ const defaultState: StateShape =  {
 
         toggleTheme: "alt+t",
         cycleLanguages: "alt+l",
+
+        toggleSimRunning: "space",
+        increaseSimSpeed: "shift+=",
+        decreaseSimSpeed: "shift+-",
+
+        zoomIn: "=",
+        zoomOut: "-",
+        centerCameraToArea: "alt+c"
     }
 }
 
