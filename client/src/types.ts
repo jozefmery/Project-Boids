@@ -27,3 +27,5 @@ export type Class = {
     new (...args: any[]): any;
     [index: string]: any;
 };
+
+export type RemoveUndefinedDeep<T> = { [P in keyof T]-?: RemoveUndefinedDeep<NonNullable<T[P]>> };
