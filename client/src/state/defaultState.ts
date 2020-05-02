@@ -47,8 +47,8 @@ const defaultState: StateShape =  {
             scale: {
                 
                 current: 1.0,
-                min: 0.1,
-                max: 10,
+                min: 0.3,
+                max: 3,
                 delta: 0.05,
                 enabled: true,
                 target: SimZoomTarget.CURSOR
@@ -71,16 +71,40 @@ const defaultState: StateShape =  {
 
     hotkeys: {
 
-        toggleTheme: "alt+t",
-        cycleLanguages: "alt+l",
+        toggleTheme: {
 
-        toggleSimRunning: "space",
-        increaseSimSpeed: "shift+=",
-        decreaseSimSpeed: "shift+-",
+            sequences: "alt+t"
+        },
+        cycleLanguages: {
 
-        zoomIn: "=",
-        zoomOut: "-",
-        centerCameraToArea: "alt+c"
+            sequences: "alt+l"
+        },
+
+        toggleSimRunning: {
+
+            sequences: "space"
+        },
+        increaseSimSpeed: {
+
+            sequences: "shift+="
+        },
+        decreaseSimSpeed: {
+
+            sequences: "shift+-"
+        },
+
+        zoomIn: {
+
+            sequences: "=",
+        },
+        zoomOut: {
+
+            sequences: "-"
+        },
+        centerCameraToArea: {
+
+            sequences: "alt+c"
+        }
     }
 }
 
