@@ -287,7 +287,7 @@ function useUpdate(state: SimState) {
         dispatch(moveCamera(state.time.delta.current));
         updateEntities(p5);
 
-    }, [state.time, updateEntities]);
+    }, [state.time, updateEntities, dispatch]);
 }
 
 function useDrawBackground() {
