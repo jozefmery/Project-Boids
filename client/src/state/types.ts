@@ -68,6 +68,14 @@ export type StateShape = {
                 target: SimZoomTarget;
             }
 
+            movement: {
+
+                up: boolean;
+                right: boolean;
+                down: boolean;
+                left: boolean;
+            };
+
             moveDelta: number;
 
             target: Position2D;
