@@ -237,53 +237,6 @@ const useStyles = makeStyles(({ theme }: Theme) => ({
     parent: parentStyle.compose(theme)
 }));
 
-// function useBindings(state: SimState) {
-
-//     // get hotkey context
-//     const hotkeys = useContext(HotkeyContext);
-
-//     // get redux state and dispatch
-//     const dispatch = useDispatch();
-
-//     const moveDelta = useSelector((state: StateShape) => state.sim.camera.moveDelta);
-//     const bindingCombinations = useSelector((state: StateShape) => state.keyboard.bindings);
-//     const scale = useSelector((state: StateShape) => state.sim.camera.scale.current);
-
-
-//     const getMoveDelta = useCallback(() => {
-
-//         return (moveDelta / 1000) * state.time.delta.current * scale; 
-
-//     }, [moveDelta, state.time.delta, scale]);
-
-//     type Bindings = { [binding in SimulationBindings]: () => unknown };
-
-//     const bindingCallbacks = useRef<Bindings>({
-
-//         moveCameraUp: () => dispatch(moveCamera({ x: 0, y: -getMoveDelta() })),
-
-//         moveCameraRight: () => dispatch(moveCamera({ x: getMoveDelta(), y: 0 })),
-
-//         moveCameraDown: () => dispatch(moveCamera({ x: 0, y: getMoveDelta() })),
-
-//         moveCameraLeft: () => dispatch(moveCamera({ x: -getMoveDelta(), y: 0 }))
-//     });
-
-//     return useCallback(() => {
- 
-//         for(const binding of simulationBindingList) {
-
-//             const combination = bindingCombinations[binding];
-
-//             if(hotkeys.isCombinationPressed(combination)) {
-
-//                 bindingCallbacks.current[binding]();
-//             }
-//         }
-
-//     }, [bindingCombinations, bindingCallbacks, hotkeys]);
-// }
-
 /// Setup hooks
 
 function useSetup(state: SimState) {
@@ -324,11 +277,14 @@ function useUpdateEntities(state: SimState) {
 
 function useUpdate(state: SimState) {
 
+    const dispatch = useDispatch();
+    
     const updateEntities = useUpdateEntities(state);
 
     return useCallback((p5: P5) => {
 
         state.time.update();
+        dispatch(moveCamera(state.time.delta.current));
         updateEntities(p5);
 
     }, [state.time, updateEntities]);
