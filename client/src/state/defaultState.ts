@@ -13,6 +13,7 @@ import { StateShape } from "./types";
 import { ColorTheme } from "../stylers";
 import { Languages } from "../lang/all";
 import { SimZoomTarget } from "../components/SimulationTypes";
+import { EventType } from "@dodmeister/hotkeys";
 
 const defaultState: StateShape =  {
 
@@ -52,6 +53,14 @@ const defaultState: StateShape =  {
                 delta: 0.05,
                 enabled: true,
                 target: SimZoomTarget.CURSOR
+            },
+
+            movement: {
+
+                up: false,
+                right: false,
+                down: false,
+                left: false
             },
             
             moveDelta: 250,
@@ -104,6 +113,54 @@ const defaultState: StateShape =  {
         centerCameraToArea: {
 
             sequences: "alt+c"
+        },
+        setCameraMoveUp: {
+
+            sequences: "w",
+            eventType: EventType.KEYDOWN,
+            exactMatch: false
+        },
+        resetCameraMoveUp: {
+
+            sequences: "w",
+            eventType: EventType.KEYUP,
+            exactMatch: false,
+        },
+        setCameraMoveRight: {
+
+            sequences: "d",
+            eventType: EventType.KEYDOWN,
+            exactMatch: false
+        },
+        resetCameraMoveRight: {
+
+            sequences: "d",
+            eventType: EventType.KEYUP,
+            exactMatch: false,
+        },
+        setCameraMoveDown: {
+
+            sequences: "s",
+            eventType: EventType.KEYDOWN,
+            exactMatch: false
+        },
+        resetCameraMoveDown: {
+
+            sequences: "s",
+            eventType: EventType.KEYUP,
+            exactMatch: false,
+        },
+        setCameraMoveLeft: {
+
+            sequences: "a",
+            eventType: EventType.KEYDOWN,
+            exactMatch: false
+        },
+        resetCameraMoveLeft: {
+
+            sequences: "a",
+            eventType: EventType.KEYUP,
+            exactMatch: false,
         }
     }
 }
