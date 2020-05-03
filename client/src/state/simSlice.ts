@@ -127,6 +127,16 @@ const simSlice = createSlice({
             state.camera.scale.target = target;
         },
 
+        setCameraMoveDirection: (state, { payload: direction }: PayloadAction<keyof typeof simState.camera.movement>) => {
+            
+            state.camera.movement[direction] = true;
+        },
+
+        resetCameraMoveDirection: (state, { payload: direction }: PayloadAction<keyof typeof simState.camera.movement>) => {
+            
+            state.camera.movement[direction] = false;
+        },
+
         setCameraMoveDelta: (state, { payload: delta }: PayloadAction<typeof simState.camera.moveDelta>) => {
             
             state.camera.moveDelta = delta;
@@ -191,6 +201,8 @@ export const {
     setCameraScaleDelta,
     setCameraScaleEnabled,
     setCameraScaleTarget,
+    setCameraMoveDirection,
+    resetCameraMoveDirection,
     setCameraMoveDelta,
     setGridSettings,
     setGridDraw,
@@ -226,17 +238,49 @@ function getClampedToArea(target: Position2D, state: StateShape): Position2D {
     }
 }
 
-export const moveCamera = (delta: Position2D): Thunk => (dispatch, getState) => {
+export const moveCamera = (delta: Position2D | number): Thunk => (dispatch, getState) => {
 
     // state shorthands
     const state = getState();
-    const current = state.sim.camera.target;
+    const { target: current, moveDelta, movement, scale } = state.sim.camera;
 
     const target = {
 
-        x: current.x + delta.x,
-        y: current.y + delta.y
+        x: current.x,
+        y: current.y 
     };
+
+    if(typeof delta === "number") {
+
+        const axisDelta = moveDelta * delta / 1000 * scale.current;
+
+        if(!Object.values(movement).reduce((sum, current) => sum || current, false)) return;
+
+        if(movement.up) {
+
+            target.y -= axisDelta; 
+        }
+
+        if(movement.right) {
+
+            target.x += axisDelta;
+        }
+
+        if(movement.down) {
+
+            target.y += axisDelta;
+        }
+
+        if(movement.left) {
+
+            target.x -= axisDelta;
+        }
+
+    } else {
+        
+        target.x += delta.x;
+        target.y += delta.y;
+    }
 
     dispatch(actions.setCameraTarget(getClampedToArea(target, state)));
 }
