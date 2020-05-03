@@ -20,8 +20,10 @@ import {
     decreaseSpeed,
 
     centerCameraToArea,
-    changeCameraScale
+    changeCameraScale,
 
+    setCameraMoveDirection,
+    resetCameraMoveDirection
 
 } from "./state/simSlice";
 
@@ -137,6 +139,28 @@ function useZoomOut() {
     }, [dispatch]);
 }
 
+function useSetMoveCameraDirection(direction: keyof StateShape["sim"]["camera"]["movement"] ) {
+
+    const dispatch = useDispatch();
+
+    return useCallback(() => {
+
+        dispatch(setCameraMoveDirection(direction));
+
+    }, [dispatch, direction]);
+}
+
+function useResetMoveCameraDirection(direction: keyof StateShape["sim"]["camera"]["movement"] ) {
+
+    const dispatch = useDispatch();
+
+    return useCallback(() => {
+
+        dispatch(resetCameraMoveDirection(direction));
+
+    }, [dispatch, direction]);
+}
+
 export const actionList = [
 
     "toggleTheme",
@@ -148,6 +172,17 @@ export const actionList = [
     "centerCameraToArea",
     "zoomIn",
     "zoomOut",
+    "setCameraMoveUp",
+    "resetCameraMoveUp",
+
+    "setCameraMoveRight",
+    "resetCameraMoveRight",
+
+    "setCameraMoveDown",
+    "resetCameraMoveDown",
+
+    "setCameraMoveLeft",
+    "resetCameraMoveLeft",
 
 ] as const;
 
@@ -166,6 +201,14 @@ function useActionMap(): ActionMap {
     const centerCameraToArea = useCenterCameraToArea();
     const zoomIn = useZoomIn();
     const zoomOut = useZoomOut();
+    const setCameraMoveUp = useSetMoveCameraDirection("up");
+    const resetCameraMoveUp = useResetMoveCameraDirection("up");
+    const setCameraMoveRight = useSetMoveCameraDirection("right");
+    const resetCameraMoveRight = useResetMoveCameraDirection("right");
+    const setCameraMoveDown = useSetMoveCameraDirection("down");
+    const resetCameraMoveDown = useResetMoveCameraDirection("down");
+    const setCameraMoveLeft = useSetMoveCameraDirection("left");
+    const resetCameraMoveLeft = useResetMoveCameraDirection("left");
 
     return {
 
@@ -177,7 +220,15 @@ function useActionMap(): ActionMap {
         decreaseSimSpeed,
         centerCameraToArea,
         zoomIn,
-        zoomOut
+        zoomOut,
+        setCameraMoveUp,
+        resetCameraMoveUp,
+        setCameraMoveRight,
+        resetCameraMoveRight,
+        setCameraMoveDown,
+        resetCameraMoveDown,
+        setCameraMoveLeft,
+        resetCameraMoveLeft
     };
 }
 
