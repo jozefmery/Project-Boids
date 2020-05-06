@@ -22,9 +22,15 @@ export type Dimensions2D = {
 
 export type Function = (...args: Array<any>) => any;
 
-export type Class = {
+export type GenericClass = {
 
     new (...args: any[]): any;
+    [index: string]: any;
+};
+
+export type Class<T> = {
+    
+    new (...args: any[]): T;
     [index: string]: any;
 };
 
