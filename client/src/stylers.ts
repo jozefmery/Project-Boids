@@ -61,7 +61,9 @@ export type SimStylerList =    "background"
                     |   "boundingBox"
                     |   "fps"
                     |   "preys"
-                    |   "predators";
+                    |   "predators"
+                    |   "entityPerception"
+                    |   "entityPercived";
 
 /**
  * 
@@ -127,10 +129,18 @@ export const simStylers: SimStylers = {
 
         predators: (p5) => {
 
-            p5.fill(128);
-            p5.stroke(0);
-            p5.strokeWeight(2);
         },
+
+        entityPerception: (p5) => {
+
+            p5.noStroke();
+            p5.fill(255, 255, 255, 60);
+        },
+
+        entityPercived: (p5) => {
+
+
+        }
     },
 
     [ColorTheme.LIGHT]: {
@@ -173,10 +183,18 @@ export const simStylers: SimStylers = {
 
         predators: (p5) => {
 
-            p5.fill(128);
-            p5.stroke(0);
-            p5.strokeWeight(2);
         },
+
+        entityPerception: (p5) => {
+
+            p5.noStroke();
+            p5.fill(255, 255, 255, 60);
+        },
+
+        entityPercived: (p5) => {
+
+
+        }
     },
 };
 
