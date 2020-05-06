@@ -250,7 +250,7 @@ function useSetup(state: SimState) {
 
         dispatch(centerCameraToArea());
 
-        state.entities.context.current.addPreys(100);
+        state.entities.context.current.addPreys(2);
         state.entities.context.current.addPredators(0);
 
     }, [dispatch, state.entities.context]);
@@ -398,15 +398,32 @@ function useDrawEntities(state: SimState) {
 
     const preyStyler = useCanvasStylers("preys");
     const predatorStyler = useCanvasStylers("predators");
+    const perceptionStyler = useCanvasStylers("entityPerception");
+    const percievedStyler = useCanvasStylers("entityPercived");
 
     return useCallback((p5: P5) => {
 
-        preyStyler(p5);
-        state.entities.context.current.drawPreys(p5);
-        predatorStyler(p5);
-        state.entities.context.current.drawPredators(p5);
+        state.entities.context.current.drawPreys(p5, {
 
-    }, [state.entities, preyStyler, predatorStyler]);
+            entity: preyStyler,
+            perception: perceptionStyler,
+            percieved: percievedStyler
+
+        });
+
+        state.entities.context.current.drawPredators(p5, {
+
+            entity: predatorStyler,
+            perception: perceptionStyler,
+            percieved: percievedStyler
+
+        });
+
+    }, [state.entities, 
+        preyStyler, 
+        predatorStyler,
+        perceptionStyler,
+        percievedStyler]);
 }
 
 function useDrawFPS(state: SimState) {
