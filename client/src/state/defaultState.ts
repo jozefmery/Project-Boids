@@ -32,15 +32,15 @@ const defaultState: StateShape =  {
 
             running: false,
             current: 1.0,
-            min: 0.5,
-            max: 2.0,
+            min: 0.1,
+            max: 5.0,
             delta: 0.1
         },
         
         area: {
 
-            width: 1000, 
-            height: 1000 
+            width: 5000, 
+            height: 5000 
         },
         
         camera: {
@@ -95,20 +95,20 @@ const defaultState: StateShape =  {
         },
         increaseSimSpeed: {
 
-            sequences: "shift+="
+            sequences: "="
         },
         decreaseSimSpeed: {
 
-            sequences: "shift+-"
+            sequences: "-"
         },
 
         zoomIn: {
 
-            sequences: "=",
+            sequences: "shift+=",
         },
         zoomOut: {
 
-            sequences: "-"
+            sequences: "shift+-"
         },
         centerCameraToArea: {
 
