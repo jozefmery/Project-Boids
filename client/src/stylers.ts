@@ -59,7 +59,9 @@ export type SimStylerList =    "background"
                     |   "grid"
                     |   "gridHighlight" 
                     |   "boundingBox"
-                    |   "fps";
+                    |   "fps"
+                    |   "preys"
+                    |   "predators";
 
 /**
  * 
@@ -114,7 +116,21 @@ export const simStylers: SimStylers = {
 
             p5.textSize(15);
             p5.fill(255);
-        }
+        },
+
+        preys: (p5) => {
+
+            p5.fill(255);
+            p5.stroke(0);
+            p5.strokeWeight(2);
+        },
+
+        predators: (p5) => {
+
+            p5.fill(128);
+            p5.stroke(0);
+            p5.strokeWeight(2);
+        },
     },
 
     [ColorTheme.LIGHT]: {
@@ -146,7 +162,21 @@ export const simStylers: SimStylers = {
 
             p5.textSize(15);
             p5.fill(0);
-        }
+        },
+        
+        preys: (p5) => {
+
+            p5.fill(255);
+            p5.stroke(0);
+            p5.strokeWeight(2);
+        },
+
+        predators: (p5) => {
+
+            p5.fill(128);
+            p5.stroke(0);
+            p5.strokeWeight(2);
+        },
     },
 };
 
