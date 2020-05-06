@@ -250,7 +250,8 @@ function useSetup(state: SimState) {
 
         dispatch(centerCameraToArea());
 
-        state.entities.context.current.add(0);
+        state.entities.context.current.addPreys(100);
+        state.entities.context.current.addPredators(0);
 
     }, [dispatch, state.entities.context]);
 }
@@ -269,7 +270,8 @@ function useUpdateEntities(state: SimState) {
 
             const scaledDelta = state.time.delta.current * speedModifier;
             
-            state.entities.context.current.updateAll(scaledDelta);
+            state.entities.context.current.updatePreys(scaledDelta);
+            state.entities.context.current.updatePredators(scaledDelta);
         }
 
     }, [state.entities.context, state.time.delta, speedModifier, simRunning]);
@@ -394,11 +396,17 @@ function useDrawBoundary() {
 
 function useDrawEntities(state: SimState) {
 
+    const preyStyler = useCanvasStylers("preys");
+    const predatorStyler = useCanvasStylers("predators");
+
     return useCallback((p5: P5) => {
 
-        state.entities.context.current.drawAll(p5);
+        preyStyler(p5);
+        state.entities.context.current.drawPreys(p5);
+        predatorStyler(p5);
+        state.entities.context.current.drawPredators(p5);
 
-    }, [state.entities]);
+    }, [state.entities, preyStyler, predatorStyler]);
 }
 
 function useDrawFPS(state: SimState) {
