@@ -140,7 +140,7 @@ export const simStylers: SimStylers = {
         entityPercived: (p5) => {
 
             p5.strokeWeight(1);
-            p5.stroke("red");
+            p5.stroke(255, 0, 0, 100);
             p5.noFill();
         }
     },
@@ -196,7 +196,7 @@ export const simStylers: SimStylers = {
         entityPercived: (p5) => {
 
             p5.strokeWeight(1);
-            p5.stroke("red");
+            p5.stroke(255, 0, 0, 100);
             p5.noFill();
         }
     },
