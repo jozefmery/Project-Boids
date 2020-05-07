@@ -57,12 +57,13 @@ type Styler = (p5: P5) => void;
 
 type EntityStylers = {
 
-    entity: Styler;
+    predator: Styler;
+    prey: Styler;
     perception: Styler;
     percieved: Styler;
 };
 
-type PercievedEntities = Array<{ instance: Prey, dist: number }>;
+type PercievedEntities = Array<{ instance: Entity, dist: number }>;
 
 type EntityForces = {
 
@@ -71,10 +72,14 @@ type EntityForces = {
     acceleration: Vector;
 };
 
+type EntityType = "predator" | "prey";
+
 class Entity {
 
     /// Protected members
 
+    protected readonly type_: EntityType;
+ 
     protected readonly id_: string;
 
     protected options_: RemoveUndefinedDeep<EntityOptions>;
@@ -92,11 +97,12 @@ class Entity {
 
     /// Constructor function
     
-    public constructor(context: Readonly<Context>) {
+    protected constructor(context: Readonly<Context>, type: EntityType) {
 
         // shorthand
         const area = context.area();
-        
+
+        this.type_ = type;
         this.id_ = uniqid();
 
         this.options_ = {
@@ -281,13 +287,13 @@ class Entity {
         // shorthands
         const { position, velocity } = this.draft().forces_;
 
-        this.percieved_ = Object.values(context.preys()).map(instance => 
+        this.percieved_ = Object.values(context.entities()).map(instance => 
             
             ({ instance, dist: position.dist(instance.position()) }))
             
             .filter(pair => {
 
-            if(pair.instance.id_ === this.id_) return false;
+            if(pair.instance === this) return false;
 
             const angle = velocity.angleBetween(Vector.sub(pair.instance.position(), position)) * (180 / Math.PI);
 
@@ -297,6 +303,11 @@ class Entity {
         return this;
     }
 
+    protected getPercievedType(type: EntityType): PercievedEntities {
+
+        return this.percieved_.filter(entity => entity.instance.type() === type);
+    }
+
     protected drawEntity(p5: P5, stylers: EntityStylers): Entity {
 
         // shorthands
@@ -304,7 +315,7 @@ class Entity {
 
         p5.push();
         
-        stylers.entity(p5);
+        stylers[this.type_](p5);
 
         p5.translate(position.x, position.y);
         p5.rotate(velocity.heading());
@@ -385,6 +396,11 @@ class Entity {
         return this.health_ > 0;
     }
 
+    public type(): EntityType {
+
+        return this.type_;
+    }
+
     public id(): string {
 
         return this.id_;
@@ -458,12 +474,18 @@ class Entity {
 
 class Prey extends Entity {
 
+    /// Constructor function
+
+    public constructor(context: Context) {
+
+        super(context, "prey");
+    }
+
     /// Protected methods
 
-    protected getAlignment(): Vector {
+    protected getAlignment(percieved: PercievedEntities): Vector {
 
         // shorthands
-        const percieved = this.percieved_;
         const { velocity } = this.draft().forces_;
 
         const alignment = createVector();
@@ -483,10 +505,9 @@ class Prey extends Entity {
         return alignment;
     }
 
-    protected getCoherence(): Vector {
+    protected getCoherence(percieved: PercievedEntities): Vector {
 
         // shorthands
-        const percieved = this.percieved_;
         const { position, velocity } = this.draft().forces_;
 
         const coherence = createVector();
@@ -507,10 +528,9 @@ class Prey extends Entity {
         return coherence;
     }
 
-    protected getSeparation(): Vector {
+    protected getSeparation(percieved: PercievedEntities): Vector {
 
         // shorthands
-        const percieved = this.percieved_;
         const { position, velocity } = this.draft().forces_;
 
         const separation = createVector();
@@ -536,19 +556,21 @@ class Prey extends Entity {
 
         const { acceleration } = this.draft().forces_;
 
+        const preys = this.getPercievedType("prey");
+        
         if(flockOptions.align) {
 
-            acceleration.add(this.getAlignment()); 
+            acceleration.add(this.getAlignment(preys)); 
         }
 
         if(flockOptions.cohere) {
 
-            acceleration.add(this.getCoherence()); 
+            acceleration.add(this.getCoherence(preys)); 
         }
 
         if(flockOptions.separate) {
 
-            acceleration.add(this.getSeparation())
+            acceleration.add(this.getSeparation(preys))
         }
 
         return this;
@@ -570,6 +592,12 @@ class Prey extends Entity {
 
 class Predator extends Entity {
 
+    /// Constructor function
+
+    public constructor(context: Context) {
+
+        super(context, "predator");
+    }
 };
 
 type Map<T> = {
@@ -592,8 +620,7 @@ export class Context {
 
     /// Protected members
 
-    protected predators_: Map<Predator>;
-    protected preys_: Map<Prey>;
+    protected entities_: Map<Entity>;
     protected area_: Dimensions2D;
 
     protected options_: RemoveUndefinedDeep<ContextOptions>;
@@ -602,8 +629,7 @@ export class Context {
 
     constructor(area: Readonly<Dimensions2D>) {
 
-        this.predators_ = {};
-        this.preys_ = {};
+        this.entities_ = {};
 
         this.area_ = area;
 
@@ -619,58 +645,51 @@ export class Context {
         }
     }
 
-    /// Protected methods
+    /// Protected static methods
 
-    protected addEntities(Ctor: Class<Predator> | Class<Prey>, count: number = 1): Context {
+    protected static typeToConstructor(type: EntityType): Class<Entity> {
 
-        let map: Map<Entity>;
+        switch(type) {
 
-        if(Ctor === Prey) {
-
-            map = this.preys_;
-        
-        } else { // Predator
-
-            map = this.predators_
+            case "prey": return Prey;
+            case "predator": return Predator;
         }
-
-        for(let i = 0; i < count; ++i) {
-
-            const entity = new Ctor(this);
-
-            map[entity.id()] = entity;
-        }
-
-        return this;
     }
 
-    protected updateEntities<T extends Entity>(timeDelta: number, entityMap: Map<T>): Context {
+    /// Protected methods
 
-        for(const id in entityMap) {
+    /// Public methods
 
-            const entity = entityMap[id];
+    // update methods
+
+    public update(timeDelta: number): Context {
+
+        for(const id in this.entities_) {
+
+            const entity = this.entities_[id];
 
             entity.update(timeDelta, this);
 
             if(!entity.isAlive()) {
 
-                delete entityMap[id];
+                delete this.entities_[id];
             }
         }
 
-        for(const id in entityMap) {
+        for(const id in this.entities_) {
 
-            entityMap[id].applyDraft();
+            this.entities_[id].applyDraft();
         }
+
 
         return this;
     }
 
-    protected drawEntities<T extends Entity>(p5: P5, entityMap: Map<T>, stylers: EntityStylers): Context {
+    public draw(p5: P5, stylers: EntityStylers): Context {
 
-        for(const id in entityMap) {
+        for(const id in this.entities_) {
 
-            const entity = entityMap[id];
+            const entity = this.entities_[id];
 
             entity.draw(p5, stylers);
         }
@@ -678,64 +697,23 @@ export class Context {
         return this;
     }
 
-    /// Public methods
-
-    // update methods
-
-    public updatePreys(timeDelta: number): Context {
-
-        this.updateEntities(timeDelta, this.preys_);
-
-        return this;
-    }
-
-    public updatePredators(timeDelta: number): Context {
-
-        this.updateEntities(timeDelta, this.predators_);
-
-        return this;
-    }
-
-    public drawPreys(p5: P5, stylers: EntityStylers): Context {
-
-        this.drawEntities(p5, this.preys_, stylers);
-
-        return this;
-    }
-
-    public drawPredators(p5: P5, stylers: EntityStylers): Context {
-
-        this.drawEntities(p5, this.predators_, stylers);
-
-        return this;
-    }
-
     // mutator methods
 
-    public addPreys(count: number = 1): Context {
+    public addEntities(type: EntityType, count: number): Context {
 
-        this.addEntities(Prey, count);
+        for(let i = 0; i < count; ++i) {
 
-        return this;
-    }
+            const entity = new (Context.typeToConstructor(type))(this);
 
-    public addPredators(count?: number): Context {
-
-        this.addEntities(Predator, count);
+            this.entities_[entity.id()] = entity;
+        }
 
         return this;
     }
 
-    public clearPreys(): Context {
+    public clearEntities(): Context {
 
-        this.preys_ = {};
-
-        return this;
-    }
-
-    public clearPredators(): Context {
-
-        this.predators_ = {};
+        this.entities_ = {};
 
         return this;
     }
@@ -761,14 +739,9 @@ export class Context {
         return this.area_;
     }
 
-    public preys(): Readonly<Map<Prey>> {
+    public entities(): Readonly<Map<Entity>> {
 
-        return this.preys_;
-    }
-
-    public predators(): Readonly<Map<Predator>> {
-
-        return this.predators_;
+        return this.entities_;
     }
 
     public options(): Readonly<RemoveUndefinedDeep<ContextOptions>> {
