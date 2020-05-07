@@ -19,30 +19,66 @@ import P5 from "p5";
 import { Dimensions2D } from "../types";
 import { Class, RemoveUndefinedDeep } from "../types";
 
-export class Entity {
+class Vector extends P5.Vector {};
+
+function createVector(v1: number | Vector = 0, v2: number = 0, v3: number = 0): Vector {
+
+    const vector = new Vector();
+
+    if(v1 instanceof Vector) {
+
+        vector.set(v1);
+    
+    } else {
+
+        vector.set(v1, v2, v3);
+    }
+
+    return vector;
+}
+
+type EntityOptions = {
+
+    speed?: number;
+    maxForce?: {
+
+        magnitude?: number;
+        angle?: number;
+    };
+
+    perception?: {
+
+        radius?: number;
+        angle?: number;
+    };
+};
+
+type Styler = (p5: P5) => void;
+
+type EntityStylers = {
+
+    entity: Styler;
+    perception: Styler;
+    percieved: Styler;
+};
+
+type Percieved = Array<{ instance: Prey, dist: number }>;
+
+class Entity {
 
     /// Protected members
 
     protected readonly id_: string;
 
-    protected speed_: number;
-    protected force_: {
+    protected options_: RemoveUndefinedDeep<EntityOptions>;
 
-        min: number;
-        max: number;
-    };
-
-    protected position_: P5.Vector = new P5.Vector();
-    protected velocity_: P5.Vector = new P5.Vector();
-    protected acceleration_: P5.Vector = new P5.Vector();
-
-    protected perception_: {
-
-        radius: number;
-        angle: number;
-    };
+    protected position_: Vector;
+    protected velocity_: Vector;
+    protected acceleration_: Vector;
 
     protected health_: number;
+
+    protected percieved_: Percieved;
 
     /// Constructor function
     
@@ -53,29 +89,32 @@ export class Entity {
         
         this.id_ = uniqid();
 
-        this.speed_ = Math.random() * 20 + 70;
+        this.options_ = {
 
-        this.force_ = {
+            speed: 100,
+            maxForce: {
 
-            min: 1,
-            max: 20
+                magnitude: 50,
+                angle: (2 / 3) * Math.PI
+            },
+
+            perception: {
+
+                radius: 100,
+                angle: 220
+            }
         };
 
-        this.position_.set(Math.random() * area.width, Math.random() * area.height);
+        this.position_ = createVector(Math.random() * area.width, Math.random() * area.height);
 
-        this.velocity_ = P5.Vector.random2D();
-        this.velocity_.setMag(this.speed_);
+        this.velocity_ = Vector.random2D();
+        this.velocity_.setMag(this.options_.speed);
 
-        this.acceleration_.set(0, 0);
+        this.acceleration_ = createVector(0, 0);
         
-        this.perception_ = {
-
-            radius: 100,
-            angle: 360
-
-        };
-
         this.health_ = 100;
+        
+        this.percieved_ = [];
     }
 
     /// Protected methods
@@ -92,7 +131,7 @@ export class Entity {
         return false;
     }
 
-    protected wrap(area: Readonly<Dimensions2D>) {
+    protected wrap(area: Readonly<Dimensions2D>): Entity {
 
         const { width, height } = area;
 
@@ -117,9 +156,11 @@ export class Entity {
 
             position.y = height;
         }
+
+        return this;
     }
 
-    protected collide(context: Context): void {
+    protected collide(context: Context): Entity {
 
         const { onBoundaryHit } = context.options();
         const area = context.area();
@@ -138,23 +179,109 @@ export class Entity {
                     this.wrap(area);
                     break;
             }
-        } 
+        }
+
+        return this;
     }
 
-    protected getSpeedAdjust(): P5.Vector {
+    protected adjustSpeed(): Entity {
 
-        const speedAdjust = new P5.Vector();
-        speedAdjust.set(this.velocity_);
-        speedAdjust.setMag(this.speed_ - this.velocity_.mag());
+        // accelerate forward 
+        const acceleration = createVector(this.velocity_);
+
+        acceleration.setMag(this.options_.speed - this.velocity_.mag());
         
-        if(this.acceleration_.mag() && speedAdjust.mag()) {
+        // safety check
+        if(this.acceleration_.magSq() && acceleration.magSq()) {
 
-            const factor = 1 - (Math.abs(speedAdjust.angleBetween(this.acceleration_)) / Math.PI);
+            const factor = 1 - (Math.abs(acceleration.angleBetween(this.acceleration_)) / Math.PI);
 
-            speedAdjust.mult(factor);
+            acceleration.mult(factor);
         }
         
-        return speedAdjust;
+        this.acceleration_.add(acceleration);
+
+        return this;
+    }
+
+    protected limitAcceleration(): Entity {
+
+        if(this.acceleration_.magSq() === 0) return this;
+
+        this.acceleration_.limit(this.options_.maxForce.magnitude);
+
+        const angle = this.velocity_.angleBetween(this.acceleration_);
+
+        const diff = Math.abs(angle) - this.options_.maxForce.angle;
+
+        if(Math.sign(diff) === 1) {
+
+            this.acceleration_.rotate(-Math.sign(angle) * diff);
+        }
+        
+        return this;
+    }
+
+    protected clearAcceleration(): Entity {
+
+        this.acceleration_.mult(0);
+
+        return this;
+    }
+
+    protected updateVectors(timeDelta: number): Entity {
+
+        this.limitAcceleration();
+        
+        this.adjustSpeed();
+
+        this.velocity_.add(Vector.mult(this.acceleration_, timeDelta / 1000));
+        this.position_.add(Vector.mult(this.velocity_, timeDelta / 1000));
+
+        this.clearAcceleration();
+
+        return this;
+    }
+
+    protected percieve(context: Context): Entity {
+
+        this.percieved_ = Object.values(context.preys()).map(instance => 
+            
+            ({ instance, dist: this.position_.dist(instance.position()) }))
+            
+            .filter(pair => {
+
+            // compare based on id not reference
+            if(pair.instance.id_ === this.id_) return false;
+
+            // console.log(this.velocity_.angleBetween(Vector.sub(pair.instance.position_, this.position_)) * ( 180 / Math.PI));
+
+            const angle = this.velocity_.angleBetween(Vector.sub(pair.instance.position_, this.position_)) * (180 / Math.PI);
+
+            return pair.dist <= this.options_.perception.radius && Math.abs(angle) <= this.options_.perception.angle / 2;
+        });
+
+        return this;
+    }
+
+    protected drawPerception(p5: P5): void {
+        
+        const { radius, angle } = this.options_.perception;
+
+        p5.ellipseMode("radius");
+        
+        p5.arc(0, 0, radius, radius, p5.radians(- angle / 2), p5.radians(angle / 2), "pie");
+    }
+
+    protected drawPercieved(p5: P5): void {      
+
+        
+        for(const other of this.percieved_) {
+            
+            const { x, y } = other.instance.position_;
+        
+            p5.line(this.position_.x, this.position_.y, x, y);
+        }
     }
 
     /// Public methods
@@ -165,6 +292,13 @@ export class Entity {
 
         this.health_ = 0;
         
+        return this;
+    }
+
+    public setOptions(options: EntityOptions): Entity {
+
+        this.options_ = lodash.merge(this.options_, options);
+
         return this;
     }
 
@@ -180,50 +314,59 @@ export class Entity {
         return this.id_;
     }
 
+    public options(): Readonly<RemoveUndefinedDeep<EntityOptions>> {
+
+        return this.options_;
+    }
+
     // update methods
 
     public update(timeDelta: number, context: Context): Entity {
 
-        this.acceleration_.limit(this.force_.max);
-
-        const speedAdjust = this.getSpeedAdjust();
-
-        this.acceleration_.add(speedAdjust);
-
-        this.velocity_.add(P5.Vector.mult(this.acceleration_, timeDelta / 1000));
-        
-        console.log(this.velocity_.mag());
-
-        this.position_.add(P5.Vector.mult(this.velocity_, timeDelta / 1000));
+        this.updateVectors(timeDelta);
 
         this.collide(context);
 
-        this.acceleration_.mult(0);
-
         return this;
     }
 
-    public draw(p5: P5): Entity {
+    public draw(p5: P5, stylers: EntityStylers): Entity {
+
+        stylers.percieved(p5);
+        this.drawPercieved(p5);
 
         p5.push();
-
+        
         p5.translate(this.position_.x, this.position_.y);
         p5.rotate(this.velocity_.heading());
-
+        
+        stylers.perception(p5);
+        this.drawPerception(p5);
+        
+        stylers.entity(p5);
         p5.triangle(15, 0, -10, 10, -10, -10);
+        
         p5.pop();
+
+        // clear array to prevent redundant copying
+        this.percieved_ = [];
 
         return this;
     }
 
-    public position(): P5.Vector {
+    public position(): Readonly<Vector> {
 
         return this.position_;
     }
 
-    public velocity(): P5.Vector {
+    public velocity(): Readonly<Vector> {
 
         return this.velocity_;
+    }
+
+    public acceleration(): Readonly<Vector> {
+
+        return this.acceleration_;
     }
 };
 
@@ -231,48 +374,38 @@ class Prey extends Entity {
 
     /// Protected methods
 
-    protected getPercieved(context: Context): Array<Prey> {
+    protected getAlignment(): Vector {
 
-        return Object.values(context.preys()).filter(other => {
+        // shorthands
+        const percieved = this.percieved_;
 
-            if(other.id_ === this.id_) return false;
-
-            const distance = this.position_.dist(other.position());
-
-            // console.log(distance);
-
-            return distance <= this.perception_.radius;
-        });
-    }
-
-    protected getAlignment(percieved: Array<Prey>): P5.Vector {
-
-        const alignment = new P5.Vector();
-        alignment.set(0, 0);
+        const alignment = createVector();
 
         for(const other of percieved) {
             
-            alignment.add(other.velocity());
+            alignment.add(other.instance.velocity());
         }
 
         if(percieved.length) {
 
             alignment.div(percieved.length);
             alignment.sub(this.velocity_);
-            alignment.setMag(this.speed_);
+            alignment.setMag(this.options_.maxForce.magnitude);
         }
 
         return alignment;
     }
 
-    protected getCoherence(percieved: Array<Prey>): P5.Vector {
+    protected getCoherence(): Vector {
 
-        const coherence = new P5.Vector();
-        coherence.set(0, 0);
+        // shorthands
+        const percieved = this.percieved_;
+
+        const coherence = createVector();
 
         for(const other of percieved) {
             
-            coherence.add(other.velocity());
+            coherence.add(other.instance.velocity());
         }
 
         if(percieved.length) {
@@ -280,50 +413,51 @@ class Prey extends Entity {
             coherence.div(percieved.length);
             coherence.sub(this.position_);
             coherence.sub(this.velocity_);
-            coherence.setMag(this.speed_);
+            coherence.setMag(this.options_.maxForce.magnitude);
         }
 
         return coherence;
     }
 
-    protected getSeparation(percieved: Array<Prey>): P5.Vector {
+    protected getSeparation(): Vector {
 
-        const separation = new P5.Vector();
-        separation.set(0, 0);
+        // shorthands
+        const percieved = this.percieved_;
+
+        const separation = createVector();
 
         for(const other of percieved) {
             
-            const diff = P5.Vector.sub(this.position_, other.position_);
-            const dist = this.position_.dist(other.position_);
-            diff.div(dist * dist);
+            const diff = Vector.sub(this.position_, other.instance.position_);
+            diff.div(other.dist * other.dist);
             separation.add(diff);
         }
 
         if(percieved.length) {
 
             separation.div(percieved.length);
-            separation.setMag(this.speed_);
+            separation.setMag(this.options_.maxForce.magnitude);
             separation.sub(this.velocity_);
         }
 
         return separation;
     }
 
-    protected flock(flockOptions: Context["options_"]["flock"], percieved: Array<Prey>): void {
+    protected flock(flockOptions: Context["options_"]["flock"]): void {
 
         if(flockOptions.align) {
 
-            this.acceleration_.add(this.getAlignment(percieved)); 
+            this.acceleration_.add(this.getAlignment()); 
         }
 
         if(flockOptions.cohere) {
 
-            this.acceleration_.add(this.getCoherence(percieved)); 
+            this.acceleration_.add(this.getCoherence()); 
         }
 
         if(flockOptions.separate) {
 
-            this.acceleration_.add(this.getSeparation(percieved))
+            this.acceleration_.add(this.getSeparation())
         }
     }
 
@@ -331,9 +465,9 @@ class Prey extends Entity {
 
     public update(timeDelta: number, context: Context): Prey {
 
-        const percieved = this.getPercieved(context);
+        this.percieve(context);
 
-        this.flock(context.options().flock, percieved);
+        this.flock(context.options().flock);
 
         super.update(timeDelta, context);
 
@@ -431,13 +565,13 @@ export class Context {
         return updatedMap;
     }
 
-    protected drawEntities(p5: P5, entityMap: Map<Entity>): void {
+    protected drawEntities(p5: P5, entityMap: Map<Entity>, stylers: EntityStylers): void {
 
         for(const id in entityMap) {
 
             const entity = entityMap[id];
 
-            entity.draw(p5)
+            entity.draw(p5, stylers);
         }
     }
 
@@ -452,17 +586,17 @@ export class Context {
 
     public updatePredators(timeDelta: number): void {
 
-        // this.getUpdatedEntities(timeDelta, this.predators_);
+        this.predators_ = this.getUpdatedEntities(timeDelta, this.predators_);
     }
 
-    public drawPreys(p5: P5): void {
+    public drawPreys(p5: P5, stylers: EntityStylers): void {
 
-        this.drawEntities(p5, this.preys_);
+        this.drawEntities(p5, this.preys_, stylers);
     }
 
-    public drawPredators(p5: P5): void {
+    public drawPredators(p5: P5, stylers: EntityStylers): void {
 
-        this.drawEntities(p5, this.predators_);
+        this.drawEntities(p5, this.predators_, stylers);
     }
 
     // mutator methods
