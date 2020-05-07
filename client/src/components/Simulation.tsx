@@ -162,7 +162,15 @@ function useEntities() {
 
     const area = useSelector((state: StateShape) => state.sim.area);
 
-    const context = useRef(new EntityContext(area));
+    const context = useRef<EntityContext>(null as any);
+
+    useEffect(() => {
+
+        context.current = new EntityContext(area);
+
+    // do not include area, call constructor only once    
+    // eslint-disable-next-line
+    }, []);
 
     useEffect(() => {
 
@@ -250,8 +258,7 @@ function useSetup(state: SimState) {
 
         dispatch(centerCameraToArea());
 
-        state.entities.context.current.addPreys(2);
-        state.entities.context.current.addPredators(0);
+        state.entities.context.current.addEntities("prey", 100);
 
     }, [dispatch, state.entities.context]);
 }
@@ -270,8 +277,7 @@ function useUpdateEntities(state: SimState) {
 
             const scaledDelta = state.time.delta.current * speedModifier;
             
-            state.entities.context.current.updatePreys(scaledDelta);
-            state.entities.context.current.updatePredators(scaledDelta);
+            state.entities.context.current.update(scaledDelta);
         }
 
     }, [state.entities.context, state.time.delta, speedModifier, simRunning]);
@@ -403,17 +409,10 @@ function useDrawEntities(state: SimState) {
 
     return useCallback((p5: P5) => {
 
-        state.entities.context.current.drawPreys(p5, {
+        state.entities.context.current.draw(p5, {
 
-            entity: preyStyler,
-            perception: perceptionStyler,
-            percieved: percievedStyler
-
-        });
-
-        state.entities.context.current.drawPredators(p5, {
-
-            entity: predatorStyler,
+            prey: preyStyler,
+            predator: predatorStyler,
             perception: perceptionStyler,
             percieved: percievedStyler
 
