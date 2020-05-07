@@ -62,7 +62,13 @@ type EntityStylers = {
     percieved: Styler;
 };
 
-type Percieved = Array<{ instance: Prey, dist: number }>;
+type PercievedEntities = Array<{ instance: Prey, dist: number }>;
+
+type Snapshotable<T> = {
+
+    last: T;
+    updated: T;
+};
 
 class Entity {
 
@@ -78,7 +84,7 @@ class Entity {
 
     protected health_: number;
 
-    protected percieved_: Percieved;
+    protected percieved_: PercievedEntities;
 
     /// Constructor function
     
@@ -254,8 +260,6 @@ class Entity {
             // compare based on id not reference
             if(pair.instance.id_ === this.id_) return false;
 
-            // console.log(this.velocity_.angleBetween(Vector.sub(pair.instance.position_, this.position_)) * ( 180 / Math.PI));
-
             const angle = this.velocity_.angleBetween(Vector.sub(pair.instance.position_, this.position_)) * (180 / Math.PI);
 
             return pair.dist <= this.options_.perception.radius && Math.abs(angle) <= this.options_.perception.angle / 2;
@@ -264,24 +268,56 @@ class Entity {
         return this;
     }
 
-    protected drawPerception(p5: P5): void {
+    protected drawEntity(p5: P5, stylers: EntityStylers): Entity {
+
+        p5.push();
+        
+        stylers.entity(p5);
+
+        p5.translate(this.position_.x, this.position_.y);
+        p5.rotate(this.velocity_.heading());
+        
+        p5.triangle(15, 0, -10, 10, -10, -10);
+        
+        p5.pop();
+
+        return this;
+    }
+
+    protected drawPerception(p5: P5, stylers: EntityStylers): Entity {
         
         const { radius, angle } = this.options_.perception;
 
+        p5.push();
+
+        stylers.perception(p5);
+
         p5.ellipseMode("radius");
+
+        p5.translate(this.position_.x, this.position_.y);
+        p5.rotate(this.velocity_.heading());
         
         p5.arc(0, 0, radius, radius, p5.radians(- angle / 2), p5.radians(angle / 2), "pie");
+
+        p5.pop();
+
+        return this;
     }
 
-    protected drawPercieved(p5: P5): void {      
+    protected drawPercieved(p5: P5, stylers: EntityStylers): Entity {      
 
-        
+        stylers.percieved(p5);
+
         for(const other of this.percieved_) {
             
             const { x, y } = other.instance.position_;
         
             p5.line(this.position_.x, this.position_.y, x, y);
+
+            p5.point(x, y);
         }
+
+        return this;
     }
 
     /// Public methods
@@ -330,24 +366,20 @@ class Entity {
         return this;
     }
 
-    public draw(p5: P5, stylers: EntityStylers): Entity {
+    public draw(p5: P5, stylers: EntityStylers, highlighted = false): Entity {
 
-        stylers.percieved(p5);
-        this.drawPercieved(p5);
+        if(highlighted) {
 
-        p5.push();
+            this.drawPerception(p5, stylers);
+        }
         
-        p5.translate(this.position_.x, this.position_.y);
-        p5.rotate(this.velocity_.heading());
+        this.drawEntity(p5, stylers);
         
-        stylers.perception(p5);
-        this.drawPerception(p5);
-        
-        stylers.entity(p5);
-        p5.triangle(15, 0, -10, 10, -10, -10);
-        
-        p5.pop();
+        if(highlighted) {
 
+            this.drawPercieved(p5, stylers);
+        }
+        
         // clear array to prevent redundant copying
         this.percieved_ = [];
 
@@ -528,7 +560,7 @@ export class Context {
 
     /// Protected methods
 
-    protected addEntities(Ctor: Class<Predator> | Class<Prey>, count: number = 1): void {
+    protected addEntities(Ctor: Class<Predator> | Class<Prey>, count: number = 1): Context {
 
         let map: Map<Entity>;
 
@@ -547,25 +579,29 @@ export class Context {
 
             map[entity.id()] = entity;
         }
+
+        return this;
     }
 
-    protected getUpdatedEntities<T extends Entity>(timeDelta: number, entityMap: Map<T>): Map<T> {
-
-        const updatedMap: Map<T> = {};
+    protected updateEntities<T extends Entity>(timeDelta: number, entityMap: Map<T>): Context {
 
         for(const id in entityMap) {
 
             const entity = entityMap[id];
 
-            if(!entity.isAlive()) continue;
+            if(!entity.isAlive()) {
 
-            updatedMap[id] = lodash.cloneDeep(entity).update(timeDelta, this) as T;
+                delete entityMap[id];
+                continue;
+            }
+
+            entity.update(timeDelta, this);
         }
 
-        return updatedMap;
+        return this;
     }
 
-    protected drawEntities(p5: P5, entityMap: Map<Entity>, stylers: EntityStylers): void {
+    protected drawEntities<T extends Entity>(p5: P5, entityMap: Map<T>, stylers: EntityStylers): Context {
 
         for(const id in entityMap) {
 
@@ -573,30 +609,40 @@ export class Context {
 
             entity.draw(p5, stylers);
         }
+
+        return this;
     }
 
     /// Public methods
 
     // update methods
 
-    public updatePreys(timeDelta: number): void {
+    public updatePreys(timeDelta: number): Context {
 
-        this.preys_ = this.getUpdatedEntities(timeDelta, this.preys_);
+        this.updateEntities(timeDelta, this.preys_);
+
+        return this;
     }
 
-    public updatePredators(timeDelta: number): void {
+    public updatePredators(timeDelta: number): Context {
 
-        this.predators_ = this.getUpdatedEntities(timeDelta, this.predators_);
+        this.updateEntities(timeDelta, this.predators_);
+
+        return this;
     }
 
-    public drawPreys(p5: P5, stylers: EntityStylers): void {
+    public drawPreys(p5: P5, stylers: EntityStylers): Context {
 
         this.drawEntities(p5, this.preys_, stylers);
+
+        return this;
     }
 
-    public drawPredators(p5: P5, stylers: EntityStylers): void {
+    public drawPredators(p5: P5, stylers: EntityStylers): Context {
 
         this.drawEntities(p5, this.predators_, stylers);
+
+        return this;
     }
 
     // mutator methods
