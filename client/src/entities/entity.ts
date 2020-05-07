@@ -64,10 +64,11 @@ type EntityStylers = {
 
 type PercievedEntities = Array<{ instance: Prey, dist: number }>;
 
-type Snapshotable<T> = {
+type EntityForces = {
 
-    last: T;
-    updated: T;
+    position: Vector;
+    velocity: Vector;
+    acceleration: Vector;
 };
 
 class Entity {
@@ -78,9 +79,12 @@ class Entity {
 
     protected options_: RemoveUndefinedDeep<EntityOptions>;
 
-    protected position_: Vector;
-    protected velocity_: Vector;
-    protected acceleration_: Vector;
+    protected forces_: EntityForces;
+
+    protected draft_: {
+
+        forces_: EntityForces;
+    };
 
     protected health_: number;
 
@@ -111,12 +115,22 @@ class Entity {
             }
         };
 
-        this.position_ = createVector(Math.random() * area.width, Math.random() * area.height);
+        this.forces_ = {
 
-        this.velocity_ = Vector.random2D();
-        this.velocity_.setMag(this.options_.speed);
+            position: createVector(),
+            velocity: createVector(),
+            acceleration: createVector()
+        };
 
-        this.acceleration_ = createVector(0, 0);
+        this.forces_.position.set(Math.random() * area.width, Math.random() * area.height);
+
+        this.forces_.velocity.set(Vector.random2D());
+        this.forces_.velocity.setMag(this.options_.speed);
+
+        this.draft_ = {
+
+            forces_: lodash.cloneDeep(this.forces_)
+        };
         
         this.health_ = 100;
         
@@ -127,7 +141,8 @@ class Entity {
 
     protected isOutsideBoundary(area: Readonly<Dimensions2D>): boolean {
 
-        const { x, y } = this.position_;
+        // shorthands
+        const { x, y } = this.draft().forces_.position;
 
         if(x < 0 || x > area.width || y < 0 || y > area.height) {
 
@@ -138,10 +153,10 @@ class Entity {
     }
 
     protected wrap(area: Readonly<Dimensions2D>): Entity {
-
+        
+        // shorthands
         const { width, height } = area;
-
-        const position = this.position_;
+        const { position } = this.draft().forces_;
 
         if(position.x > width) {
 
@@ -192,37 +207,43 @@ class Entity {
 
     protected adjustSpeed(): Entity {
 
-        // accelerate forward 
-        const acceleration = createVector(this.velocity_);
+        // shorthands
+        const { acceleration, velocity } = this.draft().forces_;
 
-        acceleration.setMag(this.options_.speed - this.velocity_.mag());
+        // accelerate forward 
+        const speedAdjustment = createVector(velocity);
+
+        speedAdjustment.setMag(this.options_.speed - velocity.mag());
         
         // safety check
-        if(this.acceleration_.magSq() && acceleration.magSq()) {
+        if(acceleration.magSq() && speedAdjustment.magSq()) {
 
-            const factor = 1 - (Math.abs(acceleration.angleBetween(this.acceleration_)) / Math.PI);
+            const factor = 1 - (Math.abs(speedAdjustment.angleBetween(acceleration)) / Math.PI);
 
-            acceleration.mult(factor);
+            speedAdjustment.mult(factor);
         }
         
-        this.acceleration_.add(acceleration);
+        acceleration.add(speedAdjustment);
 
         return this;
     }
 
     protected limitAcceleration(): Entity {
 
-        if(this.acceleration_.magSq() === 0) return this;
+        // shorthands
+        const { velocity, acceleration } = this.draft().forces_;
 
-        this.acceleration_.limit(this.options_.maxForce.magnitude);
+        if(acceleration.magSq() === 0) return this;
 
-        const angle = this.velocity_.angleBetween(this.acceleration_);
+        acceleration.limit(this.options_.maxForce.magnitude);
+
+        const angle = velocity.angleBetween(acceleration);
 
         const diff = Math.abs(angle) - this.options_.maxForce.angle;
 
         if(Math.sign(diff) === 1) {
 
-            this.acceleration_.rotate(-Math.sign(angle) * diff);
+            acceleration.rotate(-Math.sign(angle) * diff);
         }
         
         return this;
@@ -230,19 +251,25 @@ class Entity {
 
     protected clearAcceleration(): Entity {
 
-        this.acceleration_.mult(0);
+        // shorthands
+        const { acceleration } = this.draft().forces_;
+
+        acceleration.mult(0);
 
         return this;
     }
 
     protected updateVectors(timeDelta: number): Entity {
 
+        // shorthands
+        const { position, velocity, acceleration } = this.draft().forces_;
+
         this.limitAcceleration();
         
         this.adjustSpeed();
 
-        this.velocity_.add(Vector.mult(this.acceleration_, timeDelta / 1000));
-        this.position_.add(Vector.mult(this.velocity_, timeDelta / 1000));
+        velocity.add(Vector.mult(acceleration, timeDelta / 1000));
+        position.add(Vector.mult(velocity, timeDelta / 1000));
 
         this.clearAcceleration();
 
@@ -251,16 +278,18 @@ class Entity {
 
     protected percieve(context: Context): Entity {
 
+        // shorthands
+        const { position, velocity } = this.draft().forces_;
+
         this.percieved_ = Object.values(context.preys()).map(instance => 
             
-            ({ instance, dist: this.position_.dist(instance.position()) }))
+            ({ instance, dist: position.dist(instance.position()) }))
             
             .filter(pair => {
 
-            // compare based on id not reference
             if(pair.instance.id_ === this.id_) return false;
 
-            const angle = this.velocity_.angleBetween(Vector.sub(pair.instance.position_, this.position_)) * (180 / Math.PI);
+            const angle = velocity.angleBetween(Vector.sub(pair.instance.position(), position)) * (180 / Math.PI);
 
             return pair.dist <= this.options_.perception.radius && Math.abs(angle) <= this.options_.perception.angle / 2;
         });
@@ -270,12 +299,15 @@ class Entity {
 
     protected drawEntity(p5: P5, stylers: EntityStylers): Entity {
 
+        // shorthands
+        const { position, velocity } = this.forces();
+
         p5.push();
         
         stylers.entity(p5);
 
-        p5.translate(this.position_.x, this.position_.y);
-        p5.rotate(this.velocity_.heading());
+        p5.translate(position.x, position.y);
+        p5.rotate(velocity.heading());
         
         p5.triangle(15, 0, -10, 10, -10, -10);
         
@@ -286,7 +318,9 @@ class Entity {
 
     protected drawPerception(p5: P5, stylers: EntityStylers): Entity {
         
+        // shorthands
         const { radius, angle } = this.options_.perception;
+        const { position, velocity } = this.forces();
 
         p5.push();
 
@@ -294,8 +328,8 @@ class Entity {
 
         p5.ellipseMode("radius");
 
-        p5.translate(this.position_.x, this.position_.y);
-        p5.rotate(this.velocity_.heading());
+        p5.translate(position.x, position.y);
+        p5.rotate(velocity.heading());
         
         p5.arc(0, 0, radius, radius, p5.radians(- angle / 2), p5.radians(angle / 2), "pie");
 
@@ -306,18 +340,24 @@ class Entity {
 
     protected drawPercieved(p5: P5, stylers: EntityStylers): Entity {      
 
+        // shorthands
+        const { position } = this.forces();
+
         stylers.percieved(p5);
 
         for(const other of this.percieved_) {
             
-            const { x, y } = other.instance.position_;
+            const otherPosition = other.instance.position();
         
-            p5.line(this.position_.x, this.position_.y, x, y);
-
-            p5.point(x, y);
+            p5.line(position.x, position.y, otherPosition.x, otherPosition.y);
         }
 
         return this;
+    }
+
+    protected draft(): Entity["draft_"] {
+
+        return this.draft_;
     }
 
     /// Public methods
@@ -355,6 +395,26 @@ class Entity {
         return this.options_;
     }
 
+    public forces(): Readonly<EntityForces> {
+
+        return this.forces_;
+    }
+
+    public position(): Readonly<Vector> {
+
+        return this.forces_.position;
+    }
+
+    public velocity(): Readonly<Vector> {
+
+        return this.forces_.velocity;
+    }
+
+    public acceleration(): Readonly<Vector> {
+
+        return this.forces_.acceleration;
+    }
+
     // update methods
 
     public update(timeDelta: number, context: Context): Entity {
@@ -379,26 +439,20 @@ class Entity {
 
             this.drawPercieved(p5, stylers);
         }
-        
-        // clear array to prevent redundant copying
-        this.percieved_ = [];
 
         return this;
     }
 
-    public position(): Readonly<Vector> {
+    public applyDraft(): Entity {
 
-        return this.position_;
-    }
+        let draftProperty: keyof Entity["draft_"];
 
-    public velocity(): Readonly<Vector> {
+        for(draftProperty in this.draft_) {
 
-        return this.velocity_;
-    }
+            this[draftProperty] = lodash.cloneDeep(this.draft_[draftProperty]) as any;
+        }
 
-    public acceleration(): Readonly<Vector> {
-
-        return this.acceleration_;
+        return this;
     }
 };
 
@@ -410,6 +464,7 @@ class Prey extends Entity {
 
         // shorthands
         const percieved = this.percieved_;
+        const { velocity } = this.draft().forces_;
 
         const alignment = createVector();
 
@@ -421,7 +476,7 @@ class Prey extends Entity {
         if(percieved.length) {
 
             alignment.div(percieved.length);
-            alignment.sub(this.velocity_);
+            alignment.sub(velocity);
             alignment.setMag(this.options_.maxForce.magnitude);
         }
 
@@ -432,6 +487,7 @@ class Prey extends Entity {
 
         // shorthands
         const percieved = this.percieved_;
+        const { position, velocity } = this.draft().forces_;
 
         const coherence = createVector();
 
@@ -443,8 +499,8 @@ class Prey extends Entity {
         if(percieved.length) {
 
             coherence.div(percieved.length);
-            coherence.sub(this.position_);
-            coherence.sub(this.velocity_);
+            coherence.sub(position);
+            coherence.sub(velocity);
             coherence.setMag(this.options_.maxForce.magnitude);
         }
 
@@ -455,12 +511,13 @@ class Prey extends Entity {
 
         // shorthands
         const percieved = this.percieved_;
+        const { position, velocity } = this.draft().forces_;
 
         const separation = createVector();
 
         for(const other of percieved) {
             
-            const diff = Vector.sub(this.position_, other.instance.position_);
+            const diff = Vector.sub(position, other.instance.position());
             diff.div(other.dist * other.dist);
             separation.add(diff);
         }
@@ -469,28 +526,32 @@ class Prey extends Entity {
 
             separation.div(percieved.length);
             separation.setMag(this.options_.maxForce.magnitude);
-            separation.sub(this.velocity_);
+            separation.sub(velocity);
         }
 
         return separation;
     }
 
-    protected flock(flockOptions: Context["options_"]["flock"]): void {
+    protected flock(flockOptions: Context["options_"]["flock"]): Prey {
+
+        const { acceleration } = this.draft().forces_;
 
         if(flockOptions.align) {
 
-            this.acceleration_.add(this.getAlignment()); 
+            acceleration.add(this.getAlignment()); 
         }
 
         if(flockOptions.cohere) {
 
-            this.acceleration_.add(this.getCoherence()); 
+            acceleration.add(this.getCoherence()); 
         }
 
         if(flockOptions.separate) {
 
-            this.acceleration_.add(this.getSeparation())
+            acceleration.add(this.getSeparation())
         }
+
+        return this;
     }
 
     /// Public methods
@@ -589,13 +650,17 @@ export class Context {
 
             const entity = entityMap[id];
 
+            entity.update(timeDelta, this);
+
             if(!entity.isAlive()) {
 
                 delete entityMap[id];
-                continue;
             }
+        }
 
-            entity.update(timeDelta, this);
+        for(const id in entityMap) {
+
+            entityMap[id].applyDraft();
         }
 
         return this;
