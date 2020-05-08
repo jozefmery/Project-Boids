@@ -8,7 +8,7 @@ import { useSelector } from "react-redux";
 
 // import stylers
 import { makeStyles, Theme } from "@material-ui/core/styles";
-import { Style, ColorTheme } from "../../stylers";
+import { Style } from "../../stylers";
 
 // import type information
 import { StateShape } from "../../state/types";
