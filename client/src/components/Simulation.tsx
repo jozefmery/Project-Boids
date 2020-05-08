@@ -20,7 +20,7 @@ import P5 from "p5";
 
 // import redux utilities and slices
 import { useSelector, useDispatch } from "react-redux";
-import { moveCamera, centerCameraToArea, changeCameraScale } from "../state/simSlice";
+import { moveCamera, centerCameraToArea, changeCameraScale, setFps } from "../state/simSlice";
 import { setDimensions } from "../state/globalSlice";
 
 // import stylers
@@ -132,6 +132,8 @@ function useMouse() {
 
 function useFps({ delta }: ReturnType<typeof useTime>) {
 
+    const dispatch = useDispatch();
+
     // assume 60 FPS
     const fps = useRef(60);
 
@@ -141,7 +143,9 @@ function useFps({ delta }: ReturnType<typeof useTime>) {
 
         fps.current = 1000 / delta.current;
 
-    }, [delta]);
+        dispatch(setFps(fps.current));
+
+    }, [delta, dispatch]);
 
     // start update loop
     useEffect(() => {
@@ -453,19 +457,6 @@ function useDrawEntities(state: SimState) {
         percievedStyler]);
 }
 
-function useDrawFPS(state: SimState) {
-
-    const styler = useCanvasStylers("fps");
-
-    return useCallback((p5: P5) => {
-
-        p5.textAlign(p5.RIGHT);
-        styler(p5);
-        p5.text(`FPS: ${state.fps.current.toFixed(2)}`, p5.windowWidth - 10, p5.windowHeight - 10);
-
-    }, [state.fps, styler]);
-}
-
 function useDraw(state: SimState) {
 
     const drawBackground = useDrawBackground();
@@ -474,7 +465,6 @@ function useDraw(state: SimState) {
     const drawGrid = useDrawGrid();
     const drawBoundary = useDrawBoundary();
     const drawEntities = useDrawEntities(state);
-    const drawFPS = useDrawFPS(state);
 
     return useCallback((p5: P5) => {
 
@@ -486,15 +476,13 @@ function useDraw(state: SimState) {
         drawBoundary(p5);
         drawEntities(p5);
         p5.pop();
-        drawFPS(p5);
 
     }, [drawBackground, 
         transform, 
         drawArea, 
         drawGrid, 
         drawBoundary, 
-        drawEntities,
-        drawFPS]);
+        drawEntities]);
 }
 
 function useLoop(state: SimState) {
