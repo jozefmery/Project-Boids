@@ -59,7 +59,6 @@ export type SimStylerList =    "background"
                     |   "grid"
                     |   "gridHighlight" 
                     |   "boundingBox"
-                    |   "fps"
                     |   "prey"
                     |   "preyHighlight"
                     |   "predator"
@@ -114,12 +113,6 @@ export const simStylers: SimStylers = {
             p5.noFill();
             p5.stroke(140);
             p5.strokeWeight(2);
-        },
-
-        fps: (p5) => {
-
-            p5.textSize(15);
-            p5.fill(255);
         },
 
         prey: (p5) => {
@@ -182,12 +175,6 @@ export const simStylers: SimStylers = {
             p5.noFill();
             p5.stroke(30);
             p5.strokeWeight(3);
-        },
-
-        fps: (p5) => {
-
-            p5.textSize(15);
-            p5.fill(0);
         },
         
         prey: (p5) => {
