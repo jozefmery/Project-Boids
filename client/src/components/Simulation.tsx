@@ -161,6 +161,9 @@ function useFps({ delta }: ReturnType<typeof useTime>) {
 function useEntities() {
 
     const area = useSelector((state: StateShape) => state.sim.area);
+    const dimensions = useSelector((state: StateShape) => state.global.dimensions);
+    const cameraTarget = useSelector((state: StateShape) => state.sim.camera.target);
+    const scale = useSelector((state: StateShape) => state.sim.camera.scale.current);
 
     const context = useRef<EntityContext>(null as any);
 
@@ -178,8 +181,22 @@ function useEntities() {
 
     }, [area]);
 
+    const screenToCanvas = useCallback(({ x, y }) => {
+
+        return { 
+            x: (x - dimensions.width / 2 + cameraTarget.x) / scale, 
+            y: (y - dimensions.height / 2 + cameraTarget.y) / scale
+        };
+
+    }, [dimensions.width, 
+        dimensions.height,
+        cameraTarget.x,
+        cameraTarget.y,
+        scale]); 
+
     return {
         
+        screenToCanvas,
         context
     };
 }
@@ -496,13 +513,25 @@ function useEventHandlers(state: SimState) {
     
     }, [dispatch]);
 
-    const onMouseDown = useCallback((event: React.MouseEvent): void => {
+    const onMouseDown = useCallback(({ clientX: x, clientY: y }: React.MouseEvent): void => {
+        
+        const context = state.entities.context.current;
+        
+        const position = state.entities.screenToCanvas({ x, y });
+        const entity = context.entityAt(position.x, position.y);
 
-        state.mouse.setDragging(true);
+        if(entity !== undefined) {
 
-        state.mouse.setLastPosition({ x: event.clientX, y: event.clientY });
+            context.selectEntity(entity.id());
 
-    }, [state.mouse]);
+        } else {
+
+            state.mouse.setDragging(true);
+
+            state.mouse.setLastPosition({ x, y });
+        }
+
+    }, [state.mouse, state.entities]);
     
     const onMouseUp = useCallback((_: React.MouseEvent): void => {
         
