@@ -176,7 +176,26 @@ const simSlice = createSlice({
         setGridHighlight: (state, { payload: highlight }: PayloadAction<typeof simState.grid.highlight>) => {
             
             state.grid.highlight = highlight;
-        },        
+        },
+
+        // fps
+
+        setFps: (state, { payload: fps }: PayloadAction<typeof simState.fps>) => {
+
+            state.fps = fps;
+        },
+
+        // entities
+
+        setPredators: (state, { payload: predators }: PayloadAction<typeof simState.entities.predators>) => {
+
+            state.entities.predators = predators;
+        },
+
+        setPreys: (state, { payload: preys }: PayloadAction<typeof simState.entities.preys>) => {
+
+            state.entities.preys = preys;
+        }
     }
 });
 
@@ -208,7 +227,10 @@ export const {
     setGridDraw,
     toggleGridDraw,
     setGridIntensity,
-    setGridHighlight
+    setGridHighlight,
+    setFps,
+    setPredators,
+    setPreys
             
 } = actions;
 
