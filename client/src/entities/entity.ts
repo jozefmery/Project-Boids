@@ -11,6 +11,7 @@
 // import utilities
 import lodash from "lodash";
 import uniqid from "uniqid";
+import { quadtree, Quadtree, QuadtreeLeaf } from "@dodmeister/quadtree";
 
 // import p5
 import P5 from "p5";
@@ -51,6 +52,8 @@ type EntityOptions = {
         radius?: number;
         angle?: number;
     };
+
+    collisionRadius: number;
 };
 
 type Styler = (p5: P5) => void;
@@ -63,7 +66,7 @@ type EntityStylers = {
     percieved: Styler;
 };
 
-type PercievedEntities = Array<{ instance: Entity, dist: number }>;
+type Vicinity = Array<{ instance: Entity, dist: number }>;
 
 type EntityForces = {
 
@@ -93,7 +96,9 @@ class Entity {
 
     protected health_: number;
 
-    protected percieved_: PercievedEntities;
+    protected vicinity_: Vicinity;
+
+    protected percieved_: Vicinity;
 
     /// Constructor function
     
@@ -118,7 +123,9 @@ class Entity {
 
                 radius: 100,
                 angle: 220
-            }
+            },
+
+            collisionRadius: 20
         };
 
         this.forces_ = {
@@ -140,6 +147,8 @@ class Entity {
         
         this.health_ = 100;
         
+        this.vicinity_ = [];
+
         this.percieved_ = [];
     }
 
@@ -282,12 +291,17 @@ class Entity {
         return this;
     }
 
-    protected percieve(context: Context): Entity {
+    protected vicinity(context: Context): Entity {
 
         // shorthands
         const { position, velocity } = this.draft().forces_;
 
-        this.percieved_ = Object.values(context.entities()).map(instance => 
+        const { angle, radius: perceptionRadius } = this.options_.perception;
+        
+        // always have a minimal radius for collision
+        const vicinityRadius = Math.max(perceptionRadius, this.options_.collisionRadius);
+
+        this.vicinity_ = context.entities().findAll(position.x, position.y, vicinityRadius).map(instance => 
             
             ({ instance, dist: position.dist(instance.position()) }))
             
@@ -295,15 +309,20 @@ class Entity {
 
             if(pair.instance === this) return false;
 
-            const angle = velocity.angleBetween(Vector.sub(pair.instance.position(), position)) * (180 / Math.PI);
+            return pair.dist <= vicinityRadius;
+        });
 
-            return pair.dist <= this.options_.perception.radius && Math.abs(angle) <= this.options_.perception.angle / 2;
+        this.percieved_ = this.vicinity_.filter(pair => {
+
+            const angleBetween = velocity.angleBetween(Vector.sub(pair.instance.position(), position)) * (180 / Math.PI);
+
+            return pair.dist <= perceptionRadius && Math.abs(angleBetween) <= angle / 2
         });
 
         return this;
     }
 
-    protected getPercievedType(type: EntityType): PercievedEntities {
+    protected getPercievedType(type: EntityType): Vicinity {
 
         return this.percieved_.filter(entity => entity.instance.type() === type);
     }
@@ -483,7 +502,7 @@ class Prey extends Entity {
 
     /// Protected methods
 
-    protected getAlignment(percieved: PercievedEntities): Vector {
+    protected getAlignment(percieved: Vicinity): Vector {
 
         // shorthands
         const { velocity } = this.draft().forces_;
@@ -505,7 +524,7 @@ class Prey extends Entity {
         return alignment;
     }
 
-    protected getCoherence(percieved: PercievedEntities): Vector {
+    protected getCoherence(percieved: Vicinity): Vector {
 
         // shorthands
         const { position, velocity } = this.draft().forces_;
@@ -528,7 +547,7 @@ class Prey extends Entity {
         return coherence;
     }
 
-    protected getSeparation(percieved: PercievedEntities): Vector {
+    protected getSeparation(percieved: Vicinity): Vector {
 
         // shorthands
         const { position, velocity } = this.draft().forces_;
@@ -580,7 +599,7 @@ class Prey extends Entity {
 
     public update(timeDelta: number, context: Context): Prey {
 
-        this.percieve(context);
+        this.vicinity(context);
 
         this.flock(context.options().flock);
 
@@ -600,11 +619,6 @@ class Predator extends Entity {
     }
 };
 
-type Map<T> = {
-
-    [id: string]: T;
-}
-
 type ContextOptions = {
 
     onBoundaryHit?: "wrap" | "kill";
@@ -613,36 +627,44 @@ type ContextOptions = {
         align?: boolean;
         cohere?: boolean;
         separate?: boolean;
-    } 
+    }
+
+    drawQuadtree?: boolean;
 }
 
 export class Context {
 
     /// Protected members
 
-    protected entities_: Map<Entity>;
+    protected entities_: Quadtree<Entity>;
     protected area_: Dimensions2D;
 
     protected options_: RemoveUndefinedDeep<ContextOptions>;
+
+    protected selectedEntity_: string | undefined;
 
     /// Contructor function
 
     constructor(area: Readonly<Dimensions2D>) {
 
-        this.entities_ = {};
-
         this.area_ = area;
-
+        
         this.options_ = {
-
+            
             onBoundaryHit: "wrap",
             flock: {
-
+                
                 align: true,
                 cohere: true,
                 separate: true
-            }
+            },
+
+            drawQuadtree: false
         }
+
+        this.entities_ = this.createQuadTree();
+
+        this.selectedEntity_ = undefined;
     }
 
     /// Protected static methods
@@ -658,41 +680,75 @@ export class Context {
 
     /// Protected methods
 
+    protected createQuadTree(): Quadtree<Entity> {
+
+        return quadtree<Entity>()
+            .x(entity => entity.position().x)
+            .y(entity => entity.position().y)
+            .cover(this.area_.width, this.area_.height);
+    }
+
+    protected drawQuadtree(p5: P5): Context {
+
+        if(!this.options_.drawQuadtree) return this;
+
+        p5.noFill();
+        p5.stroke("yellow");
+        p5.strokeWeight(1);
+        p5.rectMode("corners");
+
+        this.entities_.visit((_, x0, y0, x1, y1) => {
+
+            p5.rect(x0, y0, x1, y1);
+        });
+
+        return this;
+    }
+
     /// Public methods
+
+    protected forEach(callback: (entity: Entity) => any): Context {
+
+        this.entities_.visit(node => {
+
+            if(node.length === undefined) {
+
+                const entity = (node as QuadtreeLeaf<Entity>).data;
+
+                callback(entity);
+            }
+        });
+
+        return this;
+    }
 
     // update methods
 
     public update(timeDelta: number): Context {
 
-        for(const id in this.entities_) {
+        this.forEach(entity => entity.update(timeDelta, this));
+        this.forEach(entity => entity.applyDraft());
 
-            const entity = this.entities_[id];
+        const newTree = this.createQuadTree();
+        
+        this.forEach((entity) => { 
+            
+            if(entity.isAlive()) {
 
-            entity.update(timeDelta, this);
-
-            if(!entity.isAlive()) {
-
-                delete this.entities_[id];
+                newTree.add(entity);
             }
-        }
+        });
 
-        for(const id in this.entities_) {
-
-            this.entities_[id].applyDraft();
-        }
-
+        this.entities_ = newTree;
 
         return this;
     }
 
     public draw(p5: P5, stylers: EntityStylers): Context {
 
-        for(const id in this.entities_) {
+        this.drawQuadtree(p5);
 
-            const entity = this.entities_[id];
-
-            entity.draw(p5, stylers);
-        }
+        this.forEach(entity => entity.draw(p5, stylers, entity.id() === this.selectedEntity_));
 
         return this;
     }
@@ -703,9 +759,7 @@ export class Context {
 
         for(let i = 0; i < count; ++i) {
 
-            const entity = new (Context.typeToConstructor(type))(this);
-
-            this.entities_[entity.id()] = entity;
+            this.entities_.add(new (Context.typeToConstructor(type))(this));
         }
 
         return this;
@@ -713,7 +767,7 @@ export class Context {
 
     public clearEntities(): Context {
 
-        this.entities_ = {};
+        this.entities_ = this.createQuadTree();
 
         return this;
     }
@@ -732,14 +786,38 @@ export class Context {
         return this;
     }
 
+    public selectEntity(id: string): Context {
+
+        this.selectedEntity_ = id;
+
+        return this;
+    }
+
+    public clearSelectedEntity(): Context {
+
+        this.selectedEntity_ = undefined;
+
+        return this;
+    }
+
     // query methods
+
+    public entityAt(x: number, y: number, radius: number = 20): Entity | undefined {
+
+        return this.entities_.find(x, y, radius);
+    }
+
+    public selectedEntity(): string | undefined {
+
+        return this.selectedEntity_;
+    }
 
     public area(): Readonly<Dimensions2D> {
 
         return this.area_;
     }
 
-    public entities(): Readonly<Map<Entity>> {
+    public entities(): Readonly<Quadtree<Entity>> {
 
         return this.entities_;
     }
