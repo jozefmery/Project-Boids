@@ -60,8 +60,16 @@ type Styler = (p5: P5) => void;
 
 type EntityStylers = {
 
-    predator: Styler;
-    prey: Styler;
+    prey: {
+
+        default: Styler;
+        highlight: Styler;
+    };
+    predator: {
+
+        default: Styler;
+        highlight: Styler;
+    };
     perception: Styler;
     percieved: Styler;
 };
@@ -327,14 +335,16 @@ class Entity {
         return this.percieved_.filter(entity => entity.instance.type() === type);
     }
 
-    protected drawEntity(p5: P5, stylers: EntityStylers): Entity {
+    protected drawEntity(p5: P5, stylers: EntityStylers, highlighted: boolean): Entity {
 
         // shorthands
         const { position, velocity } = this.forces();
 
         p5.push();
         
-        stylers[this.type_](p5);
+        const highlightStyler = highlighted ? "highlight" : "default";
+
+        stylers[this.type_][highlightStyler](p5);
 
         p5.translate(position.x, position.y);
         p5.rotate(velocity.heading());
@@ -346,8 +356,10 @@ class Entity {
         return this;
     }
 
-    protected drawPerception(p5: P5, stylers: EntityStylers): Entity {
+    protected drawPerception(p5: P5, stylers: EntityStylers, highlighted: boolean): Entity {
         
+        if(!highlighted) return this;
+
         // shorthands
         const { radius, angle } = this.options_.perception;
         const { position, velocity } = this.forces();
@@ -368,7 +380,9 @@ class Entity {
         return this;
     }
 
-    protected drawPercieved(p5: P5, stylers: EntityStylers): Entity {      
+    protected drawPercieved(p5: P5, stylers: EntityStylers, highlighted: boolean): Entity {      
+
+        if(!highlighted) return this;
 
         // shorthands
         const { position } = this.forces();
@@ -461,20 +475,12 @@ class Entity {
         return this;
     }
 
-    public draw(p5: P5, stylers: EntityStylers, highlighted = false): Entity {
+    public draw(p5: P5, stylers: EntityStylers, highlighted: boolean = false): Entity {
 
-        if(highlighted) {
-
-            this.drawPerception(p5, stylers);
-        }
+        this.drawPerception(p5, stylers, highlighted);
+        this.drawEntity(p5, stylers, highlighted);
+        this.drawPercieved(p5, stylers, highlighted);
         
-        this.drawEntity(p5, stylers);
-        
-        if(highlighted) {
-
-            this.drawPercieved(p5, stylers);
-        }
-
         return this;
     }
 
