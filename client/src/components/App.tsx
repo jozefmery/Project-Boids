@@ -24,6 +24,7 @@ import { useLanguageString } from "../hooks/UseLanguageString";
 import Simulation from "./Simulation";
 import Controls from "./ui/Controls";
 import TopBar from "./ui/TopBar";
+import Fps from "./ui/Fps";
 
 // import hotkey context provider
 import { KeyCaptureContext } from "./Hotkeys";
@@ -63,6 +64,7 @@ export default function App() {
                 <Simulation /> 
                 <TopBar />
                 <Controls />
+                <Fps />
             </KeyCaptureContext>
         </ThemeProvider>
     );
