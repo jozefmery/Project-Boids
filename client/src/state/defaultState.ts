@@ -75,6 +75,14 @@ const defaultState: StateShape =  {
             draw: true,
             intensity: 50,
             highlight: 5
+        },
+
+        fps: 0,
+
+        entities: {
+
+            predators: 0,
+            preys: 0
         }
     },
 

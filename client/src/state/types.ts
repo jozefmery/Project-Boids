@@ -66,7 +66,7 @@ export type StateShape = {
                 delta: number;
                 enabled: boolean;
                 target: SimZoomTarget;
-            }
+            };
 
             movement: {
 
@@ -81,13 +81,21 @@ export type StateShape = {
             target: Position2D;
 
             minVisibleArea: number;
-        }
+        };
 
         grid: {
 
             draw: boolean;
             intensity: number;
             highlight: number;
+        };
+
+        fps: number;
+
+        entities: {
+
+            predators: number;
+            preys: number;
         }
     };
 
