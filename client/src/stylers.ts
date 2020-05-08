@@ -60,8 +60,10 @@ export type SimStylerList =    "background"
                     |   "gridHighlight" 
                     |   "boundingBox"
                     |   "fps"
-                    |   "preys"
-                    |   "predators"
+                    |   "prey"
+                    |   "preyHighlight"
+                    |   "predator"
+                    |   "predatorHighlight"
                     |   "entityPerception"
                     |   "entityPercived";
 
@@ -120,14 +122,26 @@ export const simStylers: SimStylers = {
             p5.fill(255);
         },
 
-        preys: (p5) => {
+        prey: (p5) => {
 
             p5.fill(255);
             p5.stroke(0);
             p5.strokeWeight(2);
         },
 
-        predators: (p5) => {
+        preyHighlight: (p5) => {
+
+            p5.fill("#ffc927");
+            p5.stroke(0);
+            p5.strokeWeight(2);
+        },
+
+        predator: (p5) => {
+
+        },
+
+        predatorHighlight: (p5) => {
+
 
         },
 
@@ -176,14 +190,26 @@ export const simStylers: SimStylers = {
             p5.fill(0);
         },
         
-        preys: (p5) => {
+        prey: (p5) => {
 
-            p5.fill(255);
+            p5.fill("#00da09");
             p5.stroke(0);
             p5.strokeWeight(2);
         },
 
-        predators: (p5) => {
+        preyHighlight: (p5) => {
+
+            p5.fill("#ffc927");
+            p5.stroke(0);
+            p5.strokeWeight(2);
+        },
+
+        predator: (p5) => {
+
+        },
+
+        predatorHighlight: (p5) => {
+
 
         },
 
