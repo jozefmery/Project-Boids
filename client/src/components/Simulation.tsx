@@ -427,6 +427,7 @@ function useDrawEntities(state: SimState) {
     const predatorHighlightStyler = useCanvasStylers("predatorHighlight");
     const perceptionStyler = useCanvasStylers("entityPerception");
     const percievedStyler = useCanvasStylers("entityPercived");
+    const quadtreeStyler = useCanvasStylers("quadtree");
 
     return useCallback((p5: P5) => {
 
@@ -435,7 +436,7 @@ function useDrawEntities(state: SimState) {
             prey: {
 
                 default: preyStyler,
-                highlight: preyHighlightStyler
+                highlight: preyHighlightStyler,
             },
             predator: {
 
@@ -443,7 +444,8 @@ function useDrawEntities(state: SimState) {
                 highlight: predatorHighlightStyler
             },
             perception: perceptionStyler,
-            percieved: percievedStyler
+            percieved: percievedStyler,
+            quadtree: quadtreeStyler
         });
 
     }, [state.entities, 
@@ -452,7 +454,8 @@ function useDrawEntities(state: SimState) {
         predatorStyler,
         predatorHighlightStyler,
         perceptionStyler,
-        percievedStyler]);
+        percievedStyler,
+        quadtreeStyler]);
 }
 
 function useDraw(state: SimState) {
