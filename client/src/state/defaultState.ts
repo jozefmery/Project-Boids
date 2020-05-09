@@ -75,14 +75,6 @@ const defaultState: StateShape =  {
             draw: true,
             intensity: 50,
             highlight: 5
-        },
-
-        fps: 0,
-
-        entities: {
-
-            predators: 0,
-            preys: 0
         }
     },
 
@@ -169,6 +161,25 @@ const defaultState: StateShape =  {
             sequences: "a",
             eventType: EventType.KEYUP,
             exactMatch: false,
+        }
+    },
+
+    stats: {
+
+        open: false,
+
+        fps: {
+
+            current: 0,
+            pollingRate: 100
+        },
+
+        entities: {
+            
+            pollingRate: 1000,
+            selected: undefined,
+            predatorCount: 0,
+            preyCount: 0
         }
     }
 }
