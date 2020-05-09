@@ -38,7 +38,29 @@ const statsSlice = createSlice({
         setFps: (state, { payload: fps }: PayloadAction<typeof stats.fps.current>) => {
 
             state.fps.current = fps;
-        }
+        },
+
+        // Entities
+
+        setEntityPollingRate: (state, { payload: pollingRate }: PayloadAction<typeof stats.entities.pollingRate>) => {
+
+            state.entities.pollingRate = pollingRate;
+        },
+
+        setSelectedEntity: (state, { payload: selected }: PayloadAction<typeof stats.entities.selected>) => {
+
+            state.entities.selected = selected;
+        },
+
+        setPredatorCount: (state, { payload: count }: PayloadAction<typeof stats.entities.predatorCount>) => {
+
+            state.entities.predatorCount = count;
+        },
+
+        setPreyCount: (state, { payload: count }: PayloadAction<typeof stats.entities.preyCount>) => {
+
+            state.entities.preyCount = count;
+        },
     }
 });
 
@@ -47,7 +69,11 @@ export const {
     setStatsOpen,
     toggleStatsOpen,
     setFpsPollingRate,
-    setFps
+    setFps,
+    setEntityPollingRate,
+    setSelectedEntity,
+    setPredatorCount,
+    setPreyCount
 
 } = statsSlice.actions;
 
