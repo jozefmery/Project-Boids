@@ -19,11 +19,12 @@ import defaultState from "./defaultState";
 import sim from "./simSlice";
 import global from "./globalSlice";
 import hotkeys from "./hotkeysSlice";
+import stats from "./statsSlice";
 
 export default configureStore({
     
     // merge slice reducers into a root reducer
-    reducer: { sim, global, hotkeys },
+    reducer: { sim, global, hotkeys, stats },
     // enable extension for debugging
     devTools: true,
     // load default state
