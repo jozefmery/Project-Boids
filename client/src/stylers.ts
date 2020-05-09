@@ -65,7 +65,8 @@ export type SimStylerList =
                     |   "predator"
                     |   "predatorHighlight"
                     |   "entityPerception"
-                    |   "entityPercived";
+                    |   "entityPercived"
+                    |   "quadtree";
 
 /**
  * 
@@ -132,11 +133,12 @@ export const simStylers: SimStylers = {
 
         predator: (p5) => {
 
+            // TODO
         },
 
         predatorHighlight: (p5) => {
 
-
+            // TODO
         },
 
         entityPerception: (p5) => {
@@ -150,6 +152,13 @@ export const simStylers: SimStylers = {
             p5.strokeWeight(1);
             p5.stroke(255, 0, 0, 100);
             p5.noFill();
+        },
+
+        quadtree: (p5) => {
+
+            p5.noFill();
+            p5.stroke("yellow");
+            p5.strokeWeight(1);
         }
     },
 
@@ -194,11 +203,12 @@ export const simStylers: SimStylers = {
 
         predator: (p5) => {
 
+            // TODO
         },
 
         predatorHighlight: (p5) => {
 
-
+            // TODO
         },
 
         entityPerception: (p5) => {
@@ -212,6 +222,13 @@ export const simStylers: SimStylers = {
             p5.strokeWeight(1);
             p5.stroke(255, 0, 0, 100);
             p5.noFill();
+        },
+
+        quadtree: (p5) => {
+
+            p5.noFill();
+            p5.stroke("#d63aff");
+            p5.strokeWeight(2);
         }
     },
 };
