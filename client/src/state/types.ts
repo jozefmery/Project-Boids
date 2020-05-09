@@ -89,17 +89,28 @@ export type StateShape = {
             intensity: number;
             highlight: number;
         };
-
-        fps: number;
-
-        entities: {
-
-            predators: number;
-            preys: number;
-        }
     };
 
     hotkeys: ActionHotkeys;
+
+    stats: {
+
+        open: boolean;
+
+        fps: {
+            
+            pollingRate: number;
+            current: number;
+        },
+
+        entities: {
+            
+            pollingRate: number;
+            selected: {} | undefined;
+            predatorCount: number;
+            preyCount: number;
+        };
+    };
 };
 
 export type Thunk = ThunkAction<void, StateShape, unknown, ReduxAction<string>>;
