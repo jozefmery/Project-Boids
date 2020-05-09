@@ -250,17 +250,14 @@ function CameraControls() {
 
 const panelStyle = Style.create({
 
-    // position
-    position: "fixed",
+    // position inside grid
+    justifySelf: "center",
+    gridRow: "3 / 4",
+    gridColumn: "1 / 2",
 
     // grid
     display: "grid",
     gridTemplate: "1fr / 1fr 1fr",
-
-    // center horizontally
-    left: "50%",
-    transform: "translate(-50%)",
-    bottom: "0px",
 
     // spacing
     padding: "20px",

@@ -204,14 +204,15 @@ function ThemeToggler() {
 
 const panelStyle = Style.create({
 
-    justifyContent: "flex-end",
-    padding: "0px 10px",
+    // position inside grid
+    gridColumn: "1 / 2",
+    gridRow: "1 / 2",
 
-    position: "fixed",
-    // stretch vertically
-    top: "0px",
-    left: "0px",
-    right: "0px",
+    // flexbox
+    justifyContent: "flex-end",
+
+    // spacing
+    padding: "0px 10px",
 
     // style
     borderStyle: "none",
