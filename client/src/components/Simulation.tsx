@@ -243,8 +243,6 @@ const parentStyle = Style.create({
     // fill parent
     position: "absolute",
     top: "0",
-    right: "0",
-    bottom: "0",
     left: "0",
 
     cursor: ({ mouse, camera }: SimState) => {
@@ -274,7 +272,6 @@ function useSetup(state: SimState) {
     
     return useCallback((p5: P5) => {
 
-        p5.resizeCanvas(p5.windowWidth, p5.windowHeight);
         dispatch(setDimensions({ width: p5.windowWidth, height: p5.windowHeight }));
 
         dispatch(centerCameraToArea());
@@ -506,8 +503,7 @@ function useEventHandlers(state: SimState) {
 
     const windowResized = useCallback((p5: P5) => {
 
-        // resize canvas when parent div is resized
-        p5.resizeCanvas(p5.windowWidth, p5.windowHeight);
+        // set app dimensions
         dispatch(setDimensions({ width: p5.windowWidth, height: p5.windowHeight }));
     
     }, [dispatch]);
@@ -617,5 +613,7 @@ export default function() {
 
     const { classes, ...eventHandlers } = useSimulation();
 
-    return <P5Sketch classNames={classes.parent} {...eventHandlers} tabIndex={0} />;
+    const dimensions = useSelector((state: StateShape) => state.global.dimensions);
+
+    return <P5Sketch classNames={classes.parent} {...eventHandlers} tabIndex={0} dimensions={dimensions} />;
 }
