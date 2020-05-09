@@ -81,7 +81,8 @@ export function KeyCaptureContext({ children, tabIndex = 0, hotkeys = {} }: KeyC
 
     }, [cleanupContext]);
 
-    return (<div tabIndex={tabIndex}
+    return (<div style={{ display: "contents"}} 
+                tabIndex={tabIndex}
                 onKeyDown={(e) => {
 
                     if(e.repeat) return;
