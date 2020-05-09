@@ -166,7 +166,7 @@ const defaultState: StateShape =  {
 
     stats: {
 
-        open: false,
+        open: true,
 
         fps: {
 
