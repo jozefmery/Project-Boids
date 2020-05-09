@@ -54,7 +54,8 @@ declare module '@material-ui/core/styles/createMuiTheme' {
  * 
  * List of properties every styler requires.
  */
-export type SimStylerList =    "background"
+export type SimStylerList =    
+                        "background"
                     |   "area"
                     |   "grid"
                     |   "gridHighlight" 
