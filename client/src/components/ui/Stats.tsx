@@ -3,6 +3,12 @@
 // import react
 import React from "react";
 
+// import utilities
+import classNames from "classnames";
+
+// import p5
+import P5Sketch, { P5 } from "../P5Sketch";
+
 // import redux utilities
 import { useSelector } from "react-redux";
 
@@ -12,25 +18,6 @@ import { Style } from "../../stylers";
 
 // import type information
 import { StateShape } from "../../state/types";
-
-const panelStyle = Style.create({
-
-    // position inside grid
-    justifySelf: "end",
-    gridColumn: "1 / 2",
-    gridRow: "2 / 4",
-
-    marginTop: "-1px",
-
-    borderStyle: "none",
-    borderLeftStyle: "solid",
-
-    width: "350px",
-
-    boxShadow: "0px 5px 10px rgba(0, 0, 0, 0.4)"
-
-}, {}, [Style.panel, Style.colorTransition]);
-
 
 // const panelStyle = Style.create({
 
@@ -49,17 +36,71 @@ const panelStyle = Style.create({
 
 // }, {}, [Style.colorTransition, Style.textColor]);
 
+// const selectedEntityStyles = Style.create();
+
+// const useSelectedEntityStyles = makeStyles()
+
+function SelectedEntity() {
+
+    const loop = (p5: P5) => {
+
+        p5.background("white");
+    };
+
+    return (
+        <div>
+            <P5Sketch dimensions={{ width: 100, height: 100 }} loop={loop}/>
+        </div>);
+}
+
+const panelWrapperStyle = Style.create({
+
+    // position inside grid
+    justifySelf: "end",
+    gridColumn: "1 / 2",
+    gridRow: "2 / 4",
+
+    marginTop: "-1px",
+
+    transform: "translateX(100%)",
+
+    transition: "transform .5s linear",
+
+    "&.open": {
+
+        transform: "translateX(0%)"
+    },
+    
+    width: "350px"
+});
+
+const panelStyle = Style.create({
+
+    width: "100%",
+    height: "100%",
+
+    borderStyle: "none",
+    borderLeftStyle: "solid"
+
+}, {}, [Style.panel, Style.colorTransition]);
+
 
 const usePanelStyles = makeStyles(({ theme }: Theme) => ({
     
+    panelWrapper: panelWrapperStyle.compose(theme),
     panel: panelStyle.compose(theme)
 }));
 
 export default function() {
 
-    // const fps = useSelector((state: StateShape) => state.sim.fps);
-
     const classes = usePanelStyles();
 
-    return <div className={classes.panel}></div>
+    const isOpen = useSelector((state: StateShape) => state.stats.open);
+
+    return (
+        <div className={classNames(classes.panelWrapper, { "open": isOpen })}>
+            <div className={classes.panel}>
+            {/* <SelectedEntity /> */}
+            </div>
+        </div>);
 }
