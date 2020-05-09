@@ -74,6 +74,7 @@ type EntityStylers = {
     };
     perception: Styler;
     percieved: Styler;
+    quadtree: Styler;
 };
 
 type Vicinity = Array<{ instance: Entity, dist: number }>;
@@ -85,9 +86,9 @@ type EntityForces = {
     acceleration: Vector;
 };
 
-type EntityType = "predator" | "prey";
+export type EntityType = "predator" | "prey";
 
-class Entity {
+export class Entity {
 
     /// Protected members
 
@@ -667,7 +668,7 @@ export class Context {
                 separate: true
             },
 
-            drawQuadtree: false
+            drawQuadtree: true
         }
 
         this.entities_ = this.createQuadTree();
@@ -699,10 +700,7 @@ export class Context {
     protected drawQuadtree(p5: P5): Context {
 
         if(!this.options_.drawQuadtree) return this;
-        // TODO create styler
-        p5.noFill();
-        p5.stroke("yellow");
-        p5.strokeWeight(1);
+        
         p5.rectMode("corners");
 
         this.entities_.visit((_, x0, y0, x1, y1) => {
@@ -754,6 +752,7 @@ export class Context {
 
     public draw(p5: P5, stylers: EntityStylers): Context {
 
+        stylers.quadtree(p5);
         this.drawQuadtree(p5);
 
         this.forEach(entity => entity.draw(p5, stylers, entity.id() === this.selectedEntity_));
