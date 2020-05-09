@@ -13,6 +13,9 @@ import React, { useEffect, useRef, useState } from "react";
 import P5 from "p5";
 import ClassNames from "classnames";
 
+// import type information
+import { Dimensions2D } from "../types";
+
 type P5Callback = ((p5: P5) => any) | void | undefined;
 
 type P5EventHandlers = {
@@ -27,10 +30,13 @@ type P5EventHandlers = {
 type P5SketchProps = {
 
     classNames?: Parameters<typeof ClassNames>[0];
+    dimensions?: Dimensions2D;
 
 } & P5EventHandlers & Omit<React.ComponentProps<"div">, "className" | "ref">;
      
-function useP5({ preload, setup, loop, windowResized, cleanup }: P5EventHandlers, parent: HTMLDivElement | null) {
+function useP5({ preload, setup, loop, windowResized, cleanup }: P5EventHandlers, 
+                dimensions: Dimensions2D,
+                parent: HTMLDivElement | null) {
 
     const p5 = useRef<P5 | null>(null);
 
@@ -47,9 +53,9 @@ function useP5({ preload, setup, loop, windowResized, cleanup }: P5EventHandlers
             }
 
             p5.setup = () => {
-                
+
                 // create canvas by default
-                p5.createCanvas(0, 0).parent(parent);
+                p5.createCanvas(dimensions.width, dimensions.height).parent(parent);
             
                 if(setup) {
 
@@ -99,9 +105,24 @@ function useP5({ preload, setup, loop, windowResized, cleanup }: P5EventHandlers
         }
         
     }, [loop, windowResized, parent]);
+
+    useEffect(() => {
+
+        if(p5.current) {
+
+            p5.current.resizeCanvas(dimensions.width, dimensions.height);
+        }
+
+    }, [dimensions.width, dimensions.height]);
 }
 
-export default function P5Sketch({ classNames = "", preload, setup, loop, cleanup, windowResized, ...props }: P5SketchProps) {
+export default function P5Sketch({ classNames = "",
+                                    dimensions = { width: 0, height: 0 },
+                                    preload, 
+                                    setup, 
+                                    loop, 
+                                    cleanup, 
+                                    windowResized, ...props }: P5SketchProps) {
 
     const parent = useRef<null | HTMLDivElement>(null);
 
@@ -112,7 +133,7 @@ export default function P5Sketch({ classNames = "", preload, setup, loop, cleanu
     useEffect(() => setInitialRender(true), [setInitialRender]);
 
     // provide p5 with event handlers and parent
-    useP5({ preload, setup, loop, windowResized, cleanup }, parent.current);
+    useP5({ preload, setup, loop, windowResized, cleanup }, dimensions, parent.current);
 
     return <div ref={parent} 
                 className={ClassNames(classNames)}
