@@ -24,13 +24,12 @@ import { useLanguageString } from "../hooks/UseLanguageString";
 import Simulation from "./Simulation";
 import Controls from "./ui/Controls";
 import TopBar from "./ui/TopBar";
-import Fps from "./ui/Fps";
 
 // import hotkey context provider
 import { KeyCaptureContext } from "./Hotkeys";
 
 // import stylers
-import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
+import { createMuiTheme, ThemeProvider, makeStyles } from "@material-ui/core/styles";
 
 // import type information
 import { StateShape } from "../state/types";
@@ -52,19 +51,45 @@ function useMUItheme() {
     return createMuiTheme({ theme });
 }
 
+const useUILayoutStyle = makeStyles({
+
+    layout: {
+
+        position: "absolute",
+        top: "0px",
+        right: "0px",
+        bottom: "0px",
+        left: "0px",
+
+        pointerEvents: "none",
+
+        "& *": {
+
+            pointerEvents: "auto"
+        },
+
+        display: "grid",
+        gridTemplate: "min-content auto min-content / auto"
+    }
+
+});
+
 export default function App() {
 
     useSetTitle();
 
     const hotkeys = useSelector((state: StateShape) => state.hotkeys);
 
+    const classes = useUILayoutStyle();
+
     return (
         <ThemeProvider theme={useMUItheme()}>
             <KeyCaptureContext hotkeys={hotkeys}>
-                <Simulation /> 
-                <TopBar />
-                <Controls />
-                <Fps />
+                <Simulation />
+                <div className={classes.layout}>
+                    <TopBar />
+                    <Controls />
+                </div>
             </KeyCaptureContext>
         </ThemeProvider>
     );
