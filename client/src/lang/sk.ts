@@ -26,7 +26,9 @@ const data: LanguageDefinition = {
     decreaseSpeed: "Znížiť rýchlosť",
     currentScale: "Mierka",
     zoomIn: "Priblížiť",
-    zoomOut: "Oddialiť"
+    zoomOut: "Oddialiť",
+    openStats: "Otvoriť štatistiky",
+    closeStats: "Zatvoriť štatistiky"
 };
 
 export default data;

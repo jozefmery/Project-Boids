@@ -26,7 +26,9 @@ const data: LanguageDefinition = {
     decreaseSpeed: "Decrease speed",
     currentScale: "Current scale",
     zoomIn: "Zoom in",
-    zoomOut: "Zoom out"
+    zoomOut: "Zoom out",
+    openStats: "Open statistics",
+    closeStats: "Close statistics"
 };
 
 export default data;

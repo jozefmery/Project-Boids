@@ -32,6 +32,8 @@ export type LanguageDefinition = {
     currentScale: string;
     zoomIn: string;
     zoomOut: string;
+    openStats: string;
+    closeStats: string;
 };
 
 /**
