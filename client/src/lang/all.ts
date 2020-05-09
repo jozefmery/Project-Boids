@@ -34,6 +34,9 @@ export type LanguageDefinition = {
     zoomOut: string;
     openStats: string;
     closeStats: string;
+    selectedEntity: string;
+    entities: string;
+    noSelectedEntity: string;
 };
 
 /**

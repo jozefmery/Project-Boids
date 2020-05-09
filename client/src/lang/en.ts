@@ -28,7 +28,10 @@ const data: LanguageDefinition = {
     zoomIn: "Zoom in",
     zoomOut: "Zoom out",
     openStats: "Open statistics",
-    closeStats: "Close statistics"
+    closeStats: "Close statistics",
+    selectedEntity: "Selected entity",
+    entities: "Entities",
+    noSelectedEntity: "No entity is selected"
 };
 
 export default data;

@@ -28,7 +28,10 @@ const data: LanguageDefinition = {
     zoomIn: "Priblížiť",
     zoomOut: "Oddialiť",
     openStats: "Otvoriť štatistiky",
-    closeStats: "Zatvoriť štatistiky"
+    closeStats: "Zatvoriť štatistiky",
+    selectedEntity: "Vybraná bytosť",
+    entities: "Bytosti",
+    noSelectedEntity: "Žiadna bytosť nie je vybraná"
 };
 
 export default data;
