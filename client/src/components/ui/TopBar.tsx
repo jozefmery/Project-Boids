@@ -25,6 +25,7 @@ import LightIcon from "@material-ui/icons/Brightness7";
 import DarkIcon from "@material-ui/icons/Brightness4";
 import LanguageIcon from "@material-ui/icons/Translate";
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import DonutLargeIcon from '@material-ui/icons/DonutLarge';
 import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
 
@@ -200,6 +201,33 @@ function ThemeToggler() {
             </Tooltip>
 }
 
+/// Stats toggler
+
+function StatsToggler() {
+
+    // get actions
+    const toggleStats = useAction("toggleStatsOpen");
+
+    // get state from redux
+    const isOpen = useSelector((state: StateShape) => state.stats.open);
+
+    // get styles
+    const { tooltip, ...classes } = useSharedStyles();
+
+    // get language strings
+    const openStats = useStringWithHotkeys("openStats", "toggleStatsOpen");
+    const closeStats = useStringWithHotkeys("closeStats", "toggleStatsOpen");
+
+    return <Tooltip title={isOpen ? closeStats : openStats} 
+                    placement="bottom" 
+                    TransitionComponent={Zoom}
+                    classes={{ tooltip }}>
+                <Button className={classes.button} onClick={() => toggleStats() }>
+                    {<DonutLargeIcon />}
+                </Button>
+            </Tooltip>
+}
+
 /// Top Bar 
 
 const panelStyle = Style.create({
@@ -236,5 +264,6 @@ export default function() {
             <Title />
             <LanguageSelector />
             <ThemeToggler />
+            <StatsToggler />
         </div>);
 }
