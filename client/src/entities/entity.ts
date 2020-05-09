@@ -699,7 +699,7 @@ export class Context {
     protected drawQuadtree(p5: P5): Context {
 
         if(!this.options_.drawQuadtree) return this;
-
+        // TODO create styler
         p5.noFill();
         p5.stroke("yellow");
         p5.strokeWeight(1);
