@@ -17,8 +17,19 @@ import { SimZoomTarget } from "../components/SimulationTypes";
 import { ColorTheme } from "../stylers";
 import { Languages } from "../lang/all";
 import { Action } from "../actions";
+import { EntityType } from "../entities/entity";
 
 type Sequences = string | Array<string>;
+
+type SelectedEntity = {
+
+    type: EntityType;
+    id: string;
+    position: Position2D;
+    velocity: Position2D;
+    acceleration: Position2D;
+    health: number;
+}
 
 export type ActionHotkeys = {
 
@@ -106,7 +117,7 @@ export type StateShape = {
         entities: {
             
             pollingRate: number;
-            selected: {} | undefined;
+            selected: SelectedEntity | undefined;
             predatorCount: number;
             preyCount: number;
         };
