@@ -15,13 +15,13 @@ import React, { useRef, useEffect, useState, useCallback } from "react";
 import lodash from "lodash";
 
 // import p5
-import P5Sketch from "./P5Sketch";
-import P5 from "p5";
+import P5Sketch, { P5 } from "./P5Sketch";
 
 // import redux utilities and slices
 import { useSelector, useDispatch } from "react-redux";
-import { moveCamera, centerCameraToArea, changeCameraScale, setFps } from "../state/simSlice";
+import { moveCamera, centerCameraToArea, changeCameraScale } from "../state/simSlice";
 import { setDimensions } from "../state/globalSlice";
+import { setFps } from "../state/statsSlice";
 
 // import stylers
 import { makeStyles, Theme } from "@material-ui/core/styles";
@@ -133,6 +133,7 @@ function useMouse() {
 function useFps({ delta }: ReturnType<typeof useTime>) {
 
     const dispatch = useDispatch();
+    const pollingRate = useSelector((state: StateShape) => state.stats.fps.pollingRate);
 
     // assume 60 FPS
     const fps = useRef(60);
@@ -150,14 +151,14 @@ function useFps({ delta }: ReturnType<typeof useTime>) {
     // start update loop
     useEffect(() => {
 
-        intervalID.current = window.setInterval(update, 500);
+        intervalID.current = window.setInterval(update, pollingRate);
         
         return () => {
 
             window.clearInterval(intervalID.current);
         }
 
-    }, [update]);
+    }, [update, pollingRate]);
 
     return fps;
 }
