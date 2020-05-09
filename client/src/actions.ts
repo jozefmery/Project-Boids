@@ -27,6 +27,8 @@ import {
 
 } from "./state/simSlice";
 
+import { toggleStatsOpen } from "./state/statsSlice";
+
 // import type information
 import { StateShape } from "./state/types";
 import { Languages } from "./lang/all";
@@ -139,7 +141,7 @@ function useZoomOut() {
     }, [dispatch]);
 }
 
-function useSetMoveCameraDirection(direction: keyof StateShape["sim"]["camera"]["movement"] ) {
+function useSetMoveCameraDirection(direction: keyof StateShape["sim"]["camera"]["movement"]) {
 
     const dispatch = useDispatch();
 
@@ -150,7 +152,7 @@ function useSetMoveCameraDirection(direction: keyof StateShape["sim"]["camera"][
     }, [dispatch, direction]);
 }
 
-function useResetMoveCameraDirection(direction: keyof StateShape["sim"]["camera"]["movement"] ) {
+function useResetMoveCameraDirection(direction: keyof StateShape["sim"]["camera"]["movement"]) {
 
     const dispatch = useDispatch();
 
@@ -159,6 +161,17 @@ function useResetMoveCameraDirection(direction: keyof StateShape["sim"]["camera"
         dispatch(resetCameraMoveDirection(direction));
 
     }, [dispatch, direction]);
+}
+
+function useToggleStatsOpen() {
+
+    const dispatch = useDispatch();
+
+    return useCallback(() => {
+
+        dispatch(toggleStatsOpen());
+
+    }, [dispatch]);
 }
 
 export const actionList = [
@@ -183,6 +196,8 @@ export const actionList = [
 
     "setCameraMoveLeft",
     "resetCameraMoveLeft",
+
+    "toggleStatsOpen"
 
 ] as const;
 
@@ -209,6 +224,7 @@ function useActionMap(): ActionMap {
     const resetCameraMoveDown = useResetMoveCameraDirection("down");
     const setCameraMoveLeft = useSetMoveCameraDirection("left");
     const resetCameraMoveLeft = useResetMoveCameraDirection("left");
+    const toggleStatsOpen = useToggleStatsOpen();
 
     return {
 
@@ -228,7 +244,8 @@ function useActionMap(): ActionMap {
         setCameraMoveDown,
         resetCameraMoveDown,
         setCameraMoveLeft,
-        resetCameraMoveLeft
+        resetCameraMoveLeft,
+        toggleStatsOpen
     };
 }
 
