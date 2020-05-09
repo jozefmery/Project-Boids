@@ -16,6 +16,8 @@ import ClassNames from "classnames";
 // import type information
 import { Dimensions2D } from "../types";
 
+export { default as P5 } from "p5";
+
 type P5Callback = ((p5: P5) => any) | void | undefined;
 
 type P5EventHandlers = {
