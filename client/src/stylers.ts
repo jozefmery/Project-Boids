@@ -235,11 +235,6 @@ export class Style {
         flexFlow: "row nowrap",
         alignItems: "center"
     });
-
-    public static readonly colorTransition = Style.create({
-
-        transition: "background-color .3s linear, color .3s linear, border-color .3s linear",
-    });
         
     public static readonly panelBackground = Style.create({}, {
 

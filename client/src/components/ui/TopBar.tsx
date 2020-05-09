@@ -45,9 +45,9 @@ import languageData, { Languages } from "../../lang/all";
 
 /// Shared styles
 
-const buttonStyle = Style.create({}, {}, [Style.topBarButton, Style.colorTransition]);
+const buttonStyle = Style.create({}, {}, [Style.topBarButton]);
 
-const tooltipStyle = Style.create({}, {}, [Style.tooltip, Style.colorTransition]);
+const tooltipStyle = Style.create({}, {}, [Style.tooltip]);
 
 const useSharedStyles = makeStyles(({ theme }: Theme) => ({
 
@@ -64,7 +64,7 @@ const titleStyle = Style.create({
 
     fontSize: "20px"
 
-}, {}, [Style.textColor, Style.colorTransition]);
+}, {}, [Style.textColor]);
 
 const useTitleStyle = makeStyles(({ theme }: Theme) => ({
 
@@ -91,7 +91,7 @@ const langSelectorStyle: Style = Style.create({
     padding: "5px 10px",
     fontSize: "15px"
 
-}, {}, [Style.topBarButton, Style.colorTransition]);
+}, {}, [Style.topBarButton]);
 
 /// Language selector
 
@@ -246,7 +246,7 @@ const panelStyle = Style.create({
     borderStyle: "none",
     borderBottomStyle: "solid"
 
-}, {}, [Style.panel, Style.colorTransition, Style.verticalFlexBox]);
+}, {}, [Style.panel, Style.verticalFlexBox]);
 
 const useTopBarStyles = makeStyles(({ theme }: Theme) => ({
 

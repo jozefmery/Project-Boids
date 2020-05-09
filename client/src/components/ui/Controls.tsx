@@ -43,7 +43,7 @@ import { Style, ColorTheme } from "../../stylers";
 import { StateShape } from "../../state/types";
 import { Function } from "../../types";
 
-const buttonStyle = Style.create({}, {}, [Style.controlButton, Style.colorTransition]);
+const buttonStyle = Style.create({}, {}, [Style.controlButton]);
 
 const useButtonStyles = makeStyles(({ theme }: Theme) => ({
     
@@ -128,8 +128,7 @@ const controlGroupStyle = Style.create({
     }
 
 }, [Style.textColor, 
-    Style.panelBackground,
-    Style.colorTransition]);
+    Style.panelBackground]);
 
 const useControlGroupStyles = makeStyles(({ theme }: Theme) => ({
 
@@ -267,7 +266,7 @@ const panelStyle = Style.create({
     borderRadius: "3px 3px 0 0",
     borderStyle: "solid solid none solid"
 
-}, {}, [Style.panel, Style.colorTransition]);
+}, {}, [Style.panel]);
 
 const useControlStyles = makeStyles(({ theme }: Theme) => ({
 
