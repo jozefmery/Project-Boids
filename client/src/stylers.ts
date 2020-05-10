@@ -8,7 +8,13 @@
  * 
  */
 
-// import dependecies
+// import react hooks
+import { useCallback } from "react";
+
+// import redux utilities
+import { useSelector } from "react-redux";
+
+// import p5
 import P5 from "p5";
 
 // import utils
@@ -16,6 +22,9 @@ import lodash from "lodash";
 
 // import MUI stylers
 import { StyleRules } from "@material-ui/styles/withStyles";
+
+// import type information
+import { StateShape } from "./state/types";
 
 /**
  * 
@@ -66,7 +75,10 @@ export type SimStylerList =
                     |   "predatorHighlight"
                     |   "entityPerception"
                     |   "entityPercived"
-                    |   "quadtree";
+                    |   "quadtree"
+                    |   "forceBackground"
+                    |   "forceCircle"
+                    |   "forceArrow";
 
 /**
  * 
@@ -159,6 +171,24 @@ export const simStylers: SimStylers = {
             p5.noFill();
             p5.stroke("yellow");
             p5.strokeWeight(1);
+        },
+
+        forceBackground: (p5) => {
+
+            p5.background("#353535")
+        },
+
+        forceCircle: (p5) => {
+
+            p5.fill("#292929");
+            p5.noStroke();
+        },
+
+        forceArrow: (p5) => {
+
+            p5.fill("#801313");
+            p5.stroke("#801313");
+            p5.strokeWeight(3);
         }
     },
 
@@ -229,9 +259,38 @@ export const simStylers: SimStylers = {
             p5.noFill();
             p5.stroke("#d63aff");
             p5.strokeWeight(2);
+        },
+
+        forceBackground: (p5: P5) => {
+
+            p5.background("white")
+        },
+
+        forceCircle: (p5) => {
+
+            p5.fill("#afafaf");
+            p5.noStroke();
+        },
+
+        forceArrow: (p5) => {
+
+            p5.fill("black");
+            p5.stroke("black");
+            p5.strokeWeight(3);
         }
     },
 };
+
+export function useCanvasStylers(styler: SimStylerList) {
+
+    const theme = useSelector((state: StateShape) => state.global.theme);
+
+    return useCallback((p5: P5) => {
+
+        simStylers[theme][styler](p5);
+
+    }, [theme, styler]);
+}
 
 type StyleDefinition = StyleRules<any>[string];
 
