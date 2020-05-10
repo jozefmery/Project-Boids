@@ -217,8 +217,8 @@ function SpeedControls() {
 
     return (
         <ControlGroup icon={<SpeedIcon />}>
-            <ControlButton tooltip={tooltips.increaseSpeed} content={content.increaseSpeed} callback={() => increaseSimSpeed()} />
             <ControlButton tooltip={tooltips.decreaseSpeed} content={content.decreaseSpeed} callback={() => decreaseSimSpeed()} />
+            <ControlButton tooltip={tooltips.increaseSpeed} content={content.increaseSpeed} callback={() => increaseSimSpeed()} />
             <ControlButton tooltip={tooltips.toggler} content={content.toggler} callback={() => toggleSimRunning()} />
             <TextDisplay tooltip={tooltips.currentSpeed} text={content.currentSpeed} />
         </ControlGroup>);
