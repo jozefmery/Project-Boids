@@ -55,7 +55,14 @@ type EntityOptions = {
         angle?: number;
     };
 
-    collisionRadius: number;
+    collisionRadius?: number;
+
+    flockingModifier?: {
+
+        alignment?: number;
+        cohesion?: number;
+        separation?: number;
+    }
 };
 
 type Styler = (p5: P5) => void;
@@ -126,17 +133,24 @@ export class Entity {
             speed: 100,
             maxForce: {
 
-                magnitude: 50,
+                magnitude: 25,
                 angle: (2 / 3) * Math.PI
             },
 
             perception: {
 
-                radius: 100,
-                angle: 220
+                radius: 200,
+                angle: 120
             },
 
-            collisionRadius: 20
+            collisionRadius: 20,
+
+            flockingModifier: {
+
+                alignment: 1.0,
+                cohesion: 1.0,
+                separation: 1.0
+            }
         };
 
         this.forces_ = {
@@ -327,7 +341,7 @@ export class Entity {
 
             const angleBetween = velocity.angleBetween(Vector.sub(pair.instance.position(), position)) * (180 / Math.PI);
 
-            return pair.dist <= perceptionRadius && Math.abs(angleBetween) <= angle / 2
+            return pair.dist <= perceptionRadius && Math.abs(angleBetween) <= angle / 2;
         });
 
         return this;
@@ -411,9 +425,16 @@ export class Entity {
 
     // mutator methods
 
+    public setHealth(health: number): Entity {
+
+        this.health_ = lodash.clamp(health, 0, 100);
+
+        return this;
+    }
+
     public kill(): Entity {
 
-        this.health_ = 0;
+        this.setHealth(0);
         
         return this;
     }
@@ -430,6 +451,11 @@ export class Entity {
     public isAlive(): boolean {
 
         return this.health_ > 0;
+    }
+
+    public health(): number {
+
+        return this.health_;
     }
 
     public type(): EntityType {
@@ -526,11 +552,11 @@ class Prey extends Entity {
         if(percieved.length) {
 
             alignment.div(percieved.length);
-            alignment.sub(velocity);
             alignment.setMag(this.options_.maxForce.magnitude);
+            alignment.sub(velocity);
         }
 
-        return alignment;
+        return alignment.mult(this.options_.flockingModifier.alignment);
     }
 
     protected getCoherence(percieved: Vicinity): Vector {
@@ -549,11 +575,11 @@ class Prey extends Entity {
 
             coherence.div(percieved.length);
             coherence.sub(position);
-            coherence.sub(velocity);
             coherence.setMag(this.options_.maxForce.magnitude);
+            coherence.sub(velocity);
         }
 
-        return coherence;
+        return coherence.mult(this.options_.flockingModifier.cohesion);
     }
 
     protected getSeparation(percieved: Vicinity): Vector {
@@ -577,7 +603,7 @@ class Prey extends Entity {
             separation.sub(velocity);
         }
 
-        return separation;
+        return separation.mult(this.options_.flockingModifier.separation);
     }
 
     protected flock(flockOptions: Context["options_"]["flock"]): Prey {
@@ -650,7 +676,12 @@ export class Context {
 
     protected options_: RemoveUndefinedDeep<ContextOptions>;
 
-    protected selectedEntity_: string | undefined;
+    protected selectedEntity_: Entity | undefined;
+
+    protected counts_: {
+
+        [type in EntityType]: number;
+    };
 
     /// Contructor function
 
@@ -668,12 +699,18 @@ export class Context {
                 separate: true
             },
 
-            drawQuadtree: true
+            drawQuadtree: false
         }
 
         this.entities_ = this.createQuadTree();
 
         this.selectedEntity_ = undefined;
+
+        this.counts_ = {
+
+            predator: 0,
+            prey: 0
+        };
     }
 
     /// Protected static methods
@@ -711,6 +748,18 @@ export class Context {
         return this;
     }
 
+    protected resetCounters(): Context {
+
+        let type: EntityType;
+
+        for(type in this.counts_) {
+
+            this.counts_[type] = 0;
+        }
+
+        return this;
+    }
+
     /// Public methods
 
     protected forEach(callback: (entity: Entity) => any): Context {
@@ -736,12 +785,16 @@ export class Context {
         this.forEach(entity => entity.applyDraft());
 
         const newTree = this.createQuadTree();
+
+        this.resetCounters();
         
         this.forEach((entity) => { 
             
             if(entity.isAlive()) {
 
                 newTree.add(entity);
+
+                (this.counts_[entity.type()])++;
             }
         });
 
@@ -755,7 +808,7 @@ export class Context {
         stylers.quadtree(p5);
         this.drawQuadtree(p5);
 
-        this.forEach(entity => entity.draw(p5, stylers, entity.id() === this.selectedEntity_));
+        this.forEach(entity => entity.draw(p5, stylers, entity === this.selectedEntity_));
 
         return this;
     }
@@ -793,9 +846,9 @@ export class Context {
         return this;
     }
 
-    public selectEntity(id: string): Context {
+    public selectEntity(entity: Entity): Context {
 
-        this.selectedEntity_ = id;
+        this.selectedEntity_ = entity;
 
         return this;
     }
@@ -814,7 +867,7 @@ export class Context {
         return this.entities_.find(x, y, radius);
     }
 
-    public selectedEntity(): string | undefined {
+    public selectedEntity(): Entity | undefined {
 
         return this.selectedEntity_;
     }
@@ -832,5 +885,10 @@ export class Context {
     public options(): Readonly<RemoveUndefinedDeep<ContextOptions>> {
 
         return this.options_;
+    }
+
+    public entityCount(type: EntityType): number {
+
+        return this.counts_[type];
     }
 }
