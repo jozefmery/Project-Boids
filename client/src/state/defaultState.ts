@@ -31,7 +31,7 @@ const defaultState: StateShape =  {
         speed: {
 
             running: false,
-            current: 1.0,
+            current: 3.0,
             min: 0.1,
             max: 5.0,
             delta: 0.1
@@ -48,7 +48,7 @@ const defaultState: StateShape =  {
             scale: {
                 
                 current: 1.0,
-                min: 0.3,
+                min: 0.1,
                 max: 3,
                 delta: 0.05,
                 enabled: true,
@@ -176,7 +176,7 @@ const defaultState: StateShape =  {
 
         entities: {
             
-            pollingRate: 1000,
+            pollingRate: 200,
             selected: undefined,
             predatorCount: 0,
             preyCount: 0
