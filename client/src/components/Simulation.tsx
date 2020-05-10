@@ -21,17 +21,17 @@ import P5Sketch, { P5 } from "./P5Sketch";
 import { useSelector, useDispatch } from "react-redux";
 import { moveCamera, centerCameraToArea, changeCameraScale } from "../state/simSlice";
 import { setDimensions } from "../state/globalSlice";
-import { setFps } from "../state/statsSlice";
+import { setFps, setSelectedEntity, setPredatorCount, setPreyCount } from "../state/statsSlice";
 
 // import stylers
 import { makeStyles, Theme } from "@material-ui/core/styles";
 import { simStylers, SimStylerList, Style } from "../stylers";
 
 // import entities
-import { Context as EntityContext } from "../entities/entity";
+import { Context as EntityContext, Entity } from "../entities/entity";
 
 // import type information
-import { StateShape } from "../state/types";
+import { StateShape, SelectedEntity } from "../state/types";
 import { Position2D } from "../types"
 
 /// Type definitions
@@ -163,13 +163,36 @@ function useFps({ delta }: ReturnType<typeof useTime>) {
     return fps;
 }
 
+function vectorToPosition({ x, y }: P5.Vector): Position2D {
+
+    return { x, y };
+}
+
+function normalizeEntityData(entity: Entity | undefined): SelectedEntity | undefined {
+
+    if(entity === undefined) return undefined;
+
+    return {
+
+        type: entity.type(),
+        id: entity.id(),
+        position: vectorToPosition(entity.position()),
+        velocity: vectorToPosition(entity.velocity()),
+        acceleration: vectorToPosition(entity.acceleration()),
+        health: entity.health()
+    }
+}
+
 function useEntities() {
 
+    const dispatch = useDispatch();
+    
     const area = useSelector((state: StateShape) => state.sim.area);
     const dimensions = useSelector((state: StateShape) => state.global.dimensions);
     const cameraTarget = useSelector((state: StateShape) => state.sim.camera.target);
     const scale = useSelector((state: StateShape) => state.sim.camera.scale.current);
-
+    const entityPollingRate = useSelector((state: StateShape) => state.stats.entities.pollingRate);
+    
     const context = useRef<EntityContext>(null as any);
 
     useEffect(() => {
@@ -199,6 +222,24 @@ function useEntities() {
         cameraTarget.y,
         scale]); 
 
+    useEffect(() => {
+
+        const id = window.setInterval(() => {
+
+            const entity = context.current.selectedEntity();
+            dispatch(setSelectedEntity(normalizeEntityData(entity)));
+            dispatch(setPredatorCount(context.current.entityCount("predator")));
+            dispatch(setPreyCount(context.current.entityCount("prey")));
+        
+        }, entityPollingRate)
+
+        return () => {
+
+            window.clearInterval(id);
+        };
+
+    }, [entityPollingRate, dispatch]);
+    
     return {
         
         screenToCanvas,
@@ -277,7 +318,7 @@ function useSetup(state: SimState) {
 
         dispatch(centerCameraToArea());
 
-        state.entities.context.current.addEntities("prey", 100);
+        state.entities.context.current.addEntities("prey", 500);
 
     }, [dispatch, state.entities.context]);
 }
@@ -521,7 +562,8 @@ function useEventHandlers(state: SimState) {
 
         if(entity !== undefined) {
 
-            context.selectEntity(entity.id());
+            context.selectEntity(entity);
+            dispatch(setSelectedEntity(normalizeEntityData(entity)));
 
         } else {
 
@@ -530,7 +572,7 @@ function useEventHandlers(state: SimState) {
             state.mouse.setLastPosition({ x, y });
         }
 
-    }, [state.mouse, state.entities]);
+    }, [state.mouse, state.entities, dispatch]);
     
     const onMouseUp = useCallback((_: React.MouseEvent): void => {
         
