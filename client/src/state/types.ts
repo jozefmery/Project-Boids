@@ -27,7 +27,9 @@ export type SelectedEntity = {
     id: string;
     position: Position2D;
     velocity: Position2D;
+    maxVelocity: number;
     acceleration: Position2D;
+    maxAcceleration: number;
     health: number;
 }
 
