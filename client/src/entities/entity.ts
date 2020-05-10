@@ -139,8 +139,8 @@ export class Entity {
 
             perception: {
 
-                radius: 200,
-                angle: 120
+                radius: 150,
+                angle: 220
             },
 
             collisionRadius: 20,
@@ -568,7 +568,7 @@ class Prey extends Entity {
 
         for(const other of percieved) {
             
-            coherence.add(other.instance.velocity());
+            coherence.add(other.instance.position());
         }
 
         if(percieved.length) {
