@@ -37,6 +37,15 @@ export type LanguageDefinition = {
     selectedEntity: string;
     entities: string;
     noSelectedEntity: string;
+    predator: string;
+    prey: string;
+    clearSelection: string;
+    entityType: string;
+    id: string;
+    position: string;
+    velocity: string;
+    acceleration: string;
+    health: string;
 };
 
 /**

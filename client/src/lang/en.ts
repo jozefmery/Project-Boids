@@ -31,7 +31,16 @@ const data: LanguageDefinition = {
     closeStats: "Close statistics",
     selectedEntity: "Selected entity",
     entities: "Entities",
-    noSelectedEntity: "No entity is selected"
+    noSelectedEntity: "No entity is selected",
+    predator: "Predator",
+    prey: "Prey",
+    clearSelection: "Clear selection",
+    entityType: "Entity type",
+    id: "Identification",
+    position: "Position",
+    velocity: "Velocity",
+    acceleration: "Acceleration",
+    health: "Health"
 };
 
 export default data;

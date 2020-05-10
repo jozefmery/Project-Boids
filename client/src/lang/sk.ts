@@ -31,7 +31,16 @@ const data: LanguageDefinition = {
     closeStats: "Zatvoriť štatistiky",
     selectedEntity: "Vybraná bytosť",
     entities: "Bytosti",
-    noSelectedEntity: "Žiadna bytosť nie je vybraná"
+    noSelectedEntity: "Žiadna bytosť nie je zvolená",
+    predator: "Lovec",
+    prey: "Korisť",
+    clearSelection: "Zmazať výber",
+    entityType: "Typ bytosti",
+    id: "Identifikátor",
+    position: "Pozícia",
+    velocity: "Rýchlosť",
+    acceleration: "Akcelerácia",
+    health: "Život"
 };
 
 export default data;
