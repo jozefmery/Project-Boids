@@ -21,7 +21,7 @@ import { EntityType } from "../entities/entity";
 
 type Sequences = string | Array<string>;
 
-type SelectedEntity = {
+export type SelectedEntity = {
 
     type: EntityType;
     id: string;
