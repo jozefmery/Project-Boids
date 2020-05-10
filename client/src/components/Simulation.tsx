@@ -72,6 +72,26 @@ function useTime() {
 
     }, [delta, stamp]);
 
+    useEffect(() => {
+
+        const handler = () => {
+
+            if(document.hidden) {
+
+                // invalidate stamp on tab blur
+                stamp.current = 0;
+            }
+        };
+
+        document.addEventListener("visibilitychange", handler);
+
+        return () => {
+
+            document.removeEventListener("visibilitychange", handler);
+        };
+
+    }, []);
+
     return {
 
         delta,
