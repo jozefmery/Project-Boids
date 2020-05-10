@@ -25,7 +25,7 @@ import { setFps, setSelectedEntity, setPredatorCount, setPreyCount } from "../st
 
 // import stylers
 import { makeStyles, Theme } from "@material-ui/core/styles";
-import { simStylers, SimStylerList, Style } from "../stylers";
+import { useCanvasStylers, Style } from "../stylers";
 
 // import entities
 import { Context as EntityContext, Entity } from "../entities/entity";
@@ -198,7 +198,9 @@ function normalizeEntityData(entity: Entity | undefined): SelectedEntity | undef
         id: entity.id(),
         position: vectorToPosition(entity.position()),
         velocity: vectorToPosition(entity.velocity()),
+        maxVelocity: entity.options().speed,
         acceleration: vectorToPosition(entity.acceleration()),
+        maxAcceleration: entity.options().maxForce.magnitude,
         health: entity.health()
     }
 }
@@ -212,6 +214,7 @@ function useEntities() {
     const cameraTarget = useSelector((state: StateShape) => state.sim.camera.target);
     const scale = useSelector((state: StateShape) => state.sim.camera.scale.current);
     const entityPollingRate = useSelector((state: StateShape) => state.stats.entities.pollingRate);
+    const selectedEntity = useSelector((state: StateShape) => state.stats.entities.selected);
     
     const context = useRef<EntityContext>(null as any);
 
@@ -246,8 +249,16 @@ function useEntities() {
 
         const id = window.setInterval(() => {
 
-            const entity = context.current.selectedEntity();
-            dispatch(setSelectedEntity(normalizeEntityData(entity)));
+            if(selectedEntity) {
+
+                const entity = context.current.selectedEntity();
+                dispatch(setSelectedEntity(normalizeEntityData(entity)));
+                
+            } else {
+
+                context.current.clearSelectedEntity();
+            }
+
             dispatch(setPredatorCount(context.current.entityCount("predator")));
             dispatch(setPreyCount(context.current.entityCount("prey")));
         
@@ -258,7 +269,7 @@ function useEntities() {
             window.clearInterval(id);
         };
 
-    }, [entityPollingRate, dispatch]);
+    }, [entityPollingRate, dispatch, selectedEntity]);
     
     return {
         
@@ -288,17 +299,6 @@ function useSimState() {
 type SimState = ReturnType<typeof useSimState>;
 
 /// Styles & style hooks
-
-function useCanvasStylers(styler: SimStylerList) {
-
-    const theme = useSelector((state: StateShape) => state.global.theme);
-
-    return useCallback((p5: P5) => {
-
-        simStylers[theme][styler](p5);
-
-    }, [theme, styler]);
-}
 
 const parentStyle = Style.create({
 
@@ -338,7 +338,7 @@ function useSetup(state: SimState) {
 
         dispatch(centerCameraToArea());
 
-        state.entities.context.current.addEntities("prey", 500);
+        state.entities.context.current.addEntities("prey", 3);
 
     }, [dispatch, state.entities.context]);
 }
