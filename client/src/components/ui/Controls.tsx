@@ -43,7 +43,7 @@ import { Style, ColorTheme } from "../../stylers";
 import { StateShape } from "../../state/types";
 import { Function } from "../../types";
 
-const buttonStyle = Style.create({}, {}, [Style.controlButton]);
+const buttonStyle = Style.create({}, {}, Style.controlButton);
 
 const useButtonStyles = makeStyles(({ theme }: Theme) => ({
     
