@@ -60,7 +60,7 @@ type EntityOptions = {
     flockingModifier?: {
 
         alignment?: number;
-        cohesion?: number;
+        coherence?: number;
         separation?: number;
     }
 };
@@ -133,14 +133,14 @@ export class Entity {
             speed: 100,
             maxForce: {
 
-                magnitude: 25,
+                magnitude: 45,
                 angle: (2 / 3) * Math.PI
             },
 
             perception: {
 
                 radius: 150,
-                angle: 220
+                angle: 165
             },
 
             collisionRadius: 20,
@@ -148,7 +148,7 @@ export class Entity {
             flockingModifier: {
 
                 alignment: 1.0,
-                cohesion: 1.0,
+                coherence: 1.0,
                 separation: 1.0
             }
         };
@@ -310,8 +310,6 @@ export class Entity {
 
         velocity.add(Vector.mult(acceleration, timeDelta / 1000));
         position.add(Vector.mult(velocity, timeDelta / 1000));
-
-        this.clearAcceleration();
 
         return this;
     }
@@ -552,7 +550,6 @@ class Prey extends Entity {
         if(percieved.length) {
 
             alignment.div(percieved.length);
-            alignment.setMag(this.options_.maxForce.magnitude);
             alignment.sub(velocity);
         }
 
@@ -579,7 +576,7 @@ class Prey extends Entity {
             coherence.sub(velocity);
         }
 
-        return coherence.mult(this.options_.flockingModifier.cohesion);
+        return coherence.mult(this.options_.flockingModifier.coherence);
     }
 
     protected getSeparation(percieved: Vicinity): Vector {
@@ -633,6 +630,8 @@ class Prey extends Entity {
     /// Public methods
 
     public update(timeDelta: number, context: Context): Prey {
+
+        this.clearAcceleration();
 
         this.vicinity(context);
 
