@@ -133,14 +133,14 @@ export class Entity {
             speed: 100,
             maxForce: {
 
-                magnitude: 45,
+                magnitude: 20,
                 angle: (2 / 3) * Math.PI
             },
 
             perception: {
 
                 radius: 150,
-                angle: 165
+                angle: 170
             },
 
             collisionRadius: 20,
@@ -551,6 +551,7 @@ class Prey extends Entity {
 
             alignment.div(percieved.length);
             alignment.sub(velocity);
+            alignment.setMag(this.options_.maxForce.magnitude);
         }
 
         return alignment.mult(this.options_.flockingModifier.alignment);
@@ -572,8 +573,8 @@ class Prey extends Entity {
 
             coherence.div(percieved.length);
             coherence.sub(position);
-            coherence.setMag(this.options_.maxForce.magnitude);
             coherence.sub(velocity);
+            coherence.setMag(this.options_.maxForce.magnitude);
         }
 
         return coherence.mult(this.options_.flockingModifier.coherence);
@@ -596,8 +597,8 @@ class Prey extends Entity {
         if(percieved.length) {
 
             separation.div(percieved.length);
-            separation.setMag(this.options_.maxForce.magnitude);
             separation.sub(velocity);
+            separation.setMag(this.options_.maxForce.magnitude);
         }
 
         return separation.mult(this.options_.flockingModifier.separation);
@@ -794,6 +795,10 @@ export class Context {
                 newTree.add(entity);
 
                 (this.counts_[entity.type()])++;
+            
+            } else if(entity === this.selectedEntity_) {
+
+                this.clearSelectedEntity();
             }
         });
 
