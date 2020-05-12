@@ -60,7 +60,7 @@ type EntityOptions = {
     flockingModifier?: {
 
         alignment?: number;
-        coherence?: number;
+        cohesion?: number;
         separation?: number;
     }
 };
@@ -139,8 +139,8 @@ export class Entity {
 
             perception: {
 
-                radius: 150,
-                angle: 170
+                radius: 300,
+                angle: 220
             },
 
             collisionRadius: 20,
@@ -148,8 +148,8 @@ export class Entity {
             flockingModifier: {
 
                 alignment: 1.0,
-                coherence: 1.0,
-                separation: 1.0
+                cohesion: 1.0,
+                separation: 1.8
             }
         };
 
@@ -274,8 +274,6 @@ export class Entity {
         const { velocity, acceleration } = this.draft().forces_;
 
         if(acceleration.magSq() === 0) return this;
-
-        acceleration.limit(this.options_.maxForce.magnitude);
 
         const angle = velocity.angleBetween(acceleration);
 
@@ -550,14 +548,15 @@ class Prey extends Entity {
         if(percieved.length) {
 
             alignment.div(percieved.length);
+            alignment.setMag(this.options_.speed);
             alignment.sub(velocity);
-            alignment.setMag(this.options_.maxForce.magnitude);
+            alignment.limit(this.options_.maxForce.magnitude);
         }
 
         return alignment.mult(this.options_.flockingModifier.alignment);
     }
 
-    protected getCoherence(percieved: Vicinity): Vector {
+    protected getCohesion(percieved: Vicinity): Vector {
 
         // shorthands
         const { position, velocity } = this.draft().forces_;
@@ -573,11 +572,12 @@ class Prey extends Entity {
 
             coherence.div(percieved.length);
             coherence.sub(position);
+            coherence.setMag(this.options_.speed);
             coherence.sub(velocity);
-            coherence.setMag(this.options_.maxForce.magnitude);
+            coherence.limit(this.options_.maxForce.magnitude);
         }
 
-        return coherence.mult(this.options_.flockingModifier.coherence);
+        return coherence.mult(this.options_.flockingModifier.cohesion);
     }
 
     protected getSeparation(percieved: Vicinity): Vector {
@@ -597,8 +597,9 @@ class Prey extends Entity {
         if(percieved.length) {
 
             separation.div(percieved.length);
+            separation.setMag(this.options_.speed);
             separation.sub(velocity);
-            separation.setMag(this.options_.maxForce.magnitude);
+            separation.limit(this.options_.maxForce.magnitude);
         }
 
         return separation.mult(this.options_.flockingModifier.separation);
@@ -617,12 +618,12 @@ class Prey extends Entity {
 
         if(flockOptions.cohere) {
 
-            acceleration.add(this.getCoherence(preys)); 
+            acceleration.add(this.getCohesion(preys)); 
         }
 
         if(flockOptions.separate) {
 
-            acceleration.add(this.getSeparation(preys))
+            acceleration.add(this.getSeparation(preys));
         }
 
         return this;
