@@ -28,7 +28,7 @@ import { useCanvasStylers, Style } from "../stylers";
 
 // import type information
 import { StateShape } from "../types/redux";
-import { SimState } from "../state/simulation";
+import { SimState } from "../types/simulation";
 
 type GridLineOptions = {
 

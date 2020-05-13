@@ -10,13 +10,13 @@ import { useSelector, Provider as ReduxStateProvider } from "react-redux";
 import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
 
 // import state providers
-import { SimState, useSimState } from "./state/simulation";
+import { useSimState } from "./state/simulation";
 import { KeyCaptureContext } from "./Hotkeys";
 import reduxStateStore from "./state/store";
 
-
 // import type information
 import { StateShape } from "./types/redux";
+import { SimState } from "./types/simulation";
 
 export const SimStateContext = React.createContext<SimState>(null as any);
 
