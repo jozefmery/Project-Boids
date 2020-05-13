@@ -47,7 +47,7 @@ const useUILayoutStyle = makeStyles({
         },
 
         display: "grid",
-        gridTemplate: "min-content auto min-content / auto"
+        gridTemplate: "10% 89% 1% / auto"
     }
 
 });
