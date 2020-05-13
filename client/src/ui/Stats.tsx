@@ -1,10 +1,10 @@
 // TODO header
 
 // import react
-import React, { useCallback, useContext } from "react";
+import React, { useCallback, useContext, useState } from "react";
 
-// import sim state context
-import { SimStateContext } from "../AppState";
+// import state context
+import { SimStateContext, StatsStateContext } from "../AppState";
 
 // import p5
 import P5Sketch, { P5 } from "./P5Sketch";
@@ -29,20 +29,77 @@ import PlaceIcon from '@material-ui/icons/Place';
 import FavoriteIcon from '@material-ui/icons/Favorite';
 import FingerprintIcon from '@material-ui/icons/Fingerprint';
 
+// import charts
+import { LineChart, 
+        Line, 
+        CartesianGrid, 
+        XAxis, 
+        YAxis, 
+        ReferenceLine, 
+        Tooltip as ChartTooltip } from "recharts";
+
 // import stylers
 import { makeStyles, Theme } from "@material-ui/core/styles";
 import { Style, ColorTheme, useCanvasStylers } from "../stylers";
+
+// import utilities
+import domtoimage from "dom-to-image";
+import { saveAs } from "file-saver";
 
 // import type information
 import { StateShape } from "../types/redux";
 import { Position2D } from "../types/utils";
 import { EntityType } from "../entities/entity";
 
+function Elapsed() {
+
+    useForceUpdate(100);
+
+    const elapsed = useContext(SimStateContext).time.elapsed.current;
+    const elapsedString = useLanguageString("elapsed");
+
+    return (
+        <div>
+            {`${elapsedString}: ${(elapsed / 1000).toFixed(2)}s`}
+        </div>);   
+}
+
 const tooltipStyle = Style.create({}, {}, Style.tooltip);
 
 const useTooltipStyles = makeStyles(({ theme }: Theme) => ({
     
     tooltip: tooltipStyle.compose(theme)
+}));
+
+const verticalFlexBox = Style.create({
+
+    "& > *:not(:last-child)": {
+
+        marginRight: "15px"
+    }
+
+}, {}, Style.verticalFlexBox);
+
+const useVerticalFlexBox = makeStyles(({ theme }: Theme) => ({
+    
+    container: verticalFlexBox.compose(theme)
+}));
+
+const horizontalFlexBox = Style.create({
+
+    display: "flex",
+    flexFlow: "column nowrap",
+    alignItems: "flex-start",
+
+    "& > *:not(:last-child)": {
+
+        marginBottom: "15px"
+    }
+});
+
+const useHorizontalFlexBox = makeStyles(({ theme }: Theme) => ({
+    
+    container: horizontalFlexBox.compose(theme)
 }));
 
 function SelectedEntityType({ type }: { type: EntityType }) {
@@ -62,20 +119,6 @@ function SelectedEntityType({ type }: { type: EntityType }) {
                 </div>
             </Tooltip>);
 }
-
-const verticalFlexBox = Style.create({
-
-    "& > *:first-child": {
-
-        marginRight: "15px"
-    }
-
-}, {}, Style.verticalFlexBox);
-
-const useVerticalFlexBox = makeStyles(({ theme }: Theme) => ({
-    
-    container: verticalFlexBox.compose(theme)
-}));
 
 function SelectedEntityID({ id }: { id: string }) {
 
@@ -231,24 +274,11 @@ function ClearSelectedEntity({ clear }: { clear: () => any }) {
             </Tooltip>);
 }
 
-const useSelectedEntityStyles = makeStyles({
-
-    container: {
-
-        display: "flex",
-        flexFlow: "column nowrap",
-        alignItems: "flex-start",
-
-        "& > div:not(:last-child)": {
-
-            marginBottom: "15px"
-        }
-    }
-});
-
 function SelectedEntity() {
 
-    const { container } = useSelectedEntityStyles();
+    useForceUpdate(100);
+
+    const { container } = useHorizontalFlexBox();
 
     const simState = useContext(SimStateContext);
 
@@ -275,7 +305,31 @@ function SelectedEntity() {
         </div>);
 }
 
+function useEntityChartStylers() {
+
+    const theme = useSelector((state: StateShape) => state.global.theme);
+
+    return {
+
+        [ColorTheme.DARK]: {
+
+            
+        },
+
+        [ColorTheme.LIGHT]: {
+
+            
+        }
+
+    }[theme];
+}
+
+
 function EntityStats() {
+
+    useForceUpdate(100);
+
+    const stylers = useEntityChartStylers();
 
     return (
         <div>
@@ -283,28 +337,65 @@ function EntityStats() {
         </div>);
 }
 
+function useFPSChartStylers() {
+
+    const theme = useSelector((state: StateShape) => state.global.theme);
+
+    return {
+
+        [ColorTheme.DARK]: {
+
+            average: "white",
+            grid: "#cecece",
+            line: "red"
+        },
+
+        [ColorTheme.LIGHT]: {
+
+            average: "black",
+            grid: "black",
+            line: "red"
+        }
+
+    }[theme];
+}
+
 function FPS() {
 
-    // const fps = useSelector((state: StateShape) => state.stats.fps.current);
+    const [open, setOpen] = useState(false);
 
-    // const data = useRef<Array<number>>([]);
-    // const sum = useRef(0);
+    useForceUpdate(100);
 
-    // useEffect(() => {
+    const stylers = useFPSChartStylers();
 
+    const { container } = useHorizontalFlexBox();
 
-    //     data.current.push(fps);
-    //     sum.current += fps;
+    const fpsStats = useContext(StatsStateContext).fps;
 
-    // }, [fps, sum, data]);
+    const fps = fpsStats.current.current;
+    const array = fpsStats.array.current;
+    const average = array.reduce((total, current) => total + current.uv, 0) / array.length;
+
+    const Chart = (
+        <LineChart width={350} height={250} data={[...array]}>
+            <CartesianGrid strokeDasharray="2 2" stroke={stylers.grid} />
+            <XAxis tick={false} stroke={stylers.grid} />
+            <YAxis stroke={stylers.grid} />
+            <ReferenceLine strokeDasharray="10 10" stroke={stylers.average} y={average} />
+            <Line type="monotone" dataKey="uv" stroke={stylers.line} />
+        </LineChart>);
 
     return (
-        <div>
-            {/* {fps.toFixed(2)} Avg: {(sum.current / data.current.length).toFixed(2)} */}
+        <div className={container}>
+            <div>
+                {fps.toFixed(2)}
+            </div>
+            {!open ? Chart : null}
+            {/* {!open ? <Button onClick={() => setOpen(true)}>asd</Button> : null} */}
         </div>);
 }
 
-const panelWrapperStyle = Style.create({
+const panelStyle = Style.create({
 
     // position inside grid
     justifySelf: "end",
@@ -320,18 +411,14 @@ const panelWrapperStyle = Style.create({
 
     transition: "transform .3s ease-in-out",
 
-}, {}, [Style.verticalFlexBox]);
-
-const panelStyle = Style.create({
-
-    alignSelf: "stretch",
-
     borderStyle: "none",
     borderLeftStyle: "solid",
 
     padding: "15px",
 
-}, {}, [Style.panel]);
+    overflowY: "auto"
+
+}, {}, [Style.panel, Style.textColor]);
 
 const expansionPanelStyle = Style.create({
 
@@ -352,21 +439,18 @@ const expansionPanelStyle = Style.create({
         borderColor: "black"
     }
 
-}, [Style.textColor]);
+}, Style.textColor);
 
 const expandIconStyle = Style.create({}, {}, [Style.textColor]);
 
 const usePanelStyles = makeStyles(({ theme }: Theme) => ({
-    
-    panelWrapper: panelWrapperStyle.compose(theme),
+
     panel: panelStyle.compose(theme),
     expansionsPanel: expansionPanelStyle.compose(theme),
     expandIcon: expandIconStyle.compose(theme)
 }));
 
 export default function() {
-
-    useForceUpdate(100);
 
     const isOpen = useSelector((state: StateShape) => state.global.statsOpen);
     
@@ -376,36 +460,35 @@ export default function() {
     const entities = useLanguageString("entities");
 
     return (
-        <div className={classes.panelWrapper}>
-            <div className={classes.panel}>
-                <ExpansionPanel classes={{ root: classes.expansionsPanel }} defaultExpanded={true}>
-                    <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}
-                        classes={{ expandIcon: classes.expandIcon }}>
-                        {selectedEntity}
-                    </ExpansionPanelSummary>
-                    <ExpansionPanelDetails>
-                        <SelectedEntity />
-                    </ExpansionPanelDetails>
-                </ExpansionPanel>
-                <ExpansionPanel classes={{ root: classes.expansionsPanel }}>
-                    <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}
-                        classes={{ expandIcon: classes.expandIcon }}>
-                        {entities}
-                    </ExpansionPanelSummary>
-                    <ExpansionPanelDetails>
-                        <EntityStats />
-                    </ExpansionPanelDetails>
-                </ExpansionPanel>
-                <ExpansionPanel classes={{ root: classes.expansionsPanel }}>
-                    <ExpansionPanelSummary
-                        expandIcon={<ExpandMoreIcon />}
-                        classes={{ expandIcon: classes.expandIcon }}>
-                        FPS
-                    </ExpansionPanelSummary>
-                    <ExpansionPanelDetails>
-                        <FPS />
-                    </ExpansionPanelDetails>
-                </ExpansionPanel>
-            </div>
+        <div className={classes.panel}>
+            <Elapsed />
+            <ExpansionPanel classes={{ root: classes.expansionsPanel }} defaultExpanded={true}>
+                <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}
+                    classes={{ expandIcon: classes.expandIcon }}>
+                    {selectedEntity}
+                </ExpansionPanelSummary>
+                <ExpansionPanelDetails>
+                    <SelectedEntity />
+                </ExpansionPanelDetails>
+            </ExpansionPanel>
+            <ExpansionPanel classes={{ root: classes.expansionsPanel }} defaultExpanded={true}>
+                <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}
+                    classes={{ expandIcon: classes.expandIcon }}>
+                    {entities}
+                </ExpansionPanelSummary>
+                <ExpansionPanelDetails>
+                    <EntityStats />
+                </ExpansionPanelDetails>
+            </ExpansionPanel>
+            <ExpansionPanel classes={{ root: classes.expansionsPanel }} defaultExpanded={true}>
+                <ExpansionPanelSummary
+                    expandIcon={<ExpandMoreIcon />}
+                    classes={{ expandIcon: classes.expandIcon }}>
+                    FPS
+                </ExpansionPanelSummary>
+                <ExpansionPanelDetails>
+                    <FPS />
+                </ExpansionPanelDetails>
+            </ExpansionPanel>
         </div>);
 }
