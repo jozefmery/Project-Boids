@@ -233,6 +233,8 @@ function StatsToggler() {
 const panelStyle = Style.create({
 
     // position inside grid
+    justifySelf: "stretch",
+    alignSelf: "stretch",
     gridColumn: "1 / 2",
     gridRow: "1 / 2",
 

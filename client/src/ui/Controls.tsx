@@ -251,6 +251,7 @@ const panelStyle = Style.create({
 
     // position inside grid
     justifySelf: "center",
+    alignSelf: "end",
     gridRow: "3 / 4",
     gridColumn: "1 / 2",
 
