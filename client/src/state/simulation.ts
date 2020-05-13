@@ -19,9 +19,13 @@ import { SimState } from "../types/simulation";
 
 function useTime() {
 
+    const speedModifier = useSelector((state: StateShape) => state.sim.speed.current);
+    const simRunning = useSelector((state: StateShape) => state.sim.speed.running);
+
     // default to invalid stamp and delta
     const delta = useRef(0);
     const stamp = useRef(0);
+    const elapsed = useRef(0);
 
     const update = useCallback(() => {
 
@@ -41,7 +45,12 @@ function useTime() {
 
         stamp.current = newStamp;
 
-    }, [delta, stamp]);
+        if(simRunning) {
+
+            elapsed.current += speedModifier * delta.current;
+        }
+
+    }, [delta, stamp, simRunning, speedModifier]);
 
     useEffect(() => {
 
@@ -67,6 +76,7 @@ function useTime() {
 
         delta,
         stamp,
+        elapsed,
         update
     };
 }
@@ -131,6 +141,8 @@ function useFps({ delta }: ReturnType<typeof useTime>) {
         if(delta.current > 0) {
 
             fps.current = 1000 / delta.current;
+
+            console.log(fps.current);
         }
 
     }, [delta]);
