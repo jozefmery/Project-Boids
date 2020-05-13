@@ -1,5 +1,5 @@
 /**
- * File: TopBar.jsx
+ * File: ui/TopBar.jsx
  * 
  * Author: Jozef Méry <xmeryj00@stud.fit.vutbr.cz>
  * Date: 29.2.2020
@@ -15,7 +15,7 @@ import React, { useState } from "react";
 import { useSelector } from "react-redux";
 
 // import actions
-import { useAction } from "../../actions";
+import { useAction } from "../actions";
 
 // import UI elements
 import Button from "@material-ui/core/Button";
@@ -30,18 +30,18 @@ import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
 
 // import hooks
-import { useLanguageString } from "../../hooks/UseLanguageString";
-import { useStringWithHotkeys } from "../../hooks/UseStringWithHotkey";
+import { useLanguageString } from "../hooks/languageString";
+import { useStringWithHotkeys } from "../hooks/stringWithHotkey";
 
 // import stylers
 import { makeStyles, Theme } from "@material-ui/core/styles";
-import { Style, ColorTheme } from "../../stylers";
+import { Style, ColorTheme } from "../stylers";
 
 // import type information
-import { StateShape } from "../../state/types";
+import { StateShape } from "../types/redux";
 
 // import language data
-import languageData, { Languages } from "../../lang/all";
+import languageData, { Languages } from "../lang/all";
 
 /// Shared styles
 
@@ -209,7 +209,7 @@ function StatsToggler() {
     const toggleStats = useAction("toggleStatsOpen");
 
     // get state from redux
-    const isOpen = useSelector((state: StateShape) => state.stats.open);
+    const isOpen = useSelector((state: StateShape) => state.global.statsOpen);
 
     // get styles
     const { tooltip, ...classes } = useSharedStyles();

@@ -1,40 +1,34 @@
 /**
- * File: Simulation.tsx
+ * File: ui/Simulation.tsx
  * 
  * Author: Jozef Méry <xmeryj00@stud.fit.vutbr.cz>
  * Date: 27.1.2020
  * License: none
- * Description: Simulation implementation, including drawing using p5 library.
+ * Description: Simulation updating and drawing.
  * 
  */
 
 // import react
-import React, { useRef, useEffect, useState, useCallback } from "react";
+import React, { useContext, useCallback } from "react";
 
-// import utilities
-import lodash from "lodash";
-
+// import state
+import { SimStateContext } from "../AppState";
+ 
 // import p5
 import P5Sketch, { P5 } from "./P5Sketch";
 
 // import redux utilities and slices
 import { useSelector, useDispatch } from "react-redux";
-import { moveCamera, centerCameraToArea, changeCameraScale } from "../state/simSlice";
-import { setDimensions } from "../state/globalSlice";
-import { setFps, setSelectedEntity, setPredatorCount, setPreyCount } from "../state/statsSlice";
+import { moveCamera, centerCameraToArea, changeCameraScale } from "../state/slices/sim";
+import { setDimensions } from "../state/slices/global";
 
 // import stylers
 import { makeStyles, Theme } from "@material-ui/core/styles";
 import { useCanvasStylers, Style } from "../stylers";
 
-// import entities
-import { Context as EntityContext, Entity } from "../entities/entity";
-
 // import type information
-import { StateShape, SelectedEntity } from "../state/types";
-import { Position2D } from "../types"
-
-/// Type definitions
+import { StateShape } from "../types/redux";
+import { SimState } from "../state/simulation";
 
 type GridLineOptions = {
 
@@ -43,260 +37,6 @@ type GridLineOptions = {
     highlight: number;
     getCoordinates: (_: number) => { x1: number, x2: number, y1: number, y2: number };
 };
-
-/// State hooks
-
-function useTime() {
-
-    // default to invalid stamp and delta
-    const delta = useRef(0);
-    const stamp = useRef(0);
-
-    const update = useCallback(() => {
-
-        const newStamp = new Date().getTime();
-
-        // check if stamp is valid
-        // first iteration will have 0 time delta
-        // to make sure first delta is not too big
-        if(stamp.current) {
-
-            delta.current = newStamp - stamp.current;
-            
-        } else {
-            
-            delta.current = 0;
-        }
-
-        stamp.current = newStamp;
-
-    }, [delta, stamp]);
-
-    useEffect(() => {
-
-        const handler = () => {
-
-            if(document.hidden) {
-
-                // invalidate stamp on tab blur
-                stamp.current = 0;
-            }
-        };
-
-        document.addEventListener("visibilitychange", handler);
-
-        return () => {
-
-            document.removeEventListener("visibilitychange", handler);
-        };
-
-    }, []);
-
-    return {
-
-        delta,
-        stamp,
-        update
-    };
-}
-
-function useCamera() {
-
-    // use state to enable using in styles and triggering
-    // rerendering
-    const [zoomModifier, setModifier] = useState(0);
-
-    const timeout = useRef(0);
-
-    const resetZoomModifier = useCallback(() => setModifier(0), []);
-
-    // use effect is not sufficient, because timeout needs to be cleared
-    // whenever zoomModifier is written to and not only on change
-    const setZoomModifier = useCallback((modifier: number) => {
-
-        setModifier(modifier);
-        window.clearTimeout(timeout.current);
-        timeout.current = window.setTimeout(resetZoomModifier, 500);
-
-    }, [resetZoomModifier]);
-
-    return {
-
-        zoomModifier,
-        setZoomModifier
-    }
-}
-
-function useMouse() {
-
-    // use state to enable using in styles and triggering
-    // rerendering
-    const [dragging, setDragging] = useState(false);
-    // initial last position doesn't matter
-    const lastPosition = useRef<Position2D>({ x: 0, y: 0 });
-
-    const setLastPosition = useCallback((position: Position2D) => {
-
-        lastPosition.current = lodash.cloneDeep(position);
-
-    }, [lastPosition]);
-
-    return { 
-        
-        dragging,
-        setDragging,
-        lastPosition,
-        setLastPosition
-    };
-}
-
-function useFps({ delta }: ReturnType<typeof useTime>) {
-
-    const dispatch = useDispatch();
-    const pollingRate = useSelector((state: StateShape) => state.stats.fps.pollingRate);
-
-    // assume 60 FPS
-    const fps = useRef(60);
-
-    const intervalID = useRef(0);
-
-    const update = useCallback(() => {
-
-        fps.current = 1000 / delta.current;
-
-        dispatch(setFps(fps.current));
-
-    }, [delta, dispatch]);
-
-    // start update loop
-    useEffect(() => {
-
-        intervalID.current = window.setInterval(update, pollingRate);
-        
-        return () => {
-
-            window.clearInterval(intervalID.current);
-        }
-
-    }, [update, pollingRate]);
-
-    return fps;
-}
-
-function vectorToPosition({ x, y }: P5.Vector): Position2D {
-
-    return { x, y };
-}
-
-function normalizeEntityData(entity: Entity | undefined): SelectedEntity | undefined {
-
-    if(entity === undefined) return undefined;
-
-    return {
-
-        type: entity.type(),
-        id: entity.id(),
-        position: vectorToPosition(entity.position()),
-        velocity: vectorToPosition(entity.velocity()),
-        maxVelocity: entity.options().speed,
-        acceleration: vectorToPosition(entity.acceleration()),
-        maxAcceleration: entity.options().maxForce.magnitude,
-        health: entity.health()
-    }
-}
-
-function useEntities() {
-
-    const dispatch = useDispatch();
-    
-    const area = useSelector((state: StateShape) => state.sim.area);
-    const dimensions = useSelector((state: StateShape) => state.global.dimensions);
-    const cameraTarget = useSelector((state: StateShape) => state.sim.camera.target);
-    const scale = useSelector((state: StateShape) => state.sim.camera.scale.current);
-    const entityPollingRate = useSelector((state: StateShape) => state.stats.entities.pollingRate);
-    const selectedEntity = useSelector((state: StateShape) => state.stats.entities.selected);
-    
-    const context = useRef<EntityContext>(null as any);
-
-    useEffect(() => {
-
-        context.current = new EntityContext(area);
-
-    // do not include area, call constructor only once    
-    // eslint-disable-next-line
-    }, []);
-
-    useEffect(() => {
-
-        context.current.setArea(area);
-
-    }, [area]);
-
-    const screenToCanvas = useCallback(({ x, y }) => {
-
-        return { 
-            x: (x - dimensions.width / 2 + cameraTarget.x) / scale, 
-            y: (y - dimensions.height / 2 + cameraTarget.y) / scale
-        };
-
-    }, [dimensions.width, 
-        dimensions.height,
-        cameraTarget.x,
-        cameraTarget.y,
-        scale]); 
-
-    useEffect(() => {
-
-        const id = window.setInterval(() => {
-
-            if(selectedEntity) {
-
-                const entity = context.current.selectedEntity();
-                dispatch(setSelectedEntity(normalizeEntityData(entity)));
-                
-            } else {
-
-                context.current.clearSelectedEntity();
-            }
-
-            dispatch(setPredatorCount(context.current.entityCount("predator")));
-            dispatch(setPreyCount(context.current.entityCount("prey")));
-        
-        }, entityPollingRate)
-
-        return () => {
-
-            window.clearInterval(id);
-        };
-
-    }, [entityPollingRate, dispatch, selectedEntity]);
-    
-    return {
-        
-        screenToCanvas,
-        context
-    };
-}
-
-function useSimState() {
-
-    const time = useTime();
-    const camera = useCamera();
-    const mouse = useMouse();
-    const fps = useFps(time);
-    const entities = useEntities();
-
-    return {
-
-        time,
-        camera,
-        mouse,
-        fps,
-        entities
-    };
-}
-
-type SimState = ReturnType<typeof useSimState>;
 
 /// Styles & style hooks
 
@@ -338,7 +78,7 @@ function useSetup(state: SimState) {
 
         dispatch(centerCameraToArea());
 
-        state.entities.context.current.addEntities("prey", 3);
+        state.entities.context.current.addEntities("prey", 500);
 
     }, [dispatch, state.entities.context]);
 }
@@ -583,7 +323,6 @@ function useEventHandlers(state: SimState) {
         if(entity !== undefined) {
 
             context.selectEntity(entity);
-            dispatch(setSelectedEntity(normalizeEntityData(entity)));
 
         } else {
 
@@ -592,7 +331,7 @@ function useEventHandlers(state: SimState) {
             state.mouse.setLastPosition({ x, y });
         }
 
-    }, [state.mouse, state.entities, dispatch]);
+    }, [state.mouse, state.entities]);
     
     const onMouseUp = useCallback((_: React.MouseEvent): void => {
         
@@ -655,7 +394,7 @@ function useEventHandlers(state: SimState) {
 
 function useSimulation() {
 
-    const state = useSimState();
+    const state = useContext(SimStateContext);
 
     const setup = useSetup(state);
     const loop = useLoop(state);

@@ -9,9 +9,10 @@ import { useDispatch, useSelector } from "react-redux";
 import {
 
     toggleTheme,
-    setLanguage
+    setLanguage,
+    toggleStatsOpen
 
-} from "./state/globalSlice";
+} from "./state/slices/global";
 
 import {
 
@@ -25,14 +26,12 @@ import {
     setCameraMoveDirection,
     resetCameraMoveDirection
 
-} from "./state/simSlice";
-
-import { toggleStatsOpen } from "./state/statsSlice";
+} from "./state/slices/sim";
 
 // import type information
-import { StateShape } from "./state/types";
+import { StateShape } from "./types/redux";
 import { Languages } from "./lang/all";
-import { Function } from "./types";
+import { Function } from "./types/utils";
 
 function useToggleTheme() {
 

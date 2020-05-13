@@ -1,17 +1,20 @@
 // TODO header
 
 // import react
-import React, { useCallback } from "react";
+import React, { useCallback, useContext } from "react";
+
+// import sim state context
+import { SimStateContext } from "../AppState";
 
 // import p5
-import P5Sketch, { P5 } from "../P5Sketch";
+import P5Sketch, { P5 } from "./P5Sketch";
 
 // import redux utilities and slices
-import { useSelector, useDispatch } from "react-redux";
-import { setSelectedEntity } from "../../state/statsSlice";
+import { useSelector } from "react-redux";
 
 // import hooks
-import { useLanguageString } from "../../hooks/UseLanguageString";
+import { useLanguageString } from "../hooks/languageString";
+import { useForceUpdate } from "../hooks/forceUpdate";
 
 // import UI elements
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
@@ -28,12 +31,12 @@ import FingerprintIcon from '@material-ui/icons/Fingerprint';
 
 // import stylers
 import { makeStyles, Theme } from "@material-ui/core/styles";
-import { Style, ColorTheme, useCanvasStylers } from "../../stylers";
+import { Style, ColorTheme, useCanvasStylers } from "../stylers";
 
 // import type information
-import { StateShape } from "../../state/types";
-import { Position2D } from "../../types";
-import { EntityType } from "../../entities/entity";
+import { StateShape } from "../types/redux";
+import { Position2D } from "../types/utils";
+import { EntityType } from "../entities/entity";
 
 const tooltipStyle = Style.create({}, {}, Style.tooltip);
 
@@ -211,9 +214,7 @@ const useButtonStyles = makeStyles(({ theme }: Theme) => ({
     button: buttonStyle.compose(theme)
 }));
 
-function ClearSelectedEntity() {
-
-    const dispatch = useDispatch();
+function ClearSelectedEntity({ clear }: { clear: () => any }) {
 
     const { tooltip: tooltipClass } = useTooltipStyles();
     const { button: buttonClass } = useButtonStyles();
@@ -224,7 +225,7 @@ function ClearSelectedEntity() {
                 placement="top" 
                 TransitionComponent={Zoom}
                 classes={{ tooltip: tooltipClass }}>
-                <Button className={buttonClass} onClick={() => dispatch(setSelectedEntity(undefined))}>
+                <Button className={buttonClass} onClick={clear}>
                     <HighlightOffIcon />
                 </Button>
             </Tooltip>);
@@ -249,7 +250,9 @@ function SelectedEntity() {
 
     const { container } = useSelectedEntityStyles();
 
-    const selectedEntity = useSelector((state: StateShape) => state.stats.entities.selected);
+    const simState = useContext(SimStateContext);
+
+    const selectedEntity = simState.entities.context.current?.selectedEntity();
 
     const noSelectedEntity = useLanguageString("noSelectedEntity");
 
@@ -260,15 +263,15 @@ function SelectedEntity() {
 
     return (
         <div className={container}>
-            <SelectedEntityType type={selectedEntity.type} />
-            <SelectedEntityID id={selectedEntity.id} />
-            <SelectedEntityPosition position={selectedEntity.position} />
-            <SelectedEntityHealth health={selectedEntity.health} />
-            <SelectedEntityForces velocity={selectedEntity.velocity}
-                maxVelocity={selectedEntity.maxVelocity}
-                acceleration={selectedEntity.acceleration}
-                maxAcceleration={selectedEntity.maxAcceleration} />
-            <ClearSelectedEntity />
+            <SelectedEntityType type={selectedEntity.type()} />
+            <SelectedEntityID id={selectedEntity.id()} />
+            <SelectedEntityPosition position={selectedEntity.position()} />
+            <SelectedEntityHealth health={selectedEntity.health()} />
+            <SelectedEntityForces velocity={selectedEntity.velocity()}
+                maxVelocity={selectedEntity.options().speed}
+                acceleration={selectedEntity.acceleration()}
+                maxAcceleration={selectedEntity.options().maxForce.magnitude} />
+            <ClearSelectedEntity clear={() => simState.entities.context.current?.clearSelectedEntity()} />
         </div>);
 }
 
@@ -282,11 +285,22 @@ function EntityStats() {
 
 function FPS() {
 
-    const fps = useSelector((state: StateShape) => state.stats.fps.current);
+    // const fps = useSelector((state: StateShape) => state.stats.fps.current);
+
+    // const data = useRef<Array<number>>([]);
+    // const sum = useRef(0);
+
+    // useEffect(() => {
+
+
+    //     data.current.push(fps);
+    //     sum.current += fps;
+
+    // }, [fps, sum, data]);
 
     return (
         <div>
-            {fps.toFixed(2)}
+            {/* {fps.toFixed(2)} Avg: {(sum.current / data.current.length).toFixed(2)} */}
         </div>);
 }
 
@@ -352,7 +366,9 @@ const usePanelStyles = makeStyles(({ theme }: Theme) => ({
 
 export default function() {
 
-    const isOpen = useSelector((state: StateShape) => state.stats.open);
+    useForceUpdate(100);
+
+    const isOpen = useSelector((state: StateShape) => state.global.statsOpen);
     
     const classes = usePanelStyles(isOpen);
 

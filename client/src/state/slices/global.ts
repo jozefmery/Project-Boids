@@ -1,5 +1,5 @@
 /**
- * File: themeSlice.ts
+ * File: state/slices/global.ts
  * 
  * Author: Jozef Méry <xmeryj00@stud.fit.vutbr.cz>
  * Date: 29.2.2020
@@ -12,10 +12,10 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 // import enums
-import { ColorTheme } from "../stylers";
+import { ColorTheme } from "../../stylers";
 
 // import default state
-import defaultState from "./defaultState";
+import defaultState from "../default";
 
 // helper object for inverting color theme
 const themeInverter = {
@@ -59,6 +59,12 @@ const globalSlice = createSlice({
         setDimensions: (state, { payload: dimensions }: PayloadAction<typeof global.dimensions>) => { 
             
             state.dimensions = dimensions; 
+        },
+
+        // stats
+        toggleStatsOpen: (state) => { 
+            
+            state.statsOpen = !state.statsOpen;
         }
     }
 });
@@ -69,7 +75,8 @@ export const {
     setTheme,
     toggleTheme,
     setLanguage,
-    setDimensions
+    setDimensions,
+    toggleStatsOpen
 
 } = globalSlice.actions;
 

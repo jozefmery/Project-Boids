@@ -1,5 +1,5 @@
 /**
- * File: Controls.tsx
+ * File: ui/Controls.tsx
  * 
  * Author: Jozef Méry <xmeryj00@stud.fit.vutbr.cz>
  * Date: 29.2.2020
@@ -15,7 +15,7 @@ import React from "react";
 import { useSelector } from "react-redux";
 
 // import actions
-import { useAction } from "../../actions";
+import { useAction } from "../actions";
 
 // import UI elements
 import Button from "@material-ui/core/Button";
@@ -32,16 +32,16 @@ import ZoomInIcon from '@material-ui/icons/ZoomIn';
 import ZoomOutIcon from '@material-ui/icons/ZoomOut';
 
 // import hooks
-import { useLanguageString } from "../../hooks/UseLanguageString";
-import { useStringWithHotkeys } from "../../hooks/UseStringWithHotkey";
+import { useLanguageString } from "../hooks/languageString";
+import { useStringWithHotkeys } from "../hooks/stringWithHotkey";
 
 // import stylers
 import { makeStyles, Theme } from "@material-ui/core/styles";
-import { Style, ColorTheme } from "../../stylers";
+import { Style, ColorTheme } from "../stylers";
 
 // import type information
-import { StateShape } from "../../state/types";
-import { Function } from "../../types";
+import { StateShape } from "../types/redux";
+import { Function } from "../types/utils";
 
 const buttonStyle = Style.create({}, {}, Style.controlButton);
 

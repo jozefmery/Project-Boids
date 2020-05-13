@@ -1,5 +1,5 @@
 /**
- * File: entity.ts
+ * File: entities/entity.ts
  * 
  * Author: Jozef Méry <xmeryj00@stud.fit.vutbr.cz>
  * Date: 24.4.2020
@@ -19,8 +19,7 @@ import { quadtree, Quadtree, QuadtreeLeaf } from "@dodmeister/quadtree";
 import P5 from "p5";
 
 // import type information
-import { Dimensions2D } from "../types";
-import { Class, RemoveUndefinedDeep } from "../types";
+import { Dimensions2D, Class, RemoveUndefinedDeep  } from "../types/utils";
 
 class Vector extends P5.Vector {};
 
@@ -590,8 +589,12 @@ class Prey extends Entity {
         for(const other of percieved) {
             
             const diff = Vector.sub(position, other.instance.position());
-            diff.div(other.dist * other.dist);
-            separation.add(diff);
+
+            if(diff.magSq()) {
+
+                diff.div(other.dist * other.dist);
+                separation.add(diff);
+            }
         }
 
         if(percieved.length) {

@@ -1,5 +1,5 @@
 /**
- * File: types.ts
+ * File: types/redux.ts
  * 
  * Author: Jozef Méry <xmeryj00@stud.fit.vutbr.cz>
  * Date: 24.4.2020
@@ -12,8 +12,8 @@
 import { ThunkAction, Action as ReduxAction } from "@reduxjs/toolkit";
 
 import { EventType } from "@dodmeister/hotkeys";
-import { Dimensions2D, Position2D } from "../types";
-import { SimZoomTarget } from "../components/SimulationTypes";
+import { Dimensions2D, Position2D } from "./utils";
+import { SimZoomTarget } from "./simulation";
 import { ColorTheme } from "../stylers";
 import { Languages } from "../lang/all";
 import { Action } from "../actions";
@@ -54,6 +54,8 @@ export type StateShape = {
         theme: ColorTheme;
 
         dimensions: Dimensions2D;
+
+        statsOpen: boolean;
     };
 
     sim: {
@@ -105,25 +107,6 @@ export type StateShape = {
     };
 
     hotkeys: ActionHotkeys;
-
-    stats: {
-
-        open: boolean;
-
-        fps: {
-            
-            pollingRate: number;
-            current: number;
-        },
-
-        entities: {
-            
-            pollingRate: number;
-            selected: SelectedEntity | undefined;
-            predatorCount: number;
-            preyCount: number;
-        };
-    };
 };
 
 export type Thunk = ThunkAction<void, StateShape, unknown, ReduxAction<string>>;

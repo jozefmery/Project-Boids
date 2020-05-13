@@ -1,5 +1,5 @@
 /**
- * File: stateStore.ts
+ * File: state/store.ts
  * 
  * Author: Jozef Méry <xmeryj00@stud.fit.vutbr.cz>
  * Date: 27.1.2020
@@ -13,18 +13,17 @@
 import { configureStore } from "@reduxjs/toolkit"
 
 // import default state
-import defaultState from "./defaultState";
+import defaultState from "./default";
 
 // import reducers
-import sim from "./simSlice";
-import global from "./globalSlice";
-import hotkeys from "./hotkeysSlice";
-import stats from "./statsSlice";
+import sim from "./slices/sim";
+import global from "./slices/global";
+import hotkeys from "./slices/hotkeys";
 
 export default configureStore({
     
     // merge slice reducers into a root reducer
-    reducer: { sim, global, hotkeys, stats },
+    reducer: { sim, global, hotkeys },
     // enable extension for debugging
     devTools: true,
     // load default state

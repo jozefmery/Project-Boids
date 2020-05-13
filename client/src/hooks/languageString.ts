@@ -1,5 +1,5 @@
 /**
- * File: UseLanguageString.ts
+ * File: hooks/languageString.ts
  * 
  * Author: Jozef Méry <xmeryj00@stud.fit.vutbr.cz>
  * Date: 19.4.2020
@@ -15,7 +15,7 @@ import { useSelector } from "react-redux";
 import languageData, { LanguageStrings } from "../lang/all";
 
 // import type information
-import { StateShape } from "../state/types";
+import { StateShape } from "../types/redux";
 
 export function useLanguageString(str: LanguageStrings) {
 

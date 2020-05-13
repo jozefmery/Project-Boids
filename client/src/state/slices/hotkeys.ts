@@ -1,5 +1,5 @@
 /**
- * File: hotkeysSlice.ts
+ * File: state/slices/hotkeys.ts
  * 
  * Author: Jozef Méry <xmeryj00@stud.fit.vutbr.cz>
  * Date: 1.4.2020
@@ -12,11 +12,11 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 // import default state
-import defaultState from "./defaultState";
+import defaultState from "../default";
 
 // import type information
-import { Action } from "../actions";
-import { ActionHotkeys } from "./types";
+import { Action } from "../../actions";
+import { ActionHotkeys } from "../../types/redux";
 
 type ActionHotkey = NonNullable<ActionHotkeys[Action]>;
 

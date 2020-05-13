@@ -1,5 +1,5 @@
 /**
- * File: simSlice.ts
+ * File: state/slices/sim.ts
  * 
  * Author: Jozef Méry <xmeryj00@stud.fit.vutbr.cz>
  * Date: 27.1.2020
@@ -15,12 +15,12 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import lodash from "lodash";
 
 // import default state
-import defaultState from "./defaultState";
+import defaultState from "../default";
 
 // import types
-import { Position2D } from "../types";
-import { SimZoomTarget } from "../components/SimulationTypes";
-import { StateShape, Thunk } from "./types";
+import { Position2D } from "../../types/utils";
+import { SimZoomTarget } from "../../types/simulation";
+import { StateShape, Thunk } from "../../types/redux";
 
 // create shorthand
 const simState = defaultState.sim;

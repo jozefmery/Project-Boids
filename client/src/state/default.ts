@@ -1,5 +1,5 @@
 /**
- * File: defaultState.ts
+ * File: state/default.ts
  * 
  * Author: Jozef Méry <xmeryj00@stud.fit.vutbr.cz>
  * Date: 29.1.2020
@@ -9,10 +9,10 @@
  */
 
 // import type information 
-import { StateShape } from "./types";
+import { StateShape } from "../types/redux";
 import { ColorTheme } from "../stylers";
 import { Languages } from "../lang/all";
-import { SimZoomTarget } from "../components/SimulationTypes";
+import { SimZoomTarget } from "../types/simulation";
 import { EventType } from "@dodmeister/hotkeys";
 
 const defaultState: StateShape =  {
@@ -23,7 +23,9 @@ const defaultState: StateShape =  {
 
         theme: ColorTheme.DARK,
 
-        dimensions: { width: 0, height: 0 }
+        dimensions: { width: 0, height: 0 },
+
+        statsOpen: true
     },
 
     sim: {
@@ -161,25 +163,6 @@ const defaultState: StateShape =  {
             sequences: "a",
             eventType: EventType.KEYUP,
             exactMatch: false,
-        }
-    },
-
-    stats: {
-
-        open: true,
-
-        fps: {
-
-            current: 0,
-            pollingRate: 100
-        },
-
-        entities: {
-            
-            pollingRate: 200,
-            selected: undefined,
-            predatorCount: 0,
-            preyCount: 0
         }
     }
 }

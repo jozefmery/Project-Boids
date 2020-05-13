@@ -1,5 +1,5 @@
 /**
- * File: types.ts
+ * File: types/utils.ts
  * 
  * Author: Jozef Méry <xmeryj00@stud.fit.vutbr.cz>
  * Date: 15.4.2020

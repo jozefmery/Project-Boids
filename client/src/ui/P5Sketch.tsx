@@ -1,5 +1,5 @@
 /**
- * File: P5Sketch.tsx
+ * File: ui/P5Sketch.tsx
  * 
  * Author: Jozef Méry <xmeryj00@stud.fit.vutbr.cz>
  * Date: 24.3.2020
@@ -14,7 +14,7 @@ import P5 from "p5";
 import ClassNames from "classnames";
 
 // import type information
-import { Dimensions2D } from "../types";
+import { Dimensions2D } from "../types/utils";
 
 export { default as P5 } from "p5";
 

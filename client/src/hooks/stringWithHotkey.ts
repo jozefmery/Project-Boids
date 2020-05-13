@@ -1,5 +1,5 @@
 /**
- * File: UseStringWithHotkey.ts
+ * File: hooks/stringWithHotkey.ts
  * 
  * Author: Jozef Méry <xmeryj00@stud.fit.vutbr.cz>
  * Date: 2.5.2020
@@ -16,10 +16,10 @@ import { useSelector } from "react-redux";
 import lodash from "lodash";
 
 // import hooks
-import { useLanguageString } from "./UseLanguageString";
+import { useLanguageString } from "./languageString";
 
 // import type information
-import { StateShape } from "../state/types";
+import { StateShape } from "../types/redux";
 import { LanguageStrings } from "../lang/all";
 import { Action } from "../actions";
 

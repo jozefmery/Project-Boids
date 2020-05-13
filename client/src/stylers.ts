@@ -24,7 +24,7 @@ import lodash from "lodash";
 import { StyleRules } from "@material-ui/styles/withStyles";
 
 // import type information
-import { StateShape } from "./state/types";
+import { StateShape } from "./types/redux";
 
 /**
  * 

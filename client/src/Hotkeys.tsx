@@ -12,13 +12,13 @@
 import React, { useRef, useCallback, useEffect } from "react";
 
 // import actions
-import { useAction, Action } from "../actions";
+import { useAction, Action } from "./actions";
 
 // import hotkeys
 import Context from "@dodmeister/hotkeys";
 
 // import type information
-import { ActionHotkeys } from "../state/types";
+import { ActionHotkeys } from "./types/redux";
 
 export const HotkeyContext = React.createContext<Context>(null as any);
 
