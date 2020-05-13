@@ -93,7 +93,8 @@ const defaultState: StateShape =  {
 
         toggleSimRunning: {
 
-            sequences: "space"
+            sequences: "space",
+            preventDefault: true
         },
         increaseSimSpeed: {
 
