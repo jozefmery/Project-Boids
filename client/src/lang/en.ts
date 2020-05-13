@@ -40,7 +40,8 @@ const data: LanguageDefinition = {
     position: "Position",
     velocity: "Velocity",
     acceleration: "Acceleration",
-    health: "Health"
+    health: "Health",
+    elapsed: "Elapsed time"
 };
 
 export default data;

@@ -46,6 +46,7 @@ export type LanguageDefinition = {
     velocity: string;
     acceleration: string;
     health: string;
+    elapsed: string;
 };
 
 /**

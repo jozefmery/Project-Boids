@@ -40,7 +40,8 @@ const data: LanguageDefinition = {
     position: "Pozícia",
     velocity: "Rýchlosť",
     acceleration: "Akcelerácia",
-    health: "Život"
+    health: "Život",
+    elapsed: "Uplynutý čas"
 };
 
 export default data;
