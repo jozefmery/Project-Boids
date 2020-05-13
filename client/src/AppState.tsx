@@ -12,11 +12,13 @@ import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
 // import state providers
 import { useSimState } from "./state/simulation";
 import { KeyCaptureContext } from "./Hotkeys";
+import { useStatsState } from "./state/stats";
 import reduxStateStore from "./state/store";
 
 // import type information
 import { StateShape } from "./types/redux";
 import { SimState } from "./types/simulation";
+import { StatsState } from "./types/stats";
 
 export const SimStateContext = React.createContext<SimState>(null as any);
 
@@ -29,6 +31,19 @@ function SimStateProvider({ children }: { children: React.ReactNode }) {
     <SimStateContext.Provider value={simState}>
         {children}
     </SimStateContext.Provider>);
+}
+
+export const StatsStateContext = React.createContext<StatsState>(null as any);
+
+function StatsStateProvider({ children }: { children: React.ReactNode }) {
+
+    const statsState = useStatsState();
+
+    return (
+    
+    <StatsStateContext.Provider value={statsState}>
+        {children}
+    </StatsStateContext.Provider>);
 }
 
 function KeyCaptureContextProvider({ children }: { children: React.ReactNode }) {
@@ -55,7 +70,6 @@ function CustomThemeProvider({ children }: { children: React.ReactNode }) {
     );
 }
 
-
 function useMUItheme() {
 
     const theme = useSelector((state: StateShape) => state.global.theme);
@@ -69,7 +83,9 @@ export default function AppState({ children }: { children: React.ReactNode }) {
         <CustomThemeProvider>
         <KeyCaptureContextProvider>
         <SimStateProvider>
+        <StatsStateProvider>
             {children}
+        </StatsStateProvider>
         </SimStateProvider>
         </KeyCaptureContextProvider>
         </CustomThemeProvider>
