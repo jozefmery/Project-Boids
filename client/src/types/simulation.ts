@@ -27,6 +27,7 @@ export type SimState = {
 
         delta: React.MutableRefObject<number>;
         stamp: React.MutableRefObject<number>;
+        elapsed: React.MutableRefObject<number>;
         update: () => void;
     };
 
