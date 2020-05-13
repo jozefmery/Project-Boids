@@ -15,6 +15,7 @@ import { Context as EntityContext } from "../entities/entity";
 // import type information
 import { Position2D } from "../types/utils";
 import { StateShape } from "../types/redux";
+import { SimState } from "../types/simulation";
 
 function useTime() {
 
@@ -172,7 +173,7 @@ function useEntities() {
 
     }, [area]);
 
-    const screenToCanvas = useCallback(({ x, y }) => {
+    const screenToCanvas = useCallback(({ x, y }: Position2D) => {
 
         return { 
             x: (x - dimensions.width / 2 + cameraTarget.x) / scale, 
@@ -192,7 +193,7 @@ function useEntities() {
     };
 }
 
-export function useSimState() {
+export function useSimState(): SimState {
 
     const time = useTime();
     const camera = useCamera();
@@ -209,5 +210,3 @@ export function useSimState() {
         entities
     };
 }
-
-export type SimState = ReturnType<typeof useSimState>;
