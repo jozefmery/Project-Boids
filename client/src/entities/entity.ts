@@ -19,7 +19,7 @@ import { quadtree, Quadtree, QuadtreeLeaf } from "@dodmeister/quadtree";
 import P5 from "p5";
 
 // import type information
-import { Dimensions2D, Class, RemoveUndefinedDeep  } from "../types/utils";
+import { Dimensions2D, Class, RemoveUndefinedDeep } from "../types/utils";
 
 class Vector extends P5.Vector {};
 
@@ -62,9 +62,29 @@ type EntityOptions = {
         cohesion?: number;
         separation?: number;
     }
+
+    hungerDecay?: number;
+    healthDelta?: number;
+
+    health?: number;
+    hunger?: number;
 };
 
+type EntityCtorOptions = {
+
+    options: RemoveUndefinedDeep<EntityOptions>;
+    forces: EntityForces;
+}
+
 type Styler = (p5: P5) => void;
+
+type EntityStyler = {
+
+    entity: Styler;
+    highlight: Styler;
+    perception: Styler;
+    percieved: Styler;
+}
 
 type EntityStylers = {
 
@@ -78,6 +98,7 @@ type EntityStylers = {
         default: Styler;
         highlight: Styler;
     };
+    food: Styler;
     perception: Styler;
     percieved: Styler;
     quadtree: Styler;
@@ -92,7 +113,9 @@ type EntityForces = {
     acceleration: Vector;
 };
 
-export type EntityType = "predator" | "prey";
+export type EntityType = "predator" | "prey" | "food";
+
+export type SelectableEntity = "predator" | "prey";
 
 export class Entity {
 
@@ -111,66 +134,26 @@ export class Entity {
         forces_: EntityForces;
     };
 
-    protected health_: number;
-
     protected vicinity_: Vicinity;
 
     protected percieved_: Vicinity;
 
     /// Constructor function
     
-    protected constructor(context: Readonly<Context>, type: EntityType) {
-
-        // shorthand
-        const area = context.area();
+    protected constructor(options: EntityCtorOptions, type: EntityType) {
 
         this.type_ = type;
         this.id_ = uniqid();
 
-        this.options_ = {
+        this.options_ = lodash.cloneDeep(options.options);
 
-            speed: 100,
-            maxForce: {
-
-                magnitude: 20,
-                angle: (2 / 3) * Math.PI
-            },
-
-            perception: {
-
-                radius: 300,
-                angle: 220
-            },
-
-            collisionRadius: 20,
-
-            flockingModifier: {
-
-                alignment: 1.0,
-                cohesion: 1.0,
-                separation: 1.8
-            }
-        };
-
-        this.forces_ = {
-
-            position: createVector(),
-            velocity: createVector(),
-            acceleration: createVector()
-        };
-
-        this.forces_.position.set(Math.random() * area.width, Math.random() * area.height);
-
-        this.forces_.velocity.set(Vector.random2D());
-        this.forces_.velocity.setMag(this.options_.speed);
+        this.forces_ = lodash.cloneDeep(options.forces);
 
         this.draft_ = {
 
             forces_: lodash.cloneDeep(this.forces_)
         };
-        
-        this.health_ = 100;
-        
+
         this.vicinity_ = [];
 
         this.percieved_ = [];
@@ -311,6 +294,36 @@ export class Entity {
         return this;
     }
 
+    protected updateHealth(timeDelta: number): Entity {
+
+        const hunger = this.options_.hunger;
+
+        let modifier = 0;
+
+        if(hunger === 0) {
+
+            modifier = -1;
+        
+        } else if(hunger=== 100) {
+
+            modifier = 1;
+        }
+
+        const delta = this.options_.healthDelta * (timeDelta / 1000) * modifier;
+
+        this.options_.health = lodash.clamp(this.options_.health + delta, 0, 100);
+
+        return this;
+    }
+
+    protected updateHunger(timeDelta: number): Entity {
+
+        const delta = this.options_.hungerDecay * (timeDelta / 1000);
+        this.options_.hunger = Math.max(0, this.options_.hunger - delta);
+
+        return this;
+    }
+
     protected vicinity(context: Context): Entity {
 
         // shorthands
@@ -347,16 +360,21 @@ export class Entity {
         return this.percieved_.filter(entity => entity.instance.type() === type);
     }
 
-    protected drawEntity(p5: P5, stylers: EntityStylers, highlighted: boolean): Entity {
+    protected drawEntity(p5: P5, stylers: EntityStyler, highlighted: boolean): Entity {
 
         // shorthands
         const { position, velocity } = this.forces();
 
         p5.push();
         
-        const highlightStyler = highlighted ? "highlight" : "default";
+        if(highlighted) {
 
-        stylers[this.type_][highlightStyler](p5);
+            stylers.highlight(p5);
+        
+        } else {
+
+            stylers.entity(p5);
+        }
 
         p5.translate(position.x, position.y);
         p5.rotate(velocity.heading());
@@ -368,7 +386,7 @@ export class Entity {
         return this;
     }
 
-    protected drawPerception(p5: P5, stylers: EntityStylers, highlighted: boolean): Entity {
+    protected drawPerception(p5: P5, stylers: EntityStyler, highlighted: boolean): Entity {
         
         if(!highlighted) return this;
 
@@ -392,7 +410,7 @@ export class Entity {
         return this;
     }
 
-    protected drawPercieved(p5: P5, stylers: EntityStylers, highlighted: boolean): Entity {      
+    protected drawPercieved(p5: P5, stylers: EntityStyler, highlighted: boolean): Entity {      
 
         if(!highlighted) return this;
 
@@ -420,24 +438,10 @@ export class Entity {
 
     // mutator methods
 
-    public setHealth(health: number): Entity {
-
-        this.health_ = lodash.clamp(health, 0, 100);
-
-        return this;
-    }
-
     public kill(): Entity {
 
-        this.setHealth(0);
+        this.options_.health = 0;
         
-        return this;
-    }
-
-    public setOptions(options: EntityOptions): Entity {
-
-        this.options_ = lodash.merge(this.options_, options);
-
         return this;
     }
 
@@ -445,12 +449,17 @@ export class Entity {
 
     public isAlive(): boolean {
 
-        return this.health_ > 0;
+        return this.options_.health > 0;
     }
 
     public health(): number {
 
-        return this.health_;
+        return this.options_.health;
+    }
+
+    public hunger(): number {
+
+        return this.options_.hunger;
     }
 
     public type(): EntityType {
@@ -492,19 +501,11 @@ export class Entity {
 
     public update(timeDelta: number, context: Context): Entity {
 
-        this.updateVectors(timeDelta);
-
-        this.collide(context);
-
         return this;
     }
 
-    public draw(p5: P5, stylers: EntityStylers, highlighted: boolean = false): Entity {
+    public draw(p5: P5, stylers: EntityStyler, highlighted: boolean = false): Entity {
 
-        this.drawPerception(p5, stylers, highlighted);
-        this.drawEntity(p5, stylers, highlighted);
-        this.drawPercieved(p5, stylers, highlighted);
-        
         return this;
     }
 
@@ -525,9 +526,9 @@ class Prey extends Entity {
 
     /// Constructor function
 
-    public constructor(context: Context) {
+    public constructor(options: EntityCtorOptions) {
 
-        super(context, "prey");
+        super(options, "prey");
     }
 
     /// Protected methods
@@ -608,26 +609,15 @@ class Prey extends Entity {
         return separation.mult(this.options_.flockingModifier.separation);
     }
 
-    protected flock(flockOptions: Context["options_"]["flock"]): Prey {
+    protected flock(): Prey {
 
         const { acceleration } = this.draft().forces_;
 
         const preys = this.getPercievedType("prey");
         
-        if(flockOptions.align) {
-
-            acceleration.add(this.getAlignment(preys)); 
-        }
-
-        if(flockOptions.cohere) {
-
-            acceleration.add(this.getCohesion(preys)); 
-        }
-
-        if(flockOptions.separate) {
-
-            acceleration.add(this.getSeparation(preys));
-        }
+        acceleration.add(this.getAlignment(preys)); 
+        acceleration.add(this.getCohesion(preys)); 
+        acceleration.add(this.getSeparation(preys));
 
         return this;
     }
@@ -640,9 +630,24 @@ class Prey extends Entity {
 
         this.vicinity(context);
 
-        this.flock(context.options().flock);
+        this.flock();
 
-        super.update(timeDelta, context);
+        this.updateVectors(timeDelta);
+
+        this.collide(context);
+
+        this.updateHunger(timeDelta);
+
+        this.updateHealth(timeDelta);
+
+        return this;
+    }
+
+    public draw(p5: P5, stylers: EntityStyler, highlighted: boolean = false): Prey {
+
+        this.drawPerception(p5, stylers, highlighted);
+        this.drawEntity(p5, stylers, highlighted);
+        this.drawPercieved(p5, stylers, highlighted);
 
         return this;
     }
@@ -652,23 +657,105 @@ class Predator extends Entity {
 
     /// Constructor function
 
-    public constructor(context: Context) {
+    public constructor(options: EntityCtorOptions) {
 
-        super(context, "predator");
+        super(options, "predator");
+    }
+
+    /// Protected methods 
+
+    protected collide(context: Context): Predator {
+
+        super.collide(context);
+
+        return this;
+    }
+
+    /// Public methods
+
+    public update(timeDelta: number, context: Context): Predator {
+
+        this.clearAcceleration();
+
+        this.vicinity(context);
+
+        // TODO chase 
+
+        this.updateVectors(timeDelta);
+
+        this.collide(context);
+
+        this.updateHunger(timeDelta);
+
+        this.updateHealth(timeDelta);
+
+        return this;
+    }
+
+    public draw(p5: P5, stylers: EntityStyler, highlighted: boolean = false): Predator {
+
+        this.drawPerception(p5, stylers, highlighted);
+        this.drawEntity(p5, stylers, highlighted);
+        this.drawPercieved(p5, stylers, highlighted);
+
+        return this;
+    }
+};
+
+class Food extends Entity {
+    
+    /// Constructor function
+
+    public constructor(options: EntityCtorOptions) {
+
+        super(options, "food");
+    }
+
+    /// Protected methods
+
+    protected drawEntity(p5: P5, stylers: EntityStyler): Food {
+
+        const { position } = this.forces();
+
+        stylers.entity(p5);
+        p5.point(position.x, position.y);
+
+        return this;
+    }
+
+    /// Public methods
+
+    public update(timeDelta: number, context: Context): Food {
+
+        // TODO health decay ?
+
+        return this;
+    }
+
+    public draw(p5: P5, stylers: EntityStyler, _: boolean = false): Food {
+
+        return this.drawEntity(p5, stylers);
+    }
+}
+
+type EntityGeneration = {
+
+    [type in SelectableEntity]: {
+
+        base: RemoveUndefinedDeep<EntityOptions>;
+        variation: RemoveUndefinedDeep<EntityOptions>;
     }
 };
 
 type ContextOptions = {
 
-    onBoundaryHit?: "wrap" | "kill";
-    flock?: {
+    onBoundaryHit: "wrap" | "kill";
+    drawQuadtree: boolean;
+    area: Dimensions2D;
 
-        align?: boolean;
-        cohere?: boolean;
-        separate?: boolean;
-    }
+    entities: EntityGeneration;
 
-    drawQuadtree?: boolean;
+    foodSpawn: number;
 }
 
 export class Context {
@@ -676,11 +763,10 @@ export class Context {
     /// Protected members
 
     protected entities_: Quadtree<Entity>;
-    protected area_: Dimensions2D;
 
-    protected options_: RemoveUndefinedDeep<ContextOptions>;
+    protected options_: ContextOptions;
 
-    protected selectedEntity_: Entity | undefined;
+    protected selectedEntity_: Predator | Prey | undefined;
 
     protected counts_: {
 
@@ -689,22 +775,149 @@ export class Context {
 
     /// Contructor function
 
-    constructor(area: Readonly<Dimensions2D>) {
-
-        this.area_ = area;
+    constructor() {
         
         this.options_ = {
-            
-            onBoundaryHit: "wrap",
-            flock: {
-                
-                align: true,
-                cohere: true,
-                separate: true
+
+            onBoundaryHit: "kill",
+            drawQuadtree: false,
+            area: { width: 0, height: 0 },
+
+            entities: {
+
+                predator: {
+
+                    base: {
+                        
+                        speed: 100,
+                        maxForce: {
+
+                            magnitude: 30,
+                            angle: (2 / 3) * Math.PI
+                        },
+
+                        perception: {
+
+                            radius: 300,
+                            angle: 200
+                        },
+
+                        collisionRadius: 20,
+
+                        flockingModifier: {
+
+                            alignment: 1.0,
+                            cohesion: 1.0,
+                            separation: 1.0
+                        },
+
+                        hungerDecay: 5,
+                        healthDelta: 20,
+
+                        health: 100,
+                        hunger: 100
+                    },
+                    
+                    variation: {
+
+                        speed: 10,
+                        maxForce: {
+
+                            magnitude: 3,
+                            angle: (1 / 8) * Math.PI
+                        },
+
+                        perception: {
+
+                            radius: 20,
+                            angle: 10
+                        },
+
+                        collisionRadius: 0,
+
+                        flockingModifier: {
+
+                            alignment: 0.1,
+                            cohesion: 0.1,
+                            separation: 0.1
+                        },
+
+                        hungerDecay: 1,
+                        healthDelta: 3,
+
+                        health: 0,
+                        hunger: 0
+                    }
+                },
+
+                prey: {
+
+                    base: {
+
+                        speed: 100,
+                        maxForce: {
+
+                            magnitude: 30,
+                            angle: (2 / 3) * Math.PI
+                        },
+
+                        perception: {
+
+                            radius: 300,
+                            angle: 200
+                        },
+
+                        collisionRadius: 20,
+
+                        flockingModifier: {
+
+                            alignment: 1.0,
+                            cohesion: 1.0,
+                            separation: 1.0
+                        },
+
+                        hungerDecay: 5,
+                        healthDelta: 20,
+
+                        health: 100,
+                        hunger: 100
+                    },
+                    
+                    variation: {
+
+                        speed: 10,
+                        maxForce: {
+
+                            magnitude: 3,
+                            angle: (1 / 8) * Math.PI
+                        },
+
+                        perception: {
+
+                            radius: 20,
+                            angle: 10
+                        },
+
+                        collisionRadius: 0,
+
+                        flockingModifier: {
+
+                            alignment: 0.1,
+                            cohesion: 0.1,
+                            separation: 0.1
+                        },
+
+                        hungerDecay: 1,
+                        healthDelta: 3,
+
+                        health: 0,
+                        hunger: 0
+                    }
+                }
             },
 
-            drawQuadtree: false
-        }
+            foodSpawn: 5
+        };
 
         this.entities_ = this.createQuadTree();
 
@@ -713,13 +926,14 @@ export class Context {
         this.counts_ = {
 
             predator: 0,
-            prey: 0
+            prey: 0,
+            food: 0
         };
     }
 
     /// Protected static methods
 
-    protected static typeToConstructor(type: EntityType): Class<Entity> {
+    protected static typeToConstructor(type: SelectableEntity): Class<Entity> {
 
         switch(type) {
 
@@ -730,12 +944,31 @@ export class Context {
 
     /// Protected methods
 
+    protected getEntityCtorOptions(type: SelectableEntity): EntityCtorOptions {
+
+        const options = this.options_.entities[type].base;
+
+        const { width, height } = this.options_.area;
+        const forces: EntityForces = {
+
+            position: createVector(width * Math.random(), height * Math.random()),
+            velocity: P5.Vector.random2D(),
+            acceleration: createVector()
+        };
+
+        return {
+
+            options,
+            forces
+        }
+    }
+
     protected createQuadTree(): Quadtree<Entity> {
 
         return quadtree<Entity>()
             .x(entity => entity.position().x)
             .y(entity => entity.position().y)
-            .cover(this.area_.width, this.area_.height);
+            .cover(this.options_.area.width, this.options_.area.height);
     }
 
     protected drawQuadtree(p5: P5): Context {
@@ -764,6 +997,54 @@ export class Context {
         return this;
     }
 
+    protected getEntityStylers(stylers: EntityStylers): { [type in EntityType]: EntityStyler } {
+
+        return {
+
+            predator: {
+
+                entity: stylers.predator.default,
+                highlight: stylers.predator.highlight,
+                perception: stylers.perception,
+                percieved: stylers.percieved
+            },
+
+            prey: {
+
+                entity: stylers.prey.default,
+                highlight: stylers.prey.highlight,
+                perception: stylers.perception,
+                percieved: stylers.percieved
+            },
+
+            food: {
+
+                entity: stylers.food,
+                highlight: () => undefined,
+                perception: () => undefined,
+                percieved: () => undefined,
+            },
+        }
+    }
+
+    protected addEntities(type: SelectableEntity, count: number): Context {
+
+        for(let i = 0; i < count; ++i) {
+
+            const options = this.getEntityCtorOptions(type)
+            this.entities_.add(new (Context.typeToConstructor(type))(options));
+        }
+
+        return this;
+    }
+
+    protected spawnFood(timeDelta: number): Context {
+
+        // TODO spawn food
+
+        return this;
+    }
+
     /// Public methods
 
     protected forEach(callback: (entity: Entity) => any): Context {
@@ -784,6 +1065,8 @@ export class Context {
     // update methods
 
     public update(timeDelta: number): Context {
+
+        this.spawnFood(timeDelta);
 
         this.forEach(entity => entity.update(timeDelta, this));
         this.forEach(entity => entity.applyDraft());
@@ -816,19 +1099,24 @@ export class Context {
         stylers.quadtree(p5);
         this.drawQuadtree(p5);
 
-        this.forEach(entity => entity.draw(p5, stylers, entity === this.selectedEntity_));
+        const entityStylers = this.getEntityStylers(stylers);
+
+        this.forEach(entity => entity.draw(p5, entityStylers[entity.type()], entity === this.selectedEntity_));
 
         return this;
     }
 
     // mutator methods
 
-    public addEntities(type: EntityType, count: number): Context {
+    public init(predators: number, preys: number, options: ContextOptions): Context {
 
-        for(let i = 0; i < count; ++i) {
+        this.clearEntities();
+        this.resetCounters();
 
-            this.entities_.add(new (Context.typeToConstructor(type))(this));
-        }
+        this.options_ = lodash.cloneDeep(options);
+
+        this.addEntities("predator", predators);
+        this.addEntities("prey", preys);
 
         return this;
     }
@@ -840,21 +1128,7 @@ export class Context {
         return this;
     }
 
-    public setArea(area: Readonly<Dimensions2D>): Context {
-
-        this.area_ = lodash.cloneDeep(area);
-
-        return this;
-    }
-
-    public setOptions(options: Readonly<ContextOptions>): Context {
-
-        this.options_ = lodash.merge(this.options_, options);
-
-        return this;
-    }
-
-    public selectEntity(entity: Entity): Context {
+    public selectEntity(entity: Predator | Prey): Context {
 
         this.selectedEntity_ = entity;
 
@@ -870,19 +1144,23 @@ export class Context {
 
     // query methods
 
-    public entityAt(x: number, y: number, radius: number = 20): Entity | undefined {
+    public entityAt(x: number, y: number, radius: number = 20): Predator | Prey | undefined {
 
-        return this.entities_.find(x, y, radius);
+        const entity = this.entities_.find(x, y, radius);
+
+        if(entity === undefined || entity.type() === "food") return undefined;
+
+        return entity as Predator | Prey;
     }
 
-    public selectedEntity(): Entity | undefined {
+    public selectedEntity(): Predator | Prey | undefined {
 
         return this.selectedEntity_;
     }
 
     public area(): Readonly<Dimensions2D> {
 
-        return this.area_;
+        return this.options_.area;
     }
 
     public entities(): Readonly<Quadtree<Entity>> {
