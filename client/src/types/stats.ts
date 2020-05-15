@@ -6,20 +6,15 @@ import React from "react";
 export type StatsState = {
     
     fps: {
-        array: React.MutableRefObject<Array<{ uv: number }>>;
+        array: React.MutableRefObject<Array<{ fps: number }>>;
         current: React.MutableRefObject<number>;
     };
 
     entities: {
 
-        predators: React.MutableRefObject<{
-            count: number;
-            array: number[];
-        }>;
+        predators: React.MutableRefObject<number>;
+        preys: React.MutableRefObject<number>;
 
-        preys: React.MutableRefObject<{
-            count: number;
-            array: number[];
-        }>;
+        array: React.MutableRefObject<Array<{ predators: number, preys: number }>>;
     };
 };

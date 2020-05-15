@@ -12,7 +12,7 @@ import { SimState } from "../types/simulation";
 
 function useFps(simState: SimState, pollingRate: number) {
 
-    const array = useRef<Array<{ uv: number }>>([]);
+    const array = useRef<Array<{ fps: number }>>([]);
     const current = useRef(0);
 
     useEffect(() => {
@@ -21,9 +21,9 @@ function useFps(simState: SimState, pollingRate: number) {
 
             const fps = simState.fps.current;
             
-            array.current.push({ uv: Math.round(fps) });
+            array.current.push({ fps: Math.round(fps) });
 
-            if(array.current.length > 50) {
+            if(array.current.length > 500) {
 
                 array.current.splice(0, 1);
             }
@@ -48,21 +48,28 @@ function useFps(simState: SimState, pollingRate: number) {
 
 function useEntities(simState: SimState, pollingRate: number) {
 
-    const predators = useRef<{ count: number, array: Array<number> }>({ count: 0, array: [] });
-    const preys = useRef<{ count: number, array: Array<number> }>({ count: 0, array: [] });
+    const predators = useRef(0);
+    const preys = useRef(0);
+    const array = useRef<Array<{ predators: number, preys: number }>>([]);
 
     useEffect(() => {
+
+        // TODO update only when sim running
 
         const id = window.setInterval(() => {
 
             const predatorCount = simState.entities.context.current.entityCount("predator");
             const preyCount = simState.entities.context.current.entityCount("prey");
 
-            predators.current.array.push(predatorCount);
-            predators.current.count = predatorCount;
+            predators.current = predatorCount;
+            preys.current = preyCount;
 
-            preys.current.array.push(preyCount);
-            preys.current.count = preyCount;
+            array.current.push({ predators: predatorCount, preys: preyCount });
+
+            if(array.current.length > 500) {
+
+                array.current.splice(0, 1);
+            }
 
         }, pollingRate);
 
@@ -76,7 +83,8 @@ function useEntities(simState: SimState, pollingRate: number) {
     return {
         
         predators,
-        preys
+        preys,
+        array
     };
 }
 
@@ -85,7 +93,7 @@ export function useStatsState(): StatsState {
     const simState = useContext(SimStateContext);
 
     const fps = useFps(simState, 200);
-    const entities = useEntities(simState, 500);
+    const entities = useEntities(simState, 3000);
 
     return {
 
