@@ -1,7 +1,7 @@
 // TODO header
 
 // import react
-import React, { useCallback, useContext, useState } from "react";
+import React, { useCallback, useContext, useState, useRef } from "react";
 
 // import state context
 import { SimStateContext, StatsStateContext } from "../AppState";
@@ -28,6 +28,10 @@ import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import PlaceIcon from '@material-ui/icons/Place';
 import FavoriteIcon from '@material-ui/icons/Favorite';
 import FingerprintIcon from '@material-ui/icons/Fingerprint';
+import ZoomInIcon from '@material-ui/icons/ZoomIn';
+import ZoomOutIcon from '@material-ui/icons/ZoomOut';
+import SaveIcon from '@material-ui/icons/SaveAlt';
+import FoodIcon from '@material-ui/icons/Fastfood';
 
 // import charts
 import { LineChart, 
@@ -35,8 +39,7 @@ import { LineChart,
         CartesianGrid, 
         XAxis, 
         YAxis, 
-        ReferenceLine, 
-        Tooltip as ChartTooltip } from "recharts";
+        ReferenceLine } from "recharts";
 
 // import stylers
 import { makeStyles, Theme } from "@material-ui/core/styles";
@@ -49,7 +52,7 @@ import { saveAs } from "file-saver";
 // import type information
 import { StateShape } from "../types/redux";
 import { Position2D } from "../types/utils";
-import { EntityType } from "../entities/entity";
+import { SelectableEntity } from "../entities/entity";
 
 function Elapsed() {
 
@@ -73,9 +76,11 @@ const useTooltipStyles = makeStyles(({ theme }: Theme) => ({
 
 const verticalFlexBox = Style.create({
 
+    alignItems: "flex-start",
+
     "& > *:not(:last-child)": {
 
-        marginRight: "15px"
+        marginBottom: "15px"
     }
 
 }, {}, Style.verticalFlexBox);
@@ -87,22 +92,21 @@ const useVerticalFlexBox = makeStyles(({ theme }: Theme) => ({
 
 const horizontalFlexBox = Style.create({
 
-    display: "flex",
-    flexFlow: "column nowrap",
-    alignItems: "flex-start",
+    alignItems: "center",
 
     "& > *:not(:last-child)": {
 
-        marginBottom: "15px"
+        marginRight: "15px"
     }
-});
+
+}, {}, Style.horizontalFlexBox);
 
 const useHorizontalFlexBox = makeStyles(({ theme }: Theme) => ({
     
     container: horizontalFlexBox.compose(theme)
 }));
 
-function SelectedEntityType({ type }: { type: EntityType }) {
+function SelectedEntityType({ type }: { type: SelectableEntity }) {
 
     const { tooltip: tooltipClass } = useTooltipStyles();
 
@@ -122,7 +126,7 @@ function SelectedEntityType({ type }: { type: EntityType }) {
 
 function SelectedEntityID({ id }: { id: string }) {
 
-    const { container } = useVerticalFlexBox();
+    const { container } = useHorizontalFlexBox();
     const { tooltip: tooltipClass } = useTooltipStyles();
 
     const idString = useLanguageString("id");
@@ -141,7 +145,7 @@ function SelectedEntityID({ id }: { id: string }) {
 
 function SelectedEntityPosition({ position }: { position: Position2D }) {
 
-    const { container } = useVerticalFlexBox();
+    const { container } = useHorizontalFlexBox();
     const { tooltip: tooltipClass } = useTooltipStyles();
 
     const positionString = useLanguageString("position");
@@ -160,7 +164,7 @@ function SelectedEntityPosition({ position }: { position: Position2D }) {
 
 function SelectedEntityHealth({ health }: { health: number }) {
 
-    const { container } = useVerticalFlexBox();
+    const { container } = useHorizontalFlexBox();
     const { tooltip: tooltipClass } = useTooltipStyles();
 
     const healthString = useLanguageString("health");
@@ -177,6 +181,26 @@ function SelectedEntityHealth({ health }: { health: number }) {
         </Tooltip>);
 }
 
+function SelectedEntityHunger({ hunger }: { hunger: number }) {
+
+    const { container } = useHorizontalFlexBox();
+    const { tooltip: tooltipClass } = useTooltipStyles();
+
+    const hungerString = useLanguageString("hunger");
+
+    return (
+        <Tooltip title={hungerString} 
+                    placement="top" 
+                    TransitionComponent={Zoom}
+                    classes={{ tooltip: tooltipClass }}>
+            <div className={container}>
+                <FoodIcon />
+                <div>{Math.round(hunger)}</div>
+            </div>
+        </Tooltip>);
+}
+
+
 function SelectedEntityForce({ force, maxForce, tooltip }: 
                             { force: Position2D, maxForce: number, tooltip: string }) {
 
@@ -184,7 +208,7 @@ function SelectedEntityForce({ force, maxForce, tooltip }:
     const circleStyler = useCanvasStylers("forceCircle");
     const arrowStyler = useCanvasStylers("forceArrow");
 
-    const { container } = useVerticalFlexBox();
+    const { container } = useHorizontalFlexBox();
     const { tooltip: tooltipClass } = useTooltipStyles();
 
     const vector = new P5.Vector();
@@ -276,9 +300,9 @@ function ClearSelectedEntity({ clear }: { clear: () => any }) {
 
 function SelectedEntity() {
 
-    useForceUpdate(100);
+    useForceUpdate(1000);
 
-    const { container } = useHorizontalFlexBox();
+    const { container } = useVerticalFlexBox();
 
     const simState = useContext(SimStateContext);
 
@@ -293,10 +317,11 @@ function SelectedEntity() {
 
     return (
         <div className={container}>
-            <SelectedEntityType type={selectedEntity.type()} />
+            <SelectedEntityType type={selectedEntity.type() as SelectableEntity} />
             <SelectedEntityID id={selectedEntity.id()} />
             <SelectedEntityPosition position={selectedEntity.position()} />
             <SelectedEntityHealth health={selectedEntity.health()} />
+            <SelectedEntityHunger hunger={selectedEntity.hunger()} />
             <SelectedEntityForces velocity={selectedEntity.velocity()}
                 maxVelocity={selectedEntity.options().speed}
                 acceleration={selectedEntity.acceleration()}
@@ -313,27 +338,96 @@ function useEntityChartStylers() {
 
         [ColorTheme.DARK]: {
 
-            
+            sum: "blue",
+            grid: "#cecece",
+            predators: "red",
+            preys: "white",
+
         },
 
         [ColorTheme.LIGHT]: {
 
-            
+            sum: "black",
+            grid: "black",
+            predators: "red",
+            preys: "blue",
         }
 
     }[theme];
 }
 
-
 function EntityStats() {
 
-    useForceUpdate(100);
+    useForceUpdate(3000);
+
+    const zoomInString = useLanguageString("zoomIn");
+    const zoomOutString = useLanguageString("zoomOut");
+    const saveAsImg = useLanguageString("saveAsImg");
+    const predatorsString = useLanguageString("predators");
+    const preysString = useLanguageString("preys");
+    
+    const { button : buttonClass} = useButtonStyles();
+    const { tooltip : tooltipClass } = useTooltipStyles();
+
+    const [zoomed, setZoomed] = useState(false);
+    const canvasRef = useRef(null);
 
     const stylers = useEntityChartStylers();
 
+    const { container: vFlex } = useVerticalFlexBox();
+    const { container: hFlex } = useHorizontalFlexBox(); 
+
+    const entityStats = useContext(StatsStateContext).entities;
+
+    const predators = entityStats.predators.current;
+    const preys = entityStats.preys.current;
+    const array = entityStats.array.current;
+
     return (
-        <div>
-            
+        <div className={vFlex}>
+            <div>
+                {`${predatorsString}: ${predators}`}
+            </div>
+            <div>
+                {`${preysString}: ${preys}`}
+            </div>
+            <div ref={canvasRef}>
+                <LineChart width={zoomed ? 700 : 350} height={zoomed ? 500 : 250} data={[...array]}>
+                    <CartesianGrid strokeDasharray="2 2" stroke={stylers.grid} />
+                    <XAxis tick={false} stroke={stylers.grid} />
+                    <YAxis stroke={stylers.grid} />
+                    <Line type="monotone" dataKey="preys" stroke={stylers.preys} strokeWidth={2} dot={false} isAnimationActive={false} />
+                    <Line type="monotone" dataKey="predators" stroke={stylers.predators} strokeWidth={2} dot={false} isAnimationActive={false} />
+                    <ReferenceLine strokeDasharray="10 10" stroke={stylers.sum} y={predators + preys} strokeWidth={2} />
+                </LineChart>
+            </div>
+            <div className={hFlex}>
+                <Tooltip title={zoomed ? zoomOutString : zoomInString} 
+                        placement="top" 
+                        TransitionComponent={Zoom}
+                        classes={{ tooltip: tooltipClass }}>
+                    <Button onClick={() => setZoomed(last => !last)} className={buttonClass}>
+                        {zoomed ? <ZoomOutIcon /> : <ZoomInIcon />}
+                    </Button>
+                </Tooltip>
+                <Tooltip title={saveAsImg} 
+                        placement="top" 
+                        TransitionComponent={Zoom}
+                        classes={{ tooltip: tooltipClass }}>
+                    <Button onClick={() => {
+
+                        const node = canvasRef.current;
+
+                        if(node) {
+
+                            domtoimage.toBlob(node).then(blob => saveAs(blob, "entity-chart.png"));
+                        }
+
+                    }} className={buttonClass}>
+                        <SaveIcon />
+                    </Button>
+                </Tooltip>
+            </div>
         </div>);
 }
 
@@ -362,36 +456,75 @@ function useFPSChartStylers() {
 
 function FPS() {
 
-    const [open, setOpen] = useState(false);
+    useForceUpdate(1000);
 
-    useForceUpdate(100);
+    const zoomInString = useLanguageString("zoomIn");
+    const zoomOutString = useLanguageString("zoomOut");
+    const saveAsImg = useLanguageString("saveAsImg");
+    const currentString = useLanguageString("current");
+    const averageString = useLanguageString("average");
+    
+    const { button : buttonClass} = useButtonStyles();
+    const { tooltip : tooltipClass } = useTooltipStyles();
+
+    const [zoomed, setZoomed] = useState(false);
+    const canvasRef = useRef(null);
 
     const stylers = useFPSChartStylers();
 
-    const { container } = useHorizontalFlexBox();
+    const { container: vFlex } = useVerticalFlexBox();
+    const { container: hFlex } = useHorizontalFlexBox(); 
 
     const fpsStats = useContext(StatsStateContext).fps;
 
     const fps = fpsStats.current.current;
     const array = fpsStats.array.current;
-    const average = array.reduce((total, current) => total + current.uv, 0) / array.length;
-
-    const Chart = (
-        <LineChart width={350} height={250} data={[...array]}>
-            <CartesianGrid strokeDasharray="2 2" stroke={stylers.grid} />
-            <XAxis tick={false} stroke={stylers.grid} />
-            <YAxis stroke={stylers.grid} />
-            <ReferenceLine strokeDasharray="10 10" stroke={stylers.average} y={average} />
-            <Line type="monotone" dataKey="uv" stroke={stylers.line} />
-        </LineChart>);
+    const average = array.reduce((total, current) => total + current.fps, 0) / array.length;
 
     return (
-        <div className={container}>
+        <div className={vFlex}>
             <div>
-                {fps.toFixed(2)}
+                {`${currentString}: ${fps.toFixed(2)}`}
             </div>
-            {!open ? Chart : null}
-            {/* {!open ? <Button onClick={() => setOpen(true)}>asd</Button> : null} */}
+            <div>
+                {`${averageString}: ${average.toFixed(2)}`}
+            </div>
+            <div ref={canvasRef}>
+                <LineChart width={zoomed ? 700 : 350} height={zoomed ? 500 : 250} data={[...array]}>
+                    <CartesianGrid strokeDasharray="2 2" stroke={stylers.grid} />
+                    <XAxis tick={false} stroke={stylers.grid} />
+                    <YAxis stroke={stylers.grid} />
+                    <Line type="monotone" dataKey="fps" stroke={stylers.line} strokeWidth={2} dot={false} isAnimationActive={false} />
+                    <ReferenceLine strokeDasharray="10 10" stroke={stylers.average} y={average} strokeWidth={2} />
+                </LineChart>
+            </div>
+            <div className={hFlex}>
+                <Tooltip title={zoomed ? zoomOutString : zoomInString} 
+                        placement="top" 
+                        TransitionComponent={Zoom}
+                        classes={{ tooltip: tooltipClass }}>
+                    <Button onClick={() => setZoomed(last => !last)} className={buttonClass}>
+                        {zoomed ? <ZoomOutIcon /> : <ZoomInIcon />}
+                    </Button>
+                </Tooltip>
+                <Tooltip title={saveAsImg} 
+                        placement="top" 
+                        TransitionComponent={Zoom}
+                        classes={{ tooltip: tooltipClass }}>
+                    <Button onClick={() => {
+
+                        const node = canvasRef.current;
+
+                        if(node) {
+
+                            domtoimage.toBlob(node).then(blob => saveAs(blob, "fps-chart.png"));
+                        }
+
+                    }} className={buttonClass}>
+                        <SaveIcon />
+                    </Button>
+                </Tooltip>
+            </div>
         </div>);
 }
 
@@ -402,6 +535,7 @@ const panelStyle = Style.create({
     alignSelf: "stretch",
     gridColumn: "1 / 2",
     gridRow: "2 / 4",
+    zIndex: 1,
 
     marginTop: "-1px",
 
