@@ -254,6 +254,7 @@ const panelStyle = Style.create({
     alignSelf: "end",
     gridRow: "3 / 4",
     gridColumn: "1 / 2",
+    zIndex: 0, 
 
     // grid
     display: "grid",
