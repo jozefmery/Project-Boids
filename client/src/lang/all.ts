@@ -38,7 +38,9 @@ export type LanguageDefinition = {
     entities: string;
     noSelectedEntity: string;
     predator: string;
+    predators: string;
     prey: string;
+    preys: string;
     clearSelection: string;
     entityType: string;
     id: string;
@@ -47,6 +49,10 @@ export type LanguageDefinition = {
     acceleration: string;
     health: string;
     elapsed: string;
+    saveAsImg: string;
+    current: string;
+    average: string;
+    hunger: string;
 };
 
 /**

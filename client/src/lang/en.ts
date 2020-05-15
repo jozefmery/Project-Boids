@@ -33,7 +33,9 @@ const data: LanguageDefinition = {
     entities: "Entities",
     noSelectedEntity: "No entity is selected",
     predator: "Predator",
+    predators: "Predators",
     prey: "Prey",
+    preys: "Preys",
     clearSelection: "Clear selection",
     entityType: "Entity type",
     id: "Identification",
@@ -41,7 +43,11 @@ const data: LanguageDefinition = {
     velocity: "Velocity",
     acceleration: "Acceleration",
     health: "Health",
-    elapsed: "Elapsed time"
+    elapsed: "Elapsed time",
+    saveAsImg: "Save as image",
+    current: "Current",
+    average: "Average",
+    hunger: "Hunger"
 };
 
 export default data;

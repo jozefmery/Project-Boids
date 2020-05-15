@@ -33,7 +33,9 @@ const data: LanguageDefinition = {
     entities: "Bytosti",
     noSelectedEntity: "Žiadna bytosť nie je zvolená",
     predator: "Lovec",
+    predators: "Lovci",
     prey: "Korisť",
+    preys: "Koriste",
     clearSelection: "Zmazať výber",
     entityType: "Typ bytosti",
     id: "Identifikátor",
@@ -41,7 +43,11 @@ const data: LanguageDefinition = {
     velocity: "Rýchlosť",
     acceleration: "Akcelerácia",
     health: "Život",
-    elapsed: "Uplynutý čas"
+    elapsed: "Uplynutý čas",
+    saveAsImg: "Uložiť ako obrázok",
+    current: "Aktuálne",
+    average: "Priemer",
+    hunger: "Hlad"
 };
 
 export default data;
