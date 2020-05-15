@@ -73,6 +73,7 @@ export type SimStylerList =
                     |   "preyHighlight"
                     |   "predator"
                     |   "predatorHighlight"
+                    |   "food"
                     |   "entityPerception"
                     |   "entityPercived"
                     |   "quadtree"
@@ -151,6 +152,13 @@ export const simStylers: SimStylers = {
         predatorHighlight: (p5) => {
 
             // TODO
+        },
+
+        food: (p5) => {
+
+            // TODO
+            p5.stroke("red");
+            p5.strokeWeight(3);
         },
 
         entityPerception: (p5) => {
@@ -241,6 +249,13 @@ export const simStylers: SimStylers = {
             // TODO
         },
 
+        food: (p5) => {
+
+            // TODO
+            p5.stroke("red");
+            p5.strokeWeight(3);
+        },
+
         entityPerception: (p5) => {
 
             p5.noStroke();
@@ -305,10 +320,17 @@ export class Style {
 
     /// Public static members
 
-    public static readonly verticalFlexBox = Style.create({
+    public static readonly horizontalFlexBox = Style.create({
 
         display: "flex",
         flexFlow: "row nowrap",
+        alignItems: "center"
+    });
+
+    public static readonly verticalFlexBox = Style.create({
+
+        display: "flex",
+        flexFlow: "column nowrap",
         alignItems: "center"
     });
         
