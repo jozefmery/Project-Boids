@@ -141,8 +141,6 @@ function useFps({ delta }: ReturnType<typeof useTime>) {
         if(delta.current > 0) {
 
             fps.current = 1000 / delta.current;
-
-            console.log(fps.current);
         }
 
     }, [delta]);
@@ -173,17 +171,11 @@ function useEntities() {
 
     useEffect(() => {
 
-        context.current = new EntityContext(area);
+        context.current = new EntityContext();
 
     // do not include area, call constructor only once    
     // eslint-disable-next-line
     }, []);
-
-    useEffect(() => {
-
-        context.current.setArea(area);
-
-    }, [area]);
 
     const screenToCanvas = useCallback(({ x, y }: Position2D) => {
 
