@@ -78,8 +78,6 @@ function useSetup(state: SimState) {
 
         dispatch(centerCameraToArea());
 
-        state.entities.context.current.addEntities("prey", 500);
-
     }, [dispatch, state.entities.context]);
 }
 
@@ -226,6 +224,7 @@ function useDrawEntities(state: SimState) {
     const preyHighlightStyler = useCanvasStylers("preyHighlight");
     const predatorStyler = useCanvasStylers("predator");
     const predatorHighlightStyler = useCanvasStylers("predatorHighlight");
+    const foodStyler = useCanvasStylers("food");
     const perceptionStyler = useCanvasStylers("entityPerception");
     const percievedStyler = useCanvasStylers("entityPercived");
     const quadtreeStyler = useCanvasStylers("quadtree");
@@ -244,6 +243,7 @@ function useDrawEntities(state: SimState) {
                 default: predatorStyler,
                 highlight: predatorHighlightStyler
             },
+            food: foodStyler,
             perception: perceptionStyler,
             percieved: percievedStyler,
             quadtree: quadtreeStyler
@@ -254,6 +254,7 @@ function useDrawEntities(state: SimState) {
         preyHighlightStyler,
         predatorStyler,
         predatorHighlightStyler,
+        foodStyler,
         perceptionStyler,
         percievedStyler,
         quadtreeStyler]);
