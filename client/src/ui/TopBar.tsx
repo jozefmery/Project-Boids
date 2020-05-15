@@ -248,7 +248,7 @@ const panelStyle = Style.create({
     borderStyle: "none",
     borderBottomStyle: "solid"
 
-}, {}, [Style.panel, Style.verticalFlexBox]);
+}, {}, [Style.panel, Style.horizontalFlexBox]);
 
 const useTopBarStyles = makeStyles(({ theme }: Theme) => ({
 
