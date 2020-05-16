@@ -101,7 +101,7 @@ export function useStatsState(): StatsState {
     const simState = useContext(SimStateContext);
 
     const fps = useFps(simState, 200);
-    const entities = useEntities(simState, 300);
+    const entities = useEntities(simState, 500);
 
     return {
 
