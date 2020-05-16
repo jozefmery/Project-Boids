@@ -1,7 +1,10 @@
 // TODO header
 
 // import react
-import { useRef, useContext, useEffect } from "react";
+import { useRef, useContext, useEffect, useCallback } from "react";
+
+// import redux
+import { useSelector } from "react-redux";
 
 // import sim state
 import { SimStateContext } from "../AppState";
@@ -9,6 +12,7 @@ import { SimStateContext } from "../AppState";
 // import type information
 import { StatsState } from "../types/stats";
 import { SimState } from "../types/simulation";
+import { StateShape } from "../types/redux";
 
 function useFps(simState: SimState, pollingRate: number) {
 
@@ -52,33 +56,37 @@ function useEntities(simState: SimState, pollingRate: number) {
     const preys = useRef(0);
     const array = useRef<Array<{ predators: number, preys: number }>>([]);
 
+    const simRunning = useSelector((state: StateShape) => state.sim.speed.running);
+
+    const update = useCallback(() => {
+
+        if(!simRunning || simState.time.delta.current === 0) return;
+
+        const predatorCount = simState.entities.context.current.entityCount("predator");
+        const preyCount = simState.entities.context.current.entityCount("prey");
+
+        predators.current = predatorCount;
+        preys.current = preyCount;
+
+        array.current.push({ predators: predatorCount, preys: preyCount });
+
+        if(array.current.length > 500) {
+
+            array.current.splice(0, 1);
+        }
+
+    }, [simState.entities.context, simState.time.delta, simRunning]);
+
     useEffect(() => {
 
-        // TODO update only when sim running
-
-        const id = window.setInterval(() => {
-
-            const predatorCount = simState.entities.context.current.entityCount("predator");
-            const preyCount = simState.entities.context.current.entityCount("prey");
-
-            predators.current = predatorCount;
-            preys.current = preyCount;
-
-            array.current.push({ predators: predatorCount, preys: preyCount });
-
-            if(array.current.length > 500) {
-
-                array.current.splice(0, 1);
-            }
-
-        }, pollingRate);
+        const id = window.setInterval(update, pollingRate);
 
         return () => {
 
             window.clearInterval(id);
         }
 
-    }, [pollingRate, simState.entities.context]);
+    }, [pollingRate, update]);
     
     return {
         
@@ -93,7 +101,7 @@ export function useStatsState(): StatsState {
     const simState = useContext(SimStateContext);
 
     const fps = useFps(simState, 200);
-    const entities = useEntities(simState, 3000);
+    const entities = useEntities(simState, 300);
 
     return {
 
