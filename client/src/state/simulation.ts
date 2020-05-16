@@ -162,7 +162,6 @@ function useFps({ delta }: ReturnType<typeof useTime>) {
 
 function useEntities() {
     
-    const area = useSelector((state: StateShape) => state.sim.area);
     const dimensions = useSelector((state: StateShape) => state.global.dimensions);
     const cameraTarget = useSelector((state: StateShape) => state.sim.camera.target);
     const scale = useSelector((state: StateShape) => state.sim.camera.scale.current);
