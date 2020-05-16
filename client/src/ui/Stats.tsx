@@ -358,7 +358,7 @@ function useEntityChartStylers() {
 
 function EntityStats() {
 
-    useForceUpdate(3000);
+    useForceUpdate(1000);
 
     const zoomInString = useLanguageString("zoomIn");
     const zoomOutString = useLanguageString("zoomOut");
