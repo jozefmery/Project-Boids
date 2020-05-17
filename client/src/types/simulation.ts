@@ -4,11 +4,9 @@
  * Author: Jozef Méry <xmeryj00@stud.fit.vutbr.cz>
  * Date: 18.4.2020
  * License: none
- * Description: 
+ * Description: Defines types for simulation.
  * 
  */
-
-// TODO description
 
 // import type information
 import React from "react";
