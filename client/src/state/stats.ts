@@ -1,4 +1,12 @@
-// TODO header
+/**
+ * File: state/stats.ts
+ * 
+ * Author: Jozef Méry <xmeryj00@stud.fit.vutbr.cz>
+ * Date: 17.5.2020
+ * License: none
+ * Description: Defines state hooks for statistics.
+ * 
+ */
 
 // import react
 import { useRef, useContext, useEffect, useCallback } from "react";

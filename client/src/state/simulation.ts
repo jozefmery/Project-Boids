@@ -1,4 +1,12 @@
-// TODO header
+/**
+ * File: state/simulation.ts
+ * 
+ * Author: Jozef Méry <xmeryj00@stud.fit.vutbr.cz>
+ * Date: 17.5.2020
+ * License: none
+ * Description: Defines simulation state hooks.
+ * 
+ */
 
 // import react
 import { useRef, useState, useCallback, useEffect } from "react";
