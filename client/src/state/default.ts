@@ -4,7 +4,7 @@
  * Author: Jozef Méry <xmeryj00@stud.fit.vutbr.cz>
  * Date: 29.1.2020
  * License: none
- * Description: Defines the fault values for the app state.
+ * Description: Defines the default values for the app state.
  * 
  */
 
@@ -41,8 +41,8 @@ const defaultState: StateShape =  {
         
         area: {
 
-            width: 5000, 
-            height: 5000 
+            width: 1024, 
+            height: 1024 
         },
         
         camera: {
@@ -65,7 +65,7 @@ const defaultState: StateShape =  {
                 left: false
             },
             
-            moveDelta: 250,
+            moveDelta: 2000,
 
             target: { x: 0, y: 0 },
 
