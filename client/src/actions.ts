@@ -1,4 +1,13 @@
-// TODO action header
+/**
+ * File: actions.ts
+ * 
+ * Author: Jozef Méry <xmeryj00@stud.fit.vutbr.cz>
+ * Date: 17.5.2020
+ * License: none
+ * Description: Defines actions which wrap various state mutators used by
+ *              UI components and hotkey callbacks.
+ * 
+ */
 
 // import react
 import { useCallback, } from "react";
