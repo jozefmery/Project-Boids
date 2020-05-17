@@ -1,4 +1,13 @@
-// TODO header
+/**
+ * File: AppState.tsx
+ * 
+ * Author: Jozef Méry <xmeryj00@stud.fit.vutbr.cz>
+ * Date: 17.5.2020
+ * License: none
+ * Description: Brings together all state providers.
+ * 
+ */
+
 
 // import react
 import React from "react";
