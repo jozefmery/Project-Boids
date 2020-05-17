@@ -132,33 +132,36 @@ export const simStylers: SimStylers = {
 
         prey: (p5) => {
 
-            p5.fill(255);
+            p5.fill("#00DA09");
             p5.stroke(0);
             p5.strokeWeight(2);
         },
 
         preyHighlight: (p5) => {
 
-            p5.fill("#ffc927");
+            p5.fill("#FFC927");
             p5.stroke(0);
             p5.strokeWeight(2);
         },
 
         predator: (p5) => {
 
-            // TODO
+            p5.fill("red");
+            p5.stroke(0);
+            p5.strokeWeight(2);
         },
 
         predatorHighlight: (p5) => {
 
-            // TODO
+            p5.fill("#FFC927");
+            p5.stroke(0);
+            p5.strokeWeight(2);
         },
 
         food: (p5) => {
 
-            // TODO
-            p5.stroke("red");
-            p5.strokeWeight(3);
+            p5.stroke("#FF8000");
+            p5.strokeWeight(10);
         },
 
         entityPerception: (p5) => {
@@ -227,33 +230,36 @@ export const simStylers: SimStylers = {
         
         prey: (p5) => {
 
-            p5.fill("#00da09");
+            p5.fill("#00DA09");
             p5.stroke(0);
             p5.strokeWeight(2);
         },
 
         preyHighlight: (p5) => {
 
-            p5.fill("#ffc927");
+            p5.fill("#FFC927");
             p5.stroke(0);
             p5.strokeWeight(2);
         },
 
         predator: (p5) => {
 
-            // TODO
+            p5.fill("red");
+            p5.stroke(0);
+            p5.strokeWeight(2);
         },
 
         predatorHighlight: (p5) => {
 
-            // TODO
+            p5.fill("#FFC927");
+            p5.stroke(0);
+            p5.strokeWeight(2);
         },
 
         food: (p5) => {
 
-            // TODO
-            p5.stroke("red");
-            p5.strokeWeight(3);
+            p5.stroke("#FF8000");
+            p5.strokeWeight(10);
         },
 
         entityPerception: (p5) => {
