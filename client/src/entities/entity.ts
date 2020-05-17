@@ -4,11 +4,9 @@
  * Author: Jozef Méry <xmeryj00@stud.fit.vutbr.cz>
  * Date: 24.4.2020
  * License: none
- * Description: 
+ * Description: Defines entities for simulation.
  * 
  */
-
-// TODO description
 
 // import utilities
 import lodash from "lodash";
@@ -68,6 +66,12 @@ type EntityOptions = {
 
     health?: number;
     hunger?: number;
+
+    reproductionInterval?: number;
+
+    maxAge?: number;
+
+    eatingThreshold?: number;
 };
 
 type EntityCtorOptions = {
@@ -117,6 +121,11 @@ export type EntityType = "predator" | "prey" | "food";
 
 export type SelectableEntity = "predator" | "prey";
 
+function vary(value: number, variance: number): number {
+
+    return value + (variance * (Math.random() - 0.5));
+}
+
 export class Entity {
 
     /// Protected members
@@ -138,9 +147,25 @@ export class Entity {
 
     protected percieved_: Vicinity;
 
+    protected perceptionCache_: {
+
+        [type in EntityType]?: Vicinity;
+    }
+
+    protected vicinityCache_: {
+
+        [type in EntityType]?: Vicinity;
+    }
+
+    protected reproduction_: number;
+
+    protected age_: number;
+
+    protected foodType_: EntityType;
+
     /// Constructor function
     
-    protected constructor(options: EntityCtorOptions, type: EntityType) {
+    protected constructor(options: EntityCtorOptions, type: EntityType, food: EntityType) {
 
         this.type_ = type;
         this.id_ = uniqid();
@@ -157,6 +182,15 @@ export class Entity {
         this.vicinity_ = [];
 
         this.percieved_ = [];
+
+        this.perceptionCache_ = {};
+        this.vicinityCache_ = {};
+
+        this.reproduction_ = 0;
+
+        this.age_ = 0;
+
+        this.foodType_ = food;
     }
 
     /// Protected methods
@@ -289,6 +323,7 @@ export class Entity {
         this.adjustSpeed();
 
         velocity.add(Vector.mult(acceleration, timeDelta / 1000));
+        velocity.limit(this.options_.speed + 10);
         position.add(Vector.mult(velocity, timeDelta / 1000));
 
         return this;
@@ -304,7 +339,7 @@ export class Entity {
 
             modifier = -1;
         
-        } else if(hunger=== 100) {
+        } else if(hunger > 50) {
 
             modifier = 1;
         }
@@ -357,7 +392,34 @@ export class Entity {
 
     protected getPercievedType(type: EntityType): Vicinity {
 
-        return this.percieved_.filter(entity => entity.instance.type() === type);
+        let percieved = this.perceptionCache_[type];
+
+        if(percieved !== undefined) {
+
+            return percieved;
+        }
+
+        percieved = this.percieved_.filter(entity => entity.instance.type() === type);
+
+        this.perceptionCache_[type] = percieved;
+
+        return percieved;
+    }
+
+    protected getVicinityType(type: EntityType): Vicinity {
+
+        let vicinity = this.vicinityCache_[type];
+
+        if(vicinity !== undefined) {
+
+            return vicinity;
+        }
+
+        vicinity = this.vicinity_.filter(entity => entity.instance.type() === type);
+
+        this.vicinityCache_[type] = vicinity;
+
+        return vicinity;
     }
 
     protected drawEntity(p5: P5, stylers: EntityStyler, highlighted: boolean): Entity {
@@ -434,6 +496,136 @@ export class Entity {
         return this.draft_;
     }
 
+    protected clearCache(): Entity {
+
+        this.perceptionCache_ = {};
+        this.vicinityCache_ = {};
+
+        return this;
+    }
+
+    protected reproduce(timeDelta: number, context: Context): Entity {
+
+        this.reproduction_ += (timeDelta / 1000) * Math.random();
+
+        if(this.options_.health > 80 && 
+            this.reproduction_ > this.options_.reproductionInterval &&
+            this.age_ > this.options_.maxAge / 8) {
+
+            this.reproduction_ = 0;
+
+            context.addEntity(this.type_ as SelectableEntity, {
+
+                forces: {
+
+                    position: createVector(this.draft_.forces_.position).add(1, 1),
+                    velocity: createVector(this.draft_.forces_.velocity),
+                    acceleration: createVector()
+                },
+
+                options: {
+
+                    speed: vary(this.options_.speed, 10),
+                    maxForce: {
+
+                        magnitude: vary(this.options_.maxForce.magnitude, 3),
+                        angle: vary(this.options_.maxForce.angle, 5)
+                    },
+
+                    perception: {
+
+                        radius: vary(this.options_.perception.radius, 10),
+                        angle: vary(this.options_.perception.angle, 10),
+                    },
+
+                    collisionRadius: this.options_.collisionRadius,
+
+                    flockingModifier: {
+
+                        alignment: this.options_.flockingModifier.alignment,
+                        cohesion: this.options_.flockingModifier.cohesion,
+                        separation: this.options_.flockingModifier.separation,
+                    },
+
+                    hungerDecay: vary(this.options_.hungerDecay, 4),
+                    healthDelta: vary(this.options_.healthDelta, 5),
+
+                    health: 100,
+                    hunger: 75,
+
+                    reproductionInterval: vary(this.options_.reproductionInterval, 10),
+
+                    maxAge: vary(this.options_.maxAge, 10),
+
+                    eatingThreshold: this.options_.eatingThreshold
+                }
+            });
+        }
+
+        return this;
+    }
+
+    protected advanceAge(timeDelta: number): Entity {
+
+        this.age_ += timeDelta / 1000;
+
+        if(this.age_ > this.options_.maxAge) {
+
+            this.kill();
+        }
+
+        return this;
+    }
+
+    protected seekFood(): Entity {
+
+        if(this.options_.hunger > this.options_.eatingThreshold) return this;
+
+        const foods = this.getPercievedType(this.foodType_);
+
+        let closest: undefined | Vicinity[number] = undefined;
+
+        for(const food of foods) {
+
+            if(closest === undefined || closest.dist > food.dist) {
+
+                closest = food;
+            }
+        }
+
+        if(closest) {
+            
+            this.steerTo(closest.instance.position(), this.options_.hunger < 10 ? 3.0 : 1.0);
+        }
+
+        return this;
+    }
+
+    protected steerTo(position: Vector, multiplier: number = 1.0): Entity {
+
+        // shorthands
+        const { position: current } = this.draft().forces_;
+
+        this.steer(Vector.sub(position, current), multiplier);
+
+        return this;
+    }
+
+    protected steer(direction: Vector, multiplier: number = 1.0): Entity {
+
+        // shorthands
+        const { velocity, acceleration } = this.draft().forces_;
+
+        const steering = createVector(direction).setMag(this.options_.speed);
+        steering.sub(velocity);
+        steering.limit(this.options_.maxForce.magnitude);
+        steering.mult(multiplier);
+
+        acceleration.add(steering);
+
+        return this;
+    }
+
     /// Public methods
 
     // mutator methods
@@ -442,6 +634,13 @@ export class Entity {
 
         this.options_.health = 0;
         
+        return this;
+    }
+
+    public feed(amount: number): Entity {
+
+        this.options_.hunger = lodash.clamp(this.options_.hunger + amount, 0, 100);
+
         return this;
     }
 
@@ -497,6 +696,11 @@ export class Entity {
         return this.forces_.acceleration;
     }
 
+    public age(): number {
+
+        return this.age_;
+    }
+
     // update methods
 
     public update(timeDelta: number, context: Context): Entity {
@@ -528,17 +732,16 @@ class Prey extends Entity {
 
     public constructor(options: EntityCtorOptions) {
 
-        super(options, "prey");
+        super(options, "prey", "food");
     }
 
     /// Protected methods
 
-    protected getAlignment(percieved: Vicinity): Vector {
-
-        // shorthands
-        const { velocity } = this.draft().forces_;
+    protected align(): Prey {
 
         const alignment = createVector();
+
+        const percieved = this.getPercievedType("prey");
 
         for(const other of percieved) {
             
@@ -547,77 +750,113 @@ class Prey extends Entity {
 
         if(percieved.length) {
 
-            alignment.div(percieved.length);
-            alignment.setMag(this.options_.speed);
-            alignment.sub(velocity);
-            alignment.limit(this.options_.maxForce.magnitude);
+            this.steer(alignment.div(percieved.length), this.options_.flockingModifier.alignment);
         }
 
-        return alignment.mult(this.options_.flockingModifier.alignment);
+        return this;
     }
 
-    protected getCohesion(percieved: Vicinity): Vector {
+    protected cohere(): Prey {
 
-        // shorthands
-        const { position, velocity } = this.draft().forces_;
+        const cohesion = createVector();
 
-        const coherence = createVector();
+        const percieved = this.getPercievedType("prey");
 
         for(const other of percieved) {
             
-            coherence.add(other.instance.position());
+            cohesion.add(other.instance.position());
         }
 
         if(percieved.length) {
 
-            coherence.div(percieved.length);
-            coherence.sub(position);
-            coherence.setMag(this.options_.speed);
-            coherence.sub(velocity);
-            coherence.limit(this.options_.maxForce.magnitude);
+            this.steerTo(cohesion.div(percieved.length), this.options_.flockingModifier.cohesion);
         }
 
-        return coherence.mult(this.options_.flockingModifier.cohesion);
+        return this;
     }
 
-    protected getSeparation(percieved: Vicinity): Vector {
+    protected separate(): Prey {
 
         // shorthands
-        const { position, velocity } = this.draft().forces_;
+        const { position } = this.draft().forces_;
 
         const separation = createVector();
+
+        const percieved = this.getPercievedType("prey");
 
         for(const other of percieved) {
             
             const diff = Vector.sub(position, other.instance.position());
 
-            if(diff.magSq()) {
-
-                diff.div(other.dist * other.dist);
-                separation.add(diff);
-            }
+            diff.div(other.dist * other.dist);
+            separation.add(diff);            
         }
 
         if(percieved.length) {
 
-            separation.div(percieved.length);
-            separation.setMag(this.options_.speed);
-            separation.sub(velocity);
-            separation.limit(this.options_.maxForce.magnitude);
+            this.steer(separation.div(percieved.length), this.options_.flockingModifier.separation);
         }
 
-        return separation.mult(this.options_.flockingModifier.separation);
+        return this;
     }
 
     protected flock(): Prey {
 
-        const { acceleration } = this.draft().forces_;
+        this.align();
+        this.cohere();
+        this.separate();
 
-        const preys = this.getPercievedType("prey");
+        return this;
+    }
+
+    protected collide(context: Context): Prey {
+
+        super.collide(context);
+
+        if(this.options_.hunger > this.options_.eatingThreshold) return this;
+
+        const foodVicinity = this.getVicinityType("food");
+        const preyVicinity = this.getVicinityType("prey");
+
+        foodVicinity.forEach(({ instance: food, dist }) => {
+
+            if(dist < this.options_.collisionRadius + food.options().collisionRadius) {
+
+                food.kill();
+
+                this.feed(50);
+
+                for(const prey of preyVicinity) {
+
+                    prey.instance.feed((50 / preyVicinity.length));
+                }
+            }
+        });
+
+        return this;
+    }
+
+    protected evadePredators(): Prey {
+
+        // shorthands
+        const { position } = this.draft().forces_;
         
-        acceleration.add(this.getAlignment(preys)); 
-        acceleration.add(this.getCohesion(preys)); 
-        acceleration.add(this.getSeparation(preys));
+        const evasion = createVector();
+
+        const predators = this.getPercievedType("predator");
+
+        for(const predator of predators) {
+            
+            const diff = Vector.sub(position, predator.instance.position());
+
+            diff.div(predator.dist * predator.dist);
+            evasion.add(diff);
+        }
+
+        if(predators.length) {
+
+            this.steer(evasion.div(predators.length));
+        }
 
         return this;
     }
@@ -628,7 +867,13 @@ class Prey extends Entity {
 
         this.clearAcceleration();
 
+        this.clearCache();
+
         this.vicinity(context);
+
+        this.evadePredators();
+
+        this.seekFood();
 
         this.flock();
 
@@ -639,6 +884,10 @@ class Prey extends Entity {
         this.updateHunger(timeDelta);
 
         this.updateHealth(timeDelta);
+
+        this.advanceAge(timeDelta);
+        
+        this.reproduce(timeDelta, context);
 
         return this;
     }
@@ -659,7 +908,7 @@ class Predator extends Entity {
 
     public constructor(options: EntityCtorOptions) {
 
-        super(options, "predator");
+        super(options, "predator", "prey");
     }
 
     /// Protected methods 
@@ -667,6 +916,20 @@ class Predator extends Entity {
     protected collide(context: Context): Predator {
 
         super.collide(context);
+
+        if(this.options_.hunger > this.options_.eatingThreshold) return this;
+
+        const preyVicinity = this.getVicinityType("prey");
+
+        preyVicinity.forEach(({ instance: prey, dist }) => {
+
+            if(dist < this.options_.collisionRadius + prey.options().collisionRadius) {
+
+                prey.kill();
+
+                this.feed(100);
+            }
+        });
 
         return this;
     }
@@ -677,9 +940,11 @@ class Predator extends Entity {
 
         this.clearAcceleration();
 
+        this.clearCache();
+
         this.vicinity(context);
 
-        // TODO chase 
+        this.seekFood();
 
         this.updateVectors(timeDelta);
 
@@ -688,6 +953,10 @@ class Predator extends Entity {
         this.updateHunger(timeDelta);
 
         this.updateHealth(timeDelta);
+
+        this.advanceAge(timeDelta);
+
+        this.reproduce(timeDelta, context);
 
         return this;
     }
@@ -708,7 +977,7 @@ class Food extends Entity {
 
     public constructor(options: EntityCtorOptions) {
 
-        super(options, "food");
+        super(options, "food", "food");
     }
 
     /// Protected methods
@@ -725,9 +994,9 @@ class Food extends Entity {
 
     /// Public methods
 
-    public update(timeDelta: number, context: Context): Food {
+    public update(timeDelta: number, _: Context): Food {
 
-        // TODO health decay ?
+        this.advanceAge(timeDelta);
 
         return this;
     }
@@ -740,11 +1009,7 @@ class Food extends Entity {
 
 type EntityGeneration = {
 
-    [type in SelectableEntity]: {
-
-        base: RemoveUndefinedDeep<EntityOptions>;
-        variation: RemoveUndefinedDeep<EntityOptions>;
-    }
+    [type in SelectableEntity]: RemoveUndefinedDeep<EntityOptions>;
 };
 
 type ContextOptions = {
@@ -756,6 +1021,8 @@ type ContextOptions = {
     entities: EntityGeneration;
 
     foodSpawn: number;
+    foodMaxAge: number;
+    initialFood: number;
 }
 
 export class Context {
@@ -773,150 +1040,99 @@ export class Context {
         [type in EntityType]: number;
     };
 
+    protected foodSpawnProgress: number;
+
     /// Contructor function
 
     constructor() {
         
         this.options_ = {
 
-            onBoundaryHit: "kill",
+            onBoundaryHit: "wrap",
             drawQuadtree: false,
             area: { width: 0, height: 0 },
 
             entities: {
 
-                predator: {
+                predator: { 
+                
+                    speed: 100,
+                    maxForce: {
 
-                    base: {
-                        
-                        speed: 100,
-                        maxForce: {
-
-                            magnitude: 30,
-                            angle: (2 / 3) * Math.PI
-                        },
-
-                        perception: {
-
-                            radius: 300,
-                            angle: 200
-                        },
-
-                        collisionRadius: 20,
-
-                        flockingModifier: {
-
-                            alignment: 1.0,
-                            cohesion: 1.0,
-                            separation: 1.0
-                        },
-
-                        hungerDecay: 5,
-                        healthDelta: 20,
-
-                        health: 100,
-                        hunger: 100
+                        magnitude: 30,
+                        angle: (2 / 3) * Math.PI
                     },
-                    
-                    variation: {
 
-                        speed: 10,
-                        maxForce: {
+                    perception: {
 
-                            magnitude: 3,
-                            angle: (1 / 8) * Math.PI
-                        },
+                        radius: 300,
+                        angle: 200
+                    },
 
-                        perception: {
+                    collisionRadius: 20,
 
-                            radius: 20,
-                            angle: 10
-                        },
+                    flockingModifier: {
 
-                        collisionRadius: 0,
+                        alignment: 1.0,
+                        cohesion: 1.0,
+                        separation: 1.0
+                    },
 
-                        flockingModifier: {
+                    hungerDecay: 5,
+                    healthDelta: 20,
 
-                            alignment: 0.1,
-                            cohesion: 0.1,
-                            separation: 0.1
-                        },
+                    health: 100,
+                    hunger: 100,
 
-                        hungerDecay: 1,
-                        healthDelta: 3,
+                    reproductionInterval: 0,
 
-                        health: 0,
-                        hunger: 0
-                    }
+                    maxAge: 0,
+
+                    eatingThreshold: 0
                 },
+                    
 
                 prey: {
 
-                    base: {
+                    speed: 100,
+                    maxForce: {
 
-                        speed: 100,
-                        maxForce: {
-
-                            magnitude: 30,
-                            angle: (2 / 3) * Math.PI
-                        },
-
-                        perception: {
-
-                            radius: 300,
-                            angle: 200
-                        },
-
-                        collisionRadius: 20,
-
-                        flockingModifier: {
-
-                            alignment: 1.0,
-                            cohesion: 1.0,
-                            separation: 1.0
-                        },
-
-                        hungerDecay: 5,
-                        healthDelta: 20,
-
-                        health: 100,
-                        hunger: 100
+                        magnitude: 30,
+                        angle: (2 / 3) * Math.PI
                     },
+
+                    perception: {
+
+                        radius: 300,
+                        angle: 200
+                    },
+
+                    collisionRadius: 20,
+
+                    flockingModifier: {
+
+                        alignment: 1.0,
+                        cohesion: 1.0,
+                        separation: 1.0
+                    },
+
+                    hungerDecay: 5,
+                    healthDelta: 20,
+
+                    health: 100,
+                    hunger: 100,
+
+                    reproductionInterval: 0,
+
+                    maxAge: 0,
                     
-                    variation: {
-
-                        speed: 10,
-                        maxForce: {
-
-                            magnitude: 3,
-                            angle: (1 / 8) * Math.PI
-                        },
-
-                        perception: {
-
-                            radius: 20,
-                            angle: 10
-                        },
-
-                        collisionRadius: 0,
-
-                        flockingModifier: {
-
-                            alignment: 0.1,
-                            cohesion: 0.1,
-                            separation: 0.1
-                        },
-
-                        hungerDecay: 1,
-                        healthDelta: 3,
-
-                        health: 0,
-                        hunger: 0
-                    }
+                    eatingThreshold: 0
                 }
             },
 
-            foodSpawn: 5
+            foodSpawn: 0,
+            foodMaxAge: 0,
+            initialFood: 0
         };
 
         this.entities_ = this.createQuadTree();
@@ -929,6 +1145,8 @@ export class Context {
             prey: 0,
             food: 0
         };
+
+        this.foodSpawnProgress = 0;
     }
 
     /// Protected static methods
@@ -946,7 +1164,7 @@ export class Context {
 
     protected getEntityCtorOptions(type: SelectableEntity): EntityCtorOptions {
 
-        const options = this.options_.entities[type].base;
+        const options = this.options_.entities[type];
 
         const { width, height } = this.options_.area;
         const forces: EntityForces = {
@@ -1027,25 +1245,98 @@ export class Context {
         }
     }
 
-    protected addEntities(type: SelectableEntity, count: number): Context {
+    protected addFood(count: number): Context {
+
+        const { width, height } = this.options_.area;
 
         for(let i = 0; i < count; ++i) {
 
-            const options = this.getEntityCtorOptions(type)
-            this.entities_.add(new (Context.typeToConstructor(type))(options));
+            this.entities_.add(new Food({
+
+                forces: {
+
+                    acceleration: createVector(),
+                    velocity: createVector(),
+                    position: createVector(width * Math.random(), height * Math.random())
+                },
+
+                options: {
+
+                    speed: 0,
+                    maxForce: {
+
+                        magnitude: 0,
+                        angle: 0
+                    },
+
+                    perception: {
+
+                        radius: 0,
+                        angle: 0
+                    },
+
+                    collisionRadius: 10,
+
+                    flockingModifier: {
+
+                        alignment: 0,
+                        cohesion: 0,
+                        separation: 0
+                    },
+
+                    hungerDecay: 0,
+                    healthDelta: 0,
+
+                    health: 100,
+                    hunger: 0,
+
+                    reproductionInterval: 0,
+
+                    maxAge: this.options_.foodMaxAge,
+
+                    eatingThreshold: 0
+                }
+            }));
         }
 
         return this;
     }
 
-    protected spawnFood(timeDelta: number): Context {
+    protected spawnFoodInInterval(timeDelta: number): Context {
 
-        // TODO spawn food
+        this.foodSpawnProgress += timeDelta;
+
+        const interval = 1000 / this.options_.foodSpawn;
+
+        while(this.foodSpawnProgress > interval) {
+
+            this.addFood(1);
+
+            this.foodSpawnProgress -= interval;
+        }
 
         return this;
     }
 
     /// Public methods
+
+    public addEntity(type: SelectableEntity, options: EntityCtorOptions): Context {
+
+        this.entities_.add(new (Context.typeToConstructor(type))(options));
+
+        return this;
+    }
+
+    public addEntities(type: SelectableEntity, count: number): Context {
+
+        for(let i = 0; i < count; ++i) {
+
+            const options = this.getEntityCtorOptions(type)
+            this.addEntity(type, options);
+        }
+
+        return this;
+    }
 
     protected forEach(callback: (entity: Entity) => any): Context {
 
@@ -1066,7 +1357,7 @@ export class Context {
 
     public update(timeDelta: number): Context {
 
-        this.spawnFood(timeDelta);
+        this.spawnFoodInInterval(timeDelta);
 
         this.forEach(entity => entity.update(timeDelta, this));
         this.forEach(entity => entity.applyDraft());
@@ -1075,7 +1366,7 @@ export class Context {
 
         this.resetCounters();
         
-        this.forEach((entity) => { 
+        this.forEach((entity) => {
             
             if(entity.isAlive()) {
 
@@ -1117,6 +1408,8 @@ export class Context {
 
         this.addEntities("predator", predators);
         this.addEntities("prey", preys);
+
+        this.addFood(this.options_.initialFood);
 
         return this;
     }
