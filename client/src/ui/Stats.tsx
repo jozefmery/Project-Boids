@@ -1,4 +1,12 @@
-// TODO header
+/**
+ * File: types/stats.ts
+ * 
+ * Author: Jozef Méry <xmeryj00@stud.fit.vutbr.cz>
+ * Date: 17.5.2020
+ * License: none
+ * Description: Defines UI components for displaying entity/fps statistics.
+ * 
+ */
 
 // import react
 import React, { useCallback, useContext, useState, useRef } from "react";
@@ -32,6 +40,8 @@ import ZoomInIcon from '@material-ui/icons/ZoomIn';
 import ZoomOutIcon from '@material-ui/icons/ZoomOut';
 import SaveIcon from '@material-ui/icons/SaveAlt';
 import FoodIcon from '@material-ui/icons/Fastfood';
+import HourglassFullIcon from '@material-ui/icons/HourglassFull';
+import VisibilityIcon from '@material-ui/icons/Visibility';
 
 // import charts
 import { LineChart, 
@@ -176,7 +186,7 @@ function SelectedEntityHealth({ health }: { health: number }) {
                     classes={{ tooltip: tooltipClass }}>
             <div className={container}>
                 <FavoriteIcon />
-                <div>{Math.round(health)}</div>
+                <div>{Math.round(health)} / 100</div>
             </div>
         </Tooltip>);
 }
@@ -195,11 +205,48 @@ function SelectedEntityHunger({ hunger }: { hunger: number }) {
                     classes={{ tooltip: tooltipClass }}>
             <div className={container}>
                 <FoodIcon />
-                <div>{Math.round(hunger)}</div>
+                <div>{Math.round(hunger)} / 100</div>
             </div>
         </Tooltip>);
 }
 
+function SelectedEntityAge({ age, maxAge }: { age: number, maxAge: number }) {
+
+    const { container } = useHorizontalFlexBox();
+    const { tooltip: tooltipClass } = useTooltipStyles();
+
+    const ageString = useLanguageString("age");
+
+    return (
+        <Tooltip title={ageString} 
+                    placement="top" 
+                    TransitionComponent={Zoom}
+                    classes={{ tooltip: tooltipClass }}>
+            <div className={container}>
+                <HourglassFullIcon />
+                <div>{Math.round(age)} / {Math.round(maxAge)}</div>
+            </div>
+        </Tooltip>);
+}
+
+function SelectedEntityPerception({ radius, angle }: { radius: number, angle: number }) {
+
+    const { container } = useHorizontalFlexBox();
+    const { tooltip: tooltipClass } = useTooltipStyles();
+
+    const perceptionString = useLanguageString("perceptionAngleRadius");
+
+    return (
+        <Tooltip title={perceptionString} 
+                    placement="top" 
+                    TransitionComponent={Zoom}
+                    classes={{ tooltip: tooltipClass }}>
+            <div className={container}>
+                <VisibilityIcon />
+                <div>{`${angle}° & ${radius}`}</div>
+            </div>
+        </Tooltip>);
+}
 
 function SelectedEntityForce({ force, maxForce, tooltip }: 
                             { force: Position2D, maxForce: number, tooltip: string }) {
@@ -320,8 +367,10 @@ function SelectedEntity() {
             <SelectedEntityType type={selectedEntity.type() as SelectableEntity} />
             <SelectedEntityID id={selectedEntity.id()} />
             <SelectedEntityPosition position={selectedEntity.position()} />
+            <SelectedEntityPerception angle={selectedEntity.options().perception.angle} radius={selectedEntity.options().perception.radius} />
             <SelectedEntityHealth health={selectedEntity.health()} />
             <SelectedEntityHunger hunger={selectedEntity.hunger()} />
+            <SelectedEntityAge age={selectedEntity.age()} maxAge={selectedEntity.options().maxAge} />
             <SelectedEntityForces velocity={selectedEntity.velocity()}
                 maxVelocity={selectedEntity.options().speed}
                 acceleration={selectedEntity.acceleration()}
@@ -338,19 +387,17 @@ function useEntityChartStylers() {
 
         [ColorTheme.DARK]: {
 
-            sum: "blue",
             grid: "#cecece",
             predators: "red",
-            preys: "white",
+            preys: "#00DA09",
 
         },
 
         [ColorTheme.LIGHT]: {
 
-            sum: "black",
             grid: "black",
             predators: "red",
-            preys: "blue",
+            preys: "#00DA09",
         }
 
     }[theme];
@@ -396,9 +443,8 @@ function EntityStats() {
                     <CartesianGrid strokeDasharray="2 2" stroke={stylers.grid} />
                     <XAxis tick={false} stroke={stylers.grid} />
                     <YAxis stroke={stylers.grid} />
-                    <Line type="monotone" dataKey="preys" stroke={stylers.preys} strokeWidth={2} dot={false} isAnimationActive={false} />
-                    <Line type="monotone" dataKey="predators" stroke={stylers.predators} strokeWidth={2} dot={false} isAnimationActive={false} />
-                    <ReferenceLine strokeDasharray="10 10" stroke={stylers.sum} y={predators + preys} strokeWidth={2} />
+                    <Line type="monotone" dataKey="preys" stroke={stylers.preys} strokeWidth={3} dot={false} isAnimationActive={false} />
+                    <Line type="monotone" dataKey="predators" stroke={stylers.predators} strokeWidth={3} dot={false} isAnimationActive={false} />
                 </LineChart>
             </div>
             <div className={hFlex}>
@@ -494,8 +540,8 @@ function FPS() {
                     <CartesianGrid strokeDasharray="2 2" stroke={stylers.grid} />
                     <XAxis tick={false} stroke={stylers.grid} />
                     <YAxis stroke={stylers.grid} />
-                    <Line type="monotone" dataKey="fps" stroke={stylers.line} strokeWidth={2} dot={false} isAnimationActive={false} />
-                    <ReferenceLine strokeDasharray="10 10" stroke={stylers.average} y={average} strokeWidth={2} />
+                    <Line type="monotone" dataKey="fps" stroke={stylers.line} strokeWidth={3} dot={false} isAnimationActive={false} />
+                    <ReferenceLine strokeDasharray="10 10" stroke={stylers.average} y={average} strokeWidth={3} />
                 </LineChart>
             </div>
             <div className={hFlex}>
