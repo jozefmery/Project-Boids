@@ -5,7 +5,7 @@
  * Date: 2.5.2020
  * License: none
  * Description: Defines a hook for using localized language strings in combination
- *              with a hotkey
+ *              with a hotkey string representation.
  * 
  */
 
