@@ -53,6 +53,8 @@ export type LanguageDefinition = {
     current: string;
     average: string;
     hunger: string;
+    age: string;
+    perceptionAngleRadius: string;
 };
 
 /**

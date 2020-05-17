@@ -47,7 +47,9 @@ const data: LanguageDefinition = {
     saveAsImg: "Save as image",
     current: "Current",
     average: "Average",
-    hunger: "Hunger"
+    hunger: "Hunger",
+    age: "Age",
+    perceptionAngleRadius: "Perception angle & radius"
 };
 
 export default data;

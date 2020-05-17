@@ -47,7 +47,9 @@ const data: LanguageDefinition = {
     saveAsImg: "Uložiť ako obrázok",
     current: "Aktuálne",
     average: "Priemer",
-    hunger: "Hlad"
+    hunger: "Hlad",
+    age: "Vek",
+    perceptionAngleRadius: "Uhol & okruh vnímania"
 };
 
 export default data;
