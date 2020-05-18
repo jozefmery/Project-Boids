@@ -23,6 +23,6 @@ export type StatsState = {
         predators: React.MutableRefObject<number>;
         preys: React.MutableRefObject<number>;
 
-        array: React.MutableRefObject<Array<{ predators: number, preys: number }>>;
+        array: React.MutableRefObject<Array<{ predators: number, preys: number, stamp: number }>>;
     };
 };

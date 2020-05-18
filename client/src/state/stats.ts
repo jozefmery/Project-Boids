@@ -35,7 +35,7 @@ function useFps(simState: SimState, pollingRate: number) {
             
             array.current.push({ fps: Math.round(fps) });
 
-            if(array.current.length > 500) {
+            if(array.current.length > 50) {
 
                 array.current.splice(0, 1);
             }
@@ -62,7 +62,7 @@ function useEntities(simState: SimState, pollingRate: number) {
 
     const predators = useRef(0);
     const preys = useRef(0);
-    const array = useRef<Array<{ predators: number, preys: number }>>([]);
+    const array = useRef<Array<{ predators: number, preys: number, stamp: number }>>([]);
 
     const simRunning = useSelector((state: StateShape) => state.sim.speed.running);
 
@@ -72,11 +72,12 @@ function useEntities(simState: SimState, pollingRate: number) {
 
         const predatorCount = simState.entities.context.current.entityCount("predator");
         const preyCount = simState.entities.context.current.entityCount("prey");
+        const timeStamp = Math.round(simState.time.elapsed.current / 1000);
 
         predators.current = predatorCount;
         preys.current = preyCount;
 
-        array.current.push({ predators: predatorCount, preys: preyCount });
+        array.current.push({ predators: predatorCount, preys: preyCount, stamp: timeStamp });
 
         if(array.current.length > 500) {
 
