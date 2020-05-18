@@ -55,7 +55,7 @@ export type StateShape = {
 
         dimensions: Dimensions2D;
 
-        sidePanel: "none" | "stats" | "setup";
+        sidePanel: "none" | "stats" | "setup" | "about";
     };
 
     sim: {
