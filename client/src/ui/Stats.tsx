@@ -42,6 +42,7 @@ import SaveIcon from '@material-ui/icons/SaveAlt';
 import FoodIcon from '@material-ui/icons/Fastfood';
 import HourglassFullIcon from '@material-ui/icons/HourglassFull';
 import VisibilityIcon from '@material-ui/icons/Visibility';
+import PlusOneIcon from '@material-ui/icons/PlusOne';
 
 // import charts
 import { LineChart, 
@@ -229,6 +230,25 @@ function SelectedEntityAge({ age, maxAge }: { age: number, maxAge: number }) {
         </Tooltip>);
 }
 
+function SelectedEntityReproduction({ progress, readyAt }: { progress: number, readyAt: number }) {
+
+    const { container } = useHorizontalFlexBox();
+    const { tooltip: tooltipClass } = useTooltipStyles();
+
+    const reproductionString = useLanguageString("reproduction");
+
+    return (
+        <Tooltip title={reproductionString} 
+                    placement="top" 
+                    TransitionComponent={Zoom}
+                    classes={{ tooltip: tooltipClass }}>
+            <div className={container}>
+                <PlusOneIcon />
+                <div>{Math.round(progress)} / {Math.round(readyAt)}</div>
+            </div>
+        </Tooltip>);
+}
+
 function SelectedEntityPerception({ radius, angle }: { radius: number, angle: number }) {
 
     const { container } = useHorizontalFlexBox();
@@ -371,6 +391,7 @@ function SelectedEntity() {
             <SelectedEntityPerception angle={selectedEntity.options().perception.angle} radius={selectedEntity.options().perception.radius} />
             <SelectedEntityHealth health={selectedEntity.health()} />
             <SelectedEntityHunger hunger={selectedEntity.hunger()} />
+            <SelectedEntityReproduction progress={selectedEntity.reproduction()} readyAt={selectedEntity.options().reproductionInterval} />
             <SelectedEntityAge age={selectedEntity.age()} maxAge={selectedEntity.options().maxAge} />
             <SelectedEntityForces velocity={selectedEntity.velocity()}
                 maxVelocity={selectedEntity.options().speed}
@@ -433,16 +454,16 @@ function EntityStats() {
 
     return (
         <div className={vFlex}>
-            <div>
+            <div style={{ color: stylers.predators }}>
                 {`${predatorsString}: ${predators}`}
             </div>
-            <div>
+            <div  style={{ color: stylers.preys }}>
                 {`${preysString}: ${preys}`}
             </div>
             <div ref={canvasRef}>
                 <LineChart width={zoomed ? 700 : 350} height={zoomed ? 500 : 250} data={[...array]}>
                     <CartesianGrid strokeDasharray="2 2" stroke={stylers.grid} />
-                    <XAxis tick={false} stroke={stylers.grid} />
+                    <XAxis stroke={stylers.grid} dataKey="stamp" interval="preserveEnd" minTickGap={20} />
                     <YAxis stroke={stylers.grid} />
                     <Line type="monotone" dataKey="preys" stroke={stylers.preys} strokeWidth={3} dot={false} isAnimationActive={false} />
                     <Line type="monotone" dataKey="predators" stroke={stylers.predators} strokeWidth={3} dot={false} isAnimationActive={false} />
