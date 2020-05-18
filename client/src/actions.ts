@@ -19,7 +19,8 @@ import {
 
     toggleTheme,
     setLanguage,
-    toggleStatsOpen
+    toggleStatsOpen,
+    toggleSimSetupOpen
 
 } from "./state/slices/global";
 
@@ -182,6 +183,17 @@ function useToggleStatsOpen() {
     }, [dispatch]);
 }
 
+function useToggleSimSetupOpen() {
+
+    const dispatch = useDispatch();
+
+    return useCallback(() => {
+
+        dispatch(toggleSimSetupOpen());
+
+    }, [dispatch]);
+}
+
 export const actionList = [
 
     "toggleTheme",
@@ -205,7 +217,8 @@ export const actionList = [
     "setCameraMoveLeft",
     "resetCameraMoveLeft",
 
-    "toggleStatsOpen"
+    "toggleStatsOpen",
+    "toggleSimSetupOpen"
 
 ] as const;
 
@@ -233,6 +246,7 @@ function useActionMap(): ActionMap {
     const setCameraMoveLeft = useSetMoveCameraDirection("left");
     const resetCameraMoveLeft = useResetMoveCameraDirection("left");
     const toggleStatsOpen = useToggleStatsOpen();
+    const toggleSimSetupOpen = useToggleSimSetupOpen();
 
     return {
 
@@ -253,7 +267,8 @@ function useActionMap(): ActionMap {
         resetCameraMoveDown,
         setCameraMoveLeft,
         resetCameraMoveLeft,
-        toggleStatsOpen
+        toggleStatsOpen,
+        toggleSimSetupOpen
     };
 }
 
