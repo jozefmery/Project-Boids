@@ -84,6 +84,10 @@ export type LanguageDefinition = {
     numberInRange: string;
     nonNegativeFloat: string;
     initialCount: string;
+    openAbout: string;
+    closeAbout: string;
+    author: string;
+    lastChange: string;
 };
 
 /**

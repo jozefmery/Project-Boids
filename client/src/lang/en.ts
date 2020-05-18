@@ -78,7 +78,11 @@ const data: LanguageDefinition = {
     eatingThreshold: "Eating threshold",
     numberInRange: "Number in range",
     nonNegativeFloat: "Non-negative float",
-    initialCount: "Initial count"
+    initialCount: "Initial count",
+    openAbout: "Open about",
+    closeAbout: "Close about",
+    author: "Author",
+    lastChange: "Last change"
 };
 
 export default data;

@@ -78,7 +78,11 @@ const data: LanguageDefinition = {
     eatingThreshold: "Prah jedenia",
     numberInRange: "Číslo z rozsahu",
     nonNegativeFloat: "Nezáporné desatinné číslo",
-    initialCount: "Počiatočný počet"
+    initialCount: "Počiatočný počet",
+    openAbout: "Otvoriť informácie",
+    closeAbout: "Zatvoriť informácie",
+    author: "Autor",
+    lastChange: "Posledná zmena"
 };
 
 export default data;
