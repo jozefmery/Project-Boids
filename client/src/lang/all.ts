@@ -54,7 +54,36 @@ export type LanguageDefinition = {
     average: string;
     hunger: string;
     age: string;
-    perceptionAngleRadius: string;
+    openSimSetup: string;
+    closeSimSetup: string;
+    confirm: string;
+    drawQuadtree: string;
+    area: string;
+    verySmall: string;
+    small: string;
+    medium: string;
+    large: string;
+    veryLarge: string;
+    foodSpawnRate: string;
+    nonNegativeNumber: string;
+    foodMaxAge: string;
+    initialFood: string;
+    speed: string;
+    maxForceAngle: string;
+    maxForceMagnitude: string;
+    perceptionRadius: string;
+    perceptionAngle: string;
+    alignmentModifier: string;
+    cohesionModifier: string;
+    separationModifier: string;
+    hungerDecay: string;
+    healthDelta: string;
+    reproductionInterval: string;
+    maxAge: string;
+    eatingThreshold: string;
+    numberInRange: string;
+    nonNegativeFloat: string;
+    initialCount: string;
 };
 
 /**
