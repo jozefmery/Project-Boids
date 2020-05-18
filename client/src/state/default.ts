@@ -25,7 +25,7 @@ const defaultState: StateShape =  {
 
         dimensions: { width: 0, height: 0 },
 
-        statsOpen: true
+        sidePanel: "setup"
     },
 
     sim: {
@@ -41,8 +41,8 @@ const defaultState: StateShape =  {
         
         area: {
 
-            width: 1024, 
-            height: 1024 
+            width: 2000, 
+            height: 2000 
         },
         
         camera: {
