@@ -62,6 +62,12 @@ const globalSlice = createSlice({
         },
 
         // side panel
+
+        openSidePanel: (state, { payload: panel }: PayloadAction<typeof global.sidePanel>) => { 
+            
+            state.sidePanel = panel; 
+        },
+
         toggleStatsOpen: (state) => { 
             
             state.sidePanel = state.sidePanel === "stats" ? "none" : "stats";
@@ -88,7 +94,8 @@ export const {
     setDimensions,
     toggleStatsOpen,
     toggleSimSetupOpen,
-    toggleAboutOpen
+    toggleAboutOpen,
+    openSidePanel
 
 } = globalSlice.actions;
 
