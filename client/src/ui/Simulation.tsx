@@ -78,7 +78,7 @@ function useSetup(state: SimState) {
 
         dispatch(centerCameraToArea());
 
-    }, [dispatch, state.entities.context]);
+    }, [dispatch]);
 }
 
 /// Draw & Update hooks
