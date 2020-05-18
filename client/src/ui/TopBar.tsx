@@ -29,6 +29,7 @@ import DonutLargeIcon from '@material-ui/icons/DonutLarge';
 import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
 import SystemUpdateAltIcon from '@material-ui/icons/SystemUpdateAlt';
+import InfoIcon from '@material-ui/icons/Info';
 
 // import hooks
 import { useLanguageString } from "../hooks/languageString";
@@ -256,6 +257,34 @@ function ToggleSimSetup() {
             </Tooltip>
 }
 
+/// About
+
+function ToggleAbout() {
+
+    // get actions
+    const toggleAboutOpen = useAction("toggleAboutOpen");
+
+    // get state from redux
+    const isOpen = useSelector((state: StateShape) => state.global.sidePanel) === "about";
+    
+    // get styles
+    const { tooltip, ...classes } = useSharedStyles();
+    
+    // get language strings
+    const openAboutString = useStringWithHotkeys("openAbout", "toggleAboutOpen");
+    const closeAboutString = useStringWithHotkeys("closeAbout", "toggleAboutOpen");
+
+    return <Tooltip title={isOpen ? closeAboutString : openAboutString} 
+                    placement="bottom" 
+                    TransitionComponent={Zoom}
+                    classes={{ tooltip }}>
+                <Button className={classes.button} onClick={() => toggleAboutOpen() }>
+                    {<InfoIcon />}
+                </Button>
+            </Tooltip>
+}
+
+
 /// Top Bar 
 
 const panelStyle = Style.create({
@@ -296,5 +325,6 @@ export default function() {
             <ThemeToggler />
             <StatsToggler />
             <ToggleSimSetup />
+            <ToggleAbout />
         </div>);
 }
