@@ -28,6 +28,7 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import DonutLargeIcon from '@material-ui/icons/DonutLarge';
 import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
+import SystemUpdateAltIcon from '@material-ui/icons/SystemUpdateAlt';
 
 // import hooks
 import { useLanguageString } from "../hooks/languageString";
@@ -209,7 +210,7 @@ function StatsToggler() {
     const toggleStats = useAction("toggleStatsOpen");
 
     // get state from redux
-    const isOpen = useSelector((state: StateShape) => state.global.statsOpen);
+    const isOpen = useSelector((state: StateShape) => state.global.sidePanel) === "stats";
 
     // get styles
     const { tooltip, ...classes } = useSharedStyles();
@@ -224,6 +225,33 @@ function StatsToggler() {
                     classes={{ tooltip }}>
                 <Button className={classes.button} onClick={() => toggleStats() }>
                     {<DonutLargeIcon />}
+                </Button>
+            </Tooltip>
+}
+
+/// Sim setup
+
+function ToggleSimSetup() {
+
+    // get actions
+    const toggleSimSetupOpen = useAction("toggleSimSetupOpen");
+
+    // get state from redux
+    const isOpen = useSelector((state: StateShape) => state.global.sidePanel) === "setup";
+    
+    // get styles
+    const { tooltip, ...classes } = useSharedStyles();
+    
+    // get language strings
+    const openSimSetupString = useStringWithHotkeys("openSimSetup", "toggleSimSetupOpen");
+    const closeSimSetupString = useStringWithHotkeys("closeSimSetup", "toggleSimSetupOpen");
+
+    return <Tooltip title={isOpen ? closeSimSetupString : openSimSetupString} 
+                    placement="bottom" 
+                    TransitionComponent={Zoom}
+                    classes={{ tooltip }}>
+                <Button className={classes.button} onClick={() => toggleSimSetupOpen() }>
+                    {<SystemUpdateAltIcon />}
                 </Button>
             </Tooltip>
 }
@@ -267,5 +295,6 @@ export default function() {
             <LanguageSelector />
             <ThemeToggler />
             <StatsToggler />
+            <ToggleSimSetup />
         </div>);
 }
