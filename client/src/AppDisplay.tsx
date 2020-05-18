@@ -21,6 +21,7 @@ import Controls from "./ui/Controls";
 import TopBar from "./ui/TopBar";
 import Stats from "./ui/Stats";
 import SimSetup from "./ui/SimSetup";
+import About from "./ui/About";
 
 // import hooks
 import { useLanguageString } from "./hooks/languageString";
@@ -75,6 +76,7 @@ export default function() {
             <TopBar />
             <Stats />
             <SimSetup />
+            <About />
             <Controls />
         </div>
     </>);
