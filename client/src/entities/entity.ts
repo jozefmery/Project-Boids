@@ -61,11 +61,11 @@ type EntityOptions = {
         separation?: number;
     }
 
-    hungerDecay?: number;
-    healthDelta?: number;
-
     health?: number;
+    healthDelta?: number;
+    
     hunger?: number;
+    hungerDecay?: number;
 
     reproductionInterval?: number;
 
@@ -293,7 +293,7 @@ export class Entity {
 
         const angle = velocity.angleBetween(acceleration);
 
-        const diff = Math.abs(angle) - this.options_.maxForce.angle;
+        const diff = Math.abs(angle) - (this.options_.maxForce.angle * (Math.PI / 180));
 
         if(Math.sign(diff) === 1) {
 
@@ -1012,7 +1012,7 @@ type EntityGeneration = {
     [type in SelectableEntity]: RemoveUndefinedDeep<EntityOptions>;
 };
 
-type ContextOptions = {
+export type ContextOptions = {
 
     onBoundaryHit: "wrap" | "kill";
     drawQuadtree: boolean;
@@ -1060,7 +1060,7 @@ export class Context {
                     maxForce: {
 
                         magnitude: 30,
-                        angle: (2 / 3) * Math.PI
+                        angle: 270
                     },
 
                     perception: {
@@ -1098,7 +1098,7 @@ export class Context {
                     maxForce: {
 
                         magnitude: 30,
-                        angle: (2 / 3) * Math.PI
+                        angle: 270
                     },
 
                     perception: {
