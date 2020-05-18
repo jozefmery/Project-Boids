@@ -61,11 +61,16 @@ const globalSlice = createSlice({
             state.dimensions = dimensions; 
         },
 
-        // stats
+        // side panel
         toggleStatsOpen: (state) => { 
             
-            state.statsOpen = !state.statsOpen;
-        }
+            state.sidePanel = state.sidePanel === "stats" ? "none" : "stats";
+        },
+
+        toggleSimSetupOpen: (state) => { 
+            
+            state.sidePanel = state.sidePanel === "setup" ? "none" : "setup";
+        },
     }
 });
 
@@ -76,7 +81,8 @@ export const {
     toggleTheme,
     setLanguage,
     setDimensions,
-    toggleStatsOpen
+    toggleStatsOpen,
+    toggleSimSetupOpen
 
 } = globalSlice.actions;
 
