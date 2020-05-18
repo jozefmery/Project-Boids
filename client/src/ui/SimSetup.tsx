@@ -117,11 +117,11 @@ function SelectArea({ onChange, value }: { onChange: (value: number) => any, val
                 <Select value={value} onChange={(event) => onChange(event.target.value as number)}
                         MenuProps={{ classes: { paper: classes.menu }}}
                         classes={{ root: classes.select, icon: classes.selectIcon }}>
-                    <MenuItem value={0} classes={{ root: classes.item }}>{verySmallString} 300 x 300</MenuItem>
-                    <MenuItem value={1} classes={{ root: classes.item }}>{smallString} 1000 x 1000</MenuItem>
-                    <MenuItem value={2} classes={{ root: classes.item }}>{mediumString} 2000 x 2000</MenuItem>
-                    <MenuItem value={3} classes={{ root: classes.item }}>{largeString} 5000 x 5000</MenuItem>
-                    <MenuItem value={4} classes={{ root: classes.item }}>{veryLargeString} 10000 x 10000</MenuItem>
+                    <MenuItem value={0} classes={{ root: classes.item }}>{verySmallString} 500 x 500</MenuItem>
+                    <MenuItem value={1} classes={{ root: classes.item }}>{smallString} 2000 x 2000</MenuItem>
+                    <MenuItem value={2} classes={{ root: classes.item }}>{mediumString} 5000 x 5000</MenuItem>
+                    <MenuItem value={3} classes={{ root: classes.item }}>{largeString} 10000 x 10000</MenuItem>
+                    <MenuItem value={4} classes={{ root: classes.item }}>{veryLargeString} 20000 x 20000</MenuItem>
                 </Select>
             </FormControl>
         </div>
@@ -508,11 +508,11 @@ function setupStateToContextOptions(state: SetupState): undefined | ContextOptio
 }
 
 const areas: Array<Dimensions2D> = [
-    { width: 300, height: 300 },
-    { width: 1000, height: 1000 },
+    { width: 500, height: 500 },
     { width: 2000, height: 2000 },
     { width: 5000, height: 5000 },
     { width: 10000, height: 10000 },
+    { width: 20000, height: 20000 },
 ];
 
 function Confirm({ state }: { state: SetupState }) {
@@ -659,7 +659,7 @@ export default function SimSetup() {
     const { panel } = usePanelStyles(isOpen);
 
     const [drawQuadTree, setDrawQuadTree] = useState(true);
-    const [area, setArea] = useState(2);
+    const [area, setArea] = useState(1);
 
     const [foodSpawnRate, setFoodSpawnRate] = useState<InputWithValidation>({ value: "0", valid: true });
     const [foodMaxAge, setFoodMaxAge] = useState<InputWithValidation>({ value: "0", valid: true });
