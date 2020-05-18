@@ -82,7 +82,8 @@ const data: LanguageDefinition = {
     openAbout: "Open about",
     closeAbout: "Close about",
     author: "Author",
-    lastChange: "Last change"
+    lastChange: "Last change",
+    reproduction: "Reproduction"
 };
 
 export default data;

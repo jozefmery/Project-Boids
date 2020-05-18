@@ -82,7 +82,8 @@ const data: LanguageDefinition = {
     openAbout: "Otvoriť informácie",
     closeAbout: "Zatvoriť informácie",
     author: "Autor",
-    lastChange: "Posledná zmena"
+    lastChange: "Posledná zmena",
+    reproduction: "Reprodukcia"
 };
 
 export default data;

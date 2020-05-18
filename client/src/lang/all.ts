@@ -88,6 +88,7 @@ export type LanguageDefinition = {
     closeAbout: string;
     author: string;
     lastChange: string;
+    reproduction: string;
 };
 
 /**
