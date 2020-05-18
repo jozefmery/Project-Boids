@@ -1,4 +1,12 @@
-// TODO header
+/**
+ * File: ui/About.tsx
+ * 
+ * Author: Jozef Méry <xmeryj00@stud.fit.vutbr.cz>
+ * Date: 18.5.2020
+ * License: none
+ * Description: Defines a side panel with some basic information about the application.
+ * 
+ */
 
 // import react
 import React from "react";
