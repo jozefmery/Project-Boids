@@ -121,9 +121,9 @@ export type EntityType = "predator" | "prey" | "food";
 
 export type SelectableEntity = "predator" | "prey";
 
-function vary(value: number, variance: number): number {
+function vary(value: number, variance: number, lower: number = 0, upper: number = Infinity): number {
 
-    return value + (variance * (Math.random() - 0.5));
+    return lodash.clamp(value + (variance * (Math.random() - 0.5)), lower, upper);
 }
 
 export class Entity {
@@ -354,7 +354,7 @@ export class Entity {
     protected updateHunger(timeDelta: number): Entity {
 
         const delta = this.options_.hungerDecay * (timeDelta / 1000);
-        this.options_.hunger = Math.max(0, this.options_.hunger - delta);
+        this.feed(-delta);
 
         return this;
     }
@@ -504,13 +504,26 @@ export class Entity {
         return this;
     }
 
+    protected hasReproductionAge(): boolean {
+
+        return this.age_ > this.options_.maxAge / 4 && this.age_ < this.options_.maxAge * (3 / 4);
+    }
+
+    protected canReproduce(): boolean {
+
+        return this.hasReproductionAge() &&
+            this.options_.health > 80 && 
+            this.options_.hunger > 80 &&
+            this.reproduction_ >= this.options_.reproductionInterval;
+    }
+
     protected reproduce(timeDelta: number, context: Context): Entity {
 
-        this.reproduction_ += (timeDelta / 1000) * Math.random();
+        if(!this.hasReproductionAge()) return this;
 
-        if(this.options_.health > 80 && 
-            this.reproduction_ > this.options_.reproductionInterval &&
-            this.age_ > this.options_.maxAge / 8) {
+        this.reproduction_ = Math.min(this.reproduction_ + (timeDelta / 1000), this.options_.reproductionInterval);
+
+        if(this.canReproduce()) {
 
             this.reproduction_ = 0;
 
@@ -525,17 +538,17 @@ export class Entity {
 
                 options: {
 
-                    speed: vary(this.options_.speed, 10),
+                    speed: vary(this.options_.speed, 5, 10),
                     maxForce: {
 
                         magnitude: vary(this.options_.maxForce.magnitude, 5),
-                        angle: vary(this.options_.maxForce.angle, 10)
+                        angle: vary(this.options_.maxForce.angle, 5, 0, 360)
                     },
 
                     perception: {
 
-                        radius: vary(this.options_.perception.radius, 10),
-                        angle: vary(this.options_.perception.angle, 10),
+                        radius: vary(this.options_.perception.radius, 5, this.options_.collisionRadius + 5),
+                        angle: vary(this.options_.perception.angle, 5, 0, 360),
                     },
 
                     collisionRadius: this.options_.collisionRadius,
@@ -547,15 +560,15 @@ export class Entity {
                         separation: this.options_.flockingModifier.separation,
                     },
 
-                    hungerDecay: vary(this.options_.hungerDecay, 3),
-                    healthDelta: vary(this.options_.healthDelta, 3),
+                    hungerDecay: vary(this.options_.hungerDecay, 3, 1, 100),
+                    healthDelta: vary(this.options_.healthDelta, 3, 1, 100),
 
                     health: 100,
                     hunger: 75,
 
-                    reproductionInterval: vary(this.options_.reproductionInterval, 10),
+                    reproductionInterval: vary(this.options_.reproductionInterval, 3, 5),
 
-                    maxAge: vary(this.options_.maxAge, 10),
+                    maxAge: vary(this.options_.maxAge, 5),
 
                     eatingThreshold: this.options_.eatingThreshold
                 }
@@ -701,6 +714,11 @@ export class Entity {
         return this.age_;
     }
 
+    public reproduction(): number {
+
+        return this.reproduction_;
+    }
+
     // update methods
 
     public update(timeDelta: number, context: Context): Entity {
@@ -820,16 +838,23 @@ class Prey extends Entity {
 
         foodVicinity.forEach(({ instance: food, dist }) => {
 
-            if(dist < this.options_.collisionRadius + food.options().collisionRadius) {
+            if(food.isAlive() && dist < this.options_.collisionRadius + food.options().collisionRadius) {
 
                 food.kill();
 
-                this.feed(50);
+                if(preyVicinity.length) {
 
-                for(const prey of preyVicinity) {
+                    this.feed(50);
+                    
+                    for(const prey of preyVicinity) {
+                        
+                        prey.instance.feed((50 / preyVicinity.length));
+                    }
+                
+                } else {
 
-                    prey.instance.feed((50 / preyVicinity.length));
-                }
+                    this.feed(100);
+                } 
             }
         });
 
@@ -923,7 +948,7 @@ class Predator extends Entity {
 
         preyVicinity.forEach(({ instance: prey, dist }) => {
 
-            if(dist < this.options_.collisionRadius + prey.options().collisionRadius) {
+            if(prey.isAlive() && dist < this.options_.collisionRadius + prey.options().collisionRadius) {
 
                 prey.kill();
 
