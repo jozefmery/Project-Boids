@@ -234,10 +234,11 @@ function SelectedEntityPerception({ radius, angle }: { radius: number, angle: nu
     const { container } = useHorizontalFlexBox();
     const { tooltip: tooltipClass } = useTooltipStyles();
 
-    const perceptionString = useLanguageString("perceptionAngleRadius");
+    const perceptionAngleString = useLanguageString("perceptionAngle");
+    const perceptionRadiusString = useLanguageString("perceptionRadius");
 
     return (
-        <Tooltip title={perceptionString} 
+        <Tooltip title={`${perceptionAngleString} & ${perceptionRadiusString}`} 
                     placement="top" 
                     TransitionComponent={Zoom}
                     classes={{ tooltip: tooltipClass }}>
@@ -632,7 +633,9 @@ const usePanelStyles = makeStyles(({ theme }: Theme) => ({
 
 export default function() {
 
-    const isOpen = useSelector((state: StateShape) => state.global.statsOpen);
+    const currentPanel = useSelector((state: StateShape) => state.global.sidePanel);
+
+    const isOpen = currentPanel === "stats";
     
     const classes = usePanelStyles(isOpen);
 
