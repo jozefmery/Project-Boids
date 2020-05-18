@@ -84,11 +84,11 @@ const defaultState: StateShape =  {
 
         toggleTheme: {
 
-            sequences: "alt+t"
+            sequences: "t"
         },
         cycleLanguages: {
 
-            sequences: "alt+l"
+            sequences: "l"
         },
 
         toggleSimRunning: {
@@ -104,7 +104,6 @@ const defaultState: StateShape =  {
 
             sequences: "-"
         },
-
         zoomIn: {
 
             sequences: "shift+=",
@@ -164,6 +163,18 @@ const defaultState: StateShape =  {
             sequences: "a",
             eventType: EventType.KEYUP,
             exactMatch: false,
+        },
+        toggleStatsOpen: {
+
+            sequences: "e"
+        },
+        toggleSimSetupOpen: {
+
+            sequences: "q"
+        },
+        toggleAboutOpen: {
+
+            sequences: "i"
         }
     }
 }
