@@ -15,6 +15,7 @@ import { useSelector, useDispatch } from "react-redux";
 
 // import actions
 import { setSimArea, centerCameraToArea } from "../state/slices/sim";
+import { openSidePanel } from "../state/slices/global";
 
 // import state providers
 import { HotkeyContext } from "../Hotkeys";
@@ -174,7 +175,7 @@ function Input({ value, label, suffix = "", onChange, error, helper }:
             onChange={(event) => onChange(event.target.value)}
             error={error}
             FormHelperTextProps={{ classes: { root: classes.helper } }}
-            helperText={helper}
+            helperText={error ? helper : ""}
             onFocus={() => hotkeys.setEnabled(false)}
             onBlur={() => hotkeys.setEnabled(true)} />
     );
@@ -274,6 +275,7 @@ function EntityOptions({ type, state, setState }: { type: "predator" | "prey", s
     const nonNegativeFloat = useLanguageString("nonNegativeFloat");
     const numberInRange = useLanguageString("numberInRange");
     const numberInAngleRange = `${numberInRange}: 0-360`;
+    const numberInPercentRange = `${numberInRange}: 0-100`;
 
     return (
         <div className={container}>
@@ -319,27 +321,38 @@ function EntityOptions({ type, state, setState }: { type: "predator" | "prey", s
 
             <Input value={state.health.value} 
                     label={healthString} 
-                    onChange={(value) => setState({ ...state, health: { value, valid: positiveNumberValidator(value) } })} 
+                    onChange={(value) => setState({ ...state, health: { value, valid: numberRangeValidator(value, 0, 100) } })} 
                     error={!state.health.valid}
-                    helper={nonNegativeNumber} />
+                    suffix="%"
+                    helper={numberInPercentRange} />
 
             <Input value={state.healthDelta.value} 
                     label={healthDeltaString} 
-                    onChange={(value) => setState({ ...state, healthDelta: { value, valid: positiveNumberValidator(value) } })} 
+                    onChange={(value) => setState({ ...state, healthDelta: { value, valid: numberRangeValidator(value, 0, 100) } })} 
                     error={!state.healthDelta.valid}
-                    helper={nonNegativeNumber} />
+                    suffix="%"
+                    helper={numberInPercentRange} />
 
             <Input value={state.hunger.value} 
                     label={hungerString} 
-                    onChange={(value) => setState({ ...state, hunger: { value, valid: positiveNumberValidator(value) } })} 
+                    onChange={(value) => setState({ ...state, hunger: { value, valid: numberRangeValidator(value, 0, 100) } })} 
                     error={!state.hunger.valid}
-                    helper={nonNegativeNumber} />
+                    suffix="%"
+                    helper={numberInPercentRange} />
 
             <Input value={state.hungerDecay.value} 
                     label={hungerDecayString} 
-                    onChange={(value) => setState({ ...state, hungerDecay: { value, valid: positiveNumberValidator(value) } })} 
+                    onChange={(value) => setState({ ...state, hungerDecay: { value, valid: numberRangeValidator(value, 0, 100) } })} 
                     error={!state.hungerDecay.valid}
-                    helper={nonNegativeNumber} />
+                    suffix="%"
+                    helper={numberInPercentRange} />
+
+            <Input value={state.eatingThreshold.value} 
+                    label={eatingThresholdString} 
+                    onChange={(value) => setState({ ...state, eatingThreshold: { value, valid: numberRangeValidator(value, 0, 100) } })} 
+                    error={!state.eatingThreshold.valid}
+                    suffix="%"
+                    helper={numberInPercentRange} />
 
             <Input value={state.reproductionInterval.value} 
                     label={reproductionIntervalString} 
@@ -351,12 +364,6 @@ function EntityOptions({ type, state, setState }: { type: "predator" | "prey", s
                     label={maxAgeString} 
                     onChange={(value) => setState({ ...state, maxAge: { value, valid: positiveNumberValidator(value) } })} 
                     error={!state.maxAge.valid}
-                    helper={nonNegativeNumber} />
-
-            <Input value={state.eatingThreshold.value} 
-                    label={eatingThresholdString} 
-                    onChange={(value) => setState({ ...state, eatingThreshold: { value, valid: positiveNumberValidator(value) } })} 
-                    error={!state.eatingThreshold.valid}
                     helper={nonNegativeNumber} />
             {
             type === "prey" ?
@@ -527,7 +534,8 @@ function Confirm({ state }: { state: SetupState }) {
 
     const dispatch = useDispatch();
 
-    const entityContext = useContext(SimStateContext).entities.context.current;
+    const simState = useContext(SimStateContext);
+    const entityContext = simState.entities.context.current;
     const statsContext = useContext(StatsStateContext);
 
     const { tooltip: tooltipClass } = useTooltipStyles();
@@ -550,6 +558,7 @@ function Confirm({ state }: { state: SetupState }) {
 
                 dispatch(setSimArea(areas[state.area]));
 
+                simState.time.elapsed.current = 0;
                 statsContext.entities.array.current = [];
                 statsContext.entities.predators.current = predatorCount;
                 statsContext.entities.preys.current = preyCount;
@@ -557,6 +566,8 @@ function Confirm({ state }: { state: SetupState }) {
                 entityContext.init(predatorCount, preyCount, contextOptions);
 
                 dispatch(centerCameraToArea());
+
+                dispatch(openSidePanel("stats"));
 
             }} className={buttonClass}>
                 {<DoneIcon />}
@@ -666,12 +677,12 @@ export default function SimSetup() {
 
     const { panel } = usePanelStyles(isOpen);
 
-    const [drawQuadTree, setDrawQuadTree] = useState(true);
+    const [drawQuadTree, setDrawQuadTree] = useState(false);
     const [area, setArea] = useState(1);
 
-    const [foodSpawnRate, setFoodSpawnRate] = useState<InputWithValidation>({ value: "0", valid: true });
-    const [foodMaxAge, setFoodMaxAge] = useState<InputWithValidation>({ value: "0", valid: true });
-    const [initialFood, setInitialFood] = useState<InputWithValidation>({ value: "0", valid: true });
+    const [foodSpawnRate, setFoodSpawnRate] = useState<InputWithValidation>({ value: "5", valid: true });
+    const [foodMaxAge, setFoodMaxAge] = useState<InputWithValidation>({ value: "30", valid: true });
+    const [initialFood, setInitialFood] = useState<InputWithValidation>({ value: "100", valid: true });
 
     const [predatorState, setPredatorState] = useState<ValidatedEntityOptions>(
         {
@@ -682,27 +693,27 @@ export default function SimSetup() {
             },
             speed: {
 
-                value: "0",
+                value: "120",
                 valid: true
             },
             maxForceAngle: {
 
-                value: "0",
+                value: "270",
                 valid: true
             },
             maxForceMagnitude: {
 
-                value: "0",
+                value: "25",
                 valid: true
             },
             perceptionRadius: {
 
-                value: "0",
+                value: "150",
                 valid: true
             },
             perceptionAngle: {
 
-                value: "0",
+                value: "200",
                 valid: true
             },
             alignmentModifier: {
@@ -722,37 +733,37 @@ export default function SimSetup() {
             },
             hungerDecay: {
 
-                value: "0",
+                value: "10",
                 valid: true
             },
             healthDelta: {
 
-                value: "0",
+                value: "10",
                 valid: true
             },
             health: {
 
-                value: "0",
+                value: "100",
                 valid: true
             },
             hunger: {
 
-                value: "0",
+                value: "100",
                 valid: true
             },
             reproductionInterval: {
 
-                value: "0",
+                value: "30",
                 valid: true
             },
             maxAge: {
 
-                value: "0",
+                value: "300",
                 valid: true
             },
             eatingThreshold: {
 
-                value: "0",
+                value: "75",
                 valid: true
             }
         }
@@ -767,77 +778,77 @@ export default function SimSetup() {
             },
             speed: {
 
-                value: "0",
+                value: "100",
                 valid: true
             },
             maxForceAngle: {
 
-                value: "0",
+                value: "270",
                 valid: true
             },
             maxForceMagnitude: {
 
-                value: "0",
+                value: "20",
                 valid: true
             },
             perceptionRadius: {
 
-                value: "0",
+                value: "150",
                 valid: true
             },
             perceptionAngle: {
 
-                value: "0",
+                value: "270",
                 valid: true
             },
             alignmentModifier: {
 
-                value: "0",
+                value: "1.0",
                 valid: true
             },
             cohesionModifier: {
 
-                value: "0",
+                value: "1.0",
                 valid: true
             },
             separationModifier: {
 
-                value: "0",
+                value: "1.0",
                 valid: true
             },
             hungerDecay: {
 
-                value: "0",
+                value: "15",
                 valid: true
             },
             healthDelta: {
 
-                value: "0",
+                value: "20",
                 valid: true
             },
             health: {
 
-                value: "0",
+                value: "100",
                 valid: true
             },
             hunger: {
 
-                value: "0",
+                value: "100",
                 valid: true
             },
             reproductionInterval: {
 
-                value: "0",
+                value: "30",
                 valid: true
             },
             maxAge: {
 
-                value: "0",
+                value: "200",
                 valid: true
             },
             eatingThreshold: {
 
-                value: "0",
+                value: "75",
                 valid: true
             }
         }
