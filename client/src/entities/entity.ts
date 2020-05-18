@@ -528,8 +528,8 @@ export class Entity {
                     speed: vary(this.options_.speed, 10),
                     maxForce: {
 
-                        magnitude: vary(this.options_.maxForce.magnitude, 3),
-                        angle: vary(this.options_.maxForce.angle, 5)
+                        magnitude: vary(this.options_.maxForce.magnitude, 5),
+                        angle: vary(this.options_.maxForce.angle, 10)
                     },
 
                     perception: {
@@ -547,8 +547,8 @@ export class Entity {
                         separation: this.options_.flockingModifier.separation,
                     },
 
-                    hungerDecay: vary(this.options_.hungerDecay, 4),
-                    healthDelta: vary(this.options_.healthDelta, 5),
+                    hungerDecay: vary(this.options_.hungerDecay, 3),
+                    healthDelta: vary(this.options_.healthDelta, 3),
 
                     health: 100,
                     hunger: 75,
