@@ -556,17 +556,16 @@ function Confirm({ state }: { state: SetupState }) {
                 const predatorCount = parseInt(state.predators.initialCount.value);
                 const preyCount = parseInt(state.preys.initialCount.value);
 
-                dispatch(setSimArea(areas[state.area]));
-
                 simState.time.elapsed.current = 0;
                 statsContext.entities.array.current = [];
                 statsContext.entities.predators.current = predatorCount;
                 statsContext.entities.preys.current = preyCount;
                 
-                entityContext.init(predatorCount, preyCount, contextOptions);
-
+                entityContext.clearSelectedEntity();
+                entityContext.init(predatorCount, preyCount, contextOptions);                
+                
+                dispatch(setSimArea(areas[state.area]));
                 dispatch(centerCameraToArea());
-
                 dispatch(openSidePanel("stats"));
 
             }} className={buttonClass}>
@@ -678,10 +677,10 @@ export default function SimSetup() {
     const { panel } = usePanelStyles(isOpen);
 
     const [drawQuadTree, setDrawQuadTree] = useState(false);
-    const [area, setArea] = useState(1);
+    const [area, setArea] = useState(2);
 
     const [foodSpawnRate, setFoodSpawnRate] = useState<InputWithValidation>({ value: "5", valid: true });
-    const [foodMaxAge, setFoodMaxAge] = useState<InputWithValidation>({ value: "30", valid: true });
+    const [foodMaxAge, setFoodMaxAge] = useState<InputWithValidation>({ value: "60", valid: true });
     const [initialFood, setInitialFood] = useState<InputWithValidation>({ value: "100", valid: true });
 
     const [predatorState, setPredatorState] = useState<ValidatedEntityOptions>(
@@ -708,7 +707,7 @@ export default function SimSetup() {
             },
             perceptionRadius: {
 
-                value: "150",
+                value: "300",
                 valid: true
             },
             perceptionAngle: {
@@ -733,12 +732,12 @@ export default function SimSetup() {
             },
             hungerDecay: {
 
-                value: "10",
+                value: "5",
                 valid: true
             },
             healthDelta: {
 
-                value: "10",
+                value: "5",
                 valid: true
             },
             health: {
@@ -793,7 +792,7 @@ export default function SimSetup() {
             },
             perceptionRadius: {
 
-                value: "150",
+                value: "450",
                 valid: true
             },
             perceptionAngle: {
@@ -813,17 +812,17 @@ export default function SimSetup() {
             },
             separationModifier: {
 
-                value: "1.0",
+                value: "1.5",
                 valid: true
             },
             hungerDecay: {
 
-                value: "15",
+                value: "5",
                 valid: true
             },
             healthDelta: {
 
-                value: "20",
+                value: "10",
                 valid: true
             },
             health: {
