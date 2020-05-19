@@ -1,8 +1,8 @@
 {
 	"name": "predator-prey-simulation-server",
 	"version": "1.0.0",
-	"description": "",
-	"license": "none",
+	"description": "Simple server for serving the client.",
+	"license": "UNLICENSED",
 	"main": "server.js",
 	"scripts": {
 		"client": "npm start --prefix client",
