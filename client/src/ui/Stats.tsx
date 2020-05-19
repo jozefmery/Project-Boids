@@ -440,6 +440,7 @@ function EntityStats() {
 
     const [zoomed, setZoomed] = useState(false);
     const canvasRef = useRef(null);
+    const [chartId, setChartId] = useState(0);
 
     const stylers = useEntityChartStylers();
 
@@ -454,13 +455,13 @@ function EntityStats() {
 
     return (
         <div className={vFlex}>
-            <div style={{ color: stylers.predators }}>
-                {`${predatorsString}: ${predators}`}
-            </div>
-            <div  style={{ color: stylers.preys }}>
-                {`${preysString}: ${preys}`}
-            </div>
-            <div ref={canvasRef}>
+            <div ref={canvasRef} className={vFlex}>
+                <div style={{ color: stylers.predators }}>
+                    {`${predatorsString}: ${predators}`}
+                </div>
+                <div  style={{ color: stylers.preys }}>
+                    {`${preysString}: ${preys}`}
+                </div>
                 <LineChart width={zoomed ? 700 : 350} height={zoomed ? 500 : 250} data={[...array]}>
                     <CartesianGrid strokeDasharray="2 2" stroke={stylers.grid} />
                     <XAxis stroke={stylers.grid} dataKey="stamp" interval="preserveEnd" minTickGap={20} />
@@ -488,7 +489,8 @@ function EntityStats() {
 
                         if(node) {
 
-                            domtoimage.toBlob(node).then(blob => saveAs(blob, "entity-chart.png"));
+                            domtoimage.toBlob(node).then(blob => saveAs(blob, `entity-chart-${chartId}.png`));
+                            setChartId(last => last + 1);
                         }
 
                     }} className={buttonClass}>
@@ -524,7 +526,7 @@ function useFPSChartStylers() {
 
 function FPS() {
 
-    useForceUpdate(1000);
+    useForceUpdate(500);
 
     const zoomInString = useLanguageString("zoomIn");
     const zoomOutString = useLanguageString("zoomOut");
@@ -537,6 +539,7 @@ function FPS() {
 
     const [zoomed, setZoomed] = useState(false);
     const canvasRef = useRef(null);
+    const [chartId, setChartId] = useState(0);
 
     const stylers = useFPSChartStylers();
 
@@ -551,13 +554,13 @@ function FPS() {
 
     return (
         <div className={vFlex}>
-            <div>
-                {`${currentString}: ${fps.toFixed(2)}`}
-            </div>
-            <div>
-                {`${averageString}: ${average.toFixed(2)}`}
-            </div>
-            <div ref={canvasRef}>
+            <div ref={canvasRef} className={vFlex}>
+                <div style={{ color: stylers.line }}>
+                    {`${currentString}: ${fps.toFixed(2)}`}
+                </div>
+                <div style={{ color: stylers.average }}>
+                    {`${averageString}: ${average.toFixed(2)}`}
+                </div>
                 <LineChart width={zoomed ? 700 : 350} height={zoomed ? 500 : 250} data={[...array]}>
                     <CartesianGrid strokeDasharray="2 2" stroke={stylers.grid} />
                     <XAxis tick={false} stroke={stylers.grid} />
@@ -585,7 +588,8 @@ function FPS() {
 
                         if(node) {
 
-                            domtoimage.toBlob(node).then(blob => saveAs(blob, "fps-chart.png"));
+                            domtoimage.toBlob(node).then(blob => saveAs(blob, `fps-chart-${chartId}.png`));
+                            setChartId(last => last + 1);
                         }
 
                     }} className={buttonClass}>
