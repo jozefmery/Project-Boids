@@ -84,7 +84,7 @@ function useEntities(simState: SimState, pollingRate: number) {
             array.current.splice(0, 1);
         }
 
-    }, [simState.entities.context, simState.time.delta, simRunning]);
+    }, [simState.entities.context, simState.time.delta, simRunning, simState.time.elapsed]);
 
     useEffect(() => {
 
