@@ -1,5 +1,8 @@
 @echo off
 
+REM Author: Jozef Méry
+REM Date: 19.05.2020
+
 REM create directory if it doesn't exist
 if not exist build md build
 
