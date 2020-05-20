@@ -11,7 +11,7 @@ cp ./server.js ./build/server.js
 
 # build client
 cd client
-npm run build
+npm run build:both
 cd ..
 
 # copy built client 
