@@ -8,6 +8,7 @@ package-lock.json
 
 # built files
 build/
+electron-build/
 
 # Typescript
 react-app-env.d.ts
