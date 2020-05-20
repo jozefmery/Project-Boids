@@ -11,10 +11,12 @@ copy .\server.js .\build\server.js
 
 REM build client
 cd client
-call npm run build
+call npm run build:both
 cd ..
 
 REM copy built client 
 robocopy .\client\build .\build\client /E
+REM copy electron app
+robocopy .\client\electron-build .\build\electron /E
 
 @echo "All done"
