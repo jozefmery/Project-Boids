@@ -11,7 +11,7 @@ be the root directory of the application (or this README).
 
 Install required remote packages:
 
-    npm run install-all
+    npm run install:all
 
 Building the client only:
 
