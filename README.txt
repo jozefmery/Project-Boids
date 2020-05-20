@@ -13,11 +13,18 @@ Install required remote packages:
 
     npm run install-all
 
-Build the server and client:
+Building the client only:
+
+    cd client
+    npm run build
+
+Now it is possible to use the client by opening the index.html inside the build directory.
+
+Building the server and client:
 
     - Windows using a script:
     
-        ./build.bat
+        .\build.bat
 
     - Linux based systems:
 
@@ -41,4 +48,5 @@ Run the server:
 
         node build/server.js PORT
 
-PORT argument is optional and defaults to 5000
+PORT argument is optional and defaults to 5000.
+The application is now accesible at http://localhost:PORT.
