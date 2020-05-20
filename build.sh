@@ -16,5 +16,7 @@ cd ..
 
 # copy built client 
 cp -r ./client/build/. ./build/client
+# copy desktop app
+cp -r ./client/electron-build/. .build/electron
 
 echo All done

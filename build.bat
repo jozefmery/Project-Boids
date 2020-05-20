@@ -9,14 +9,14 @@ if not exist build md build
 REM copy server
 copy .\server.js .\build\server.js
 
-REM build client
+REM build client and desktop application
 cd client
 call npm run build:both
 cd ..
 
 REM copy built client 
 robocopy .\client\build .\build\client /E
-REM copy electron app
+REM copy desktop app
 robocopy .\client\electron-build .\build\electron /E
 
 @echo "All done"
