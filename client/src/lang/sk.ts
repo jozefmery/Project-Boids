@@ -76,14 +76,15 @@ const data: LanguageDefinition = {
     reproductionInterval: "Interval reprodukcie",
     maxAge: "Maximálny vek",
     eatingThreshold: "Prah jedenia",
-    numberInRange: "Číslo z rozsahu",
-    nonNegativeFloat: "Nezáporné desatinné číslo",
+    decimalInRange: "Desatinné číslo z rozsahu",
+    nonNegativeDecimal: "Nezáporné desatinné číslo",
     initialCount: "Počiatočný počet",
     openAbout: "Otvoriť informácie",
     closeAbout: "Zatvoriť informácie",
     author: "Autor",
     lastChange: "Posledná zmena",
-    reproduction: "Reprodukcia"
+    reproduction: "Reprodukcia",
+    units: "jednotiek"
 };
 
 export default data;

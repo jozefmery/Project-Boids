@@ -76,14 +76,15 @@ const data: LanguageDefinition = {
     reproductionInterval: "Reproduction interval",
     maxAge: "Maximum age",
     eatingThreshold: "Eating threshold",
-    numberInRange: "Number in range",
-    nonNegativeFloat: "Non-negative float",
+    decimalInRange: "Decimal number in range",
+    nonNegativeDecimal: "Non-negative decimal number",
     initialCount: "Initial count",
     openAbout: "Open about",
     closeAbout: "Close about",
     author: "Author",
     lastChange: "Last change",
-    reproduction: "Reproduction"
+    reproduction: "Reproduction",
+    units: "units"
 };
 
 export default data;

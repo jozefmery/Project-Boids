@@ -81,14 +81,15 @@ export type LanguageDefinition = {
     reproductionInterval: string;
     maxAge: string;
     eatingThreshold: string;
-    numberInRange: string;
-    nonNegativeFloat: string;
+    decimalInRange: string;
+    nonNegativeDecimal: string;
     initialCount: string;
     openAbout: string;
     closeAbout: string;
     author: string;
     lastChange: string;
     reproduction: string;
+    units: string;
 };
 
 /**
