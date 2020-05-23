@@ -84,7 +84,8 @@ const data: LanguageDefinition = {
     author: "Author",
     lastChange: "Last change",
     reproduction: "Reproduction",
-    units: "units"
+    units: "units",
+    varianceModifier: "Variance modifier"
 };
 
 export default data;

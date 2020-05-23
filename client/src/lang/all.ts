@@ -90,6 +90,7 @@ export type LanguageDefinition = {
     lastChange: string;
     reproduction: string;
     units: string;
+    varianceModifier: string;
 };
 
 /**
