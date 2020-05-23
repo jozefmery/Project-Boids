@@ -51,6 +51,8 @@ export type EntityOptions = {
     maxAge?: number;
 
     eatingThreshold?: number;
+
+    varianceModifier?: number;
 };
 
 export type EntityCtorOptions = {
