@@ -13,7 +13,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 
 // import styles
-import "./css/index.scss";
+import "./styles/main.scss";
 
 // import main component
 import App from "./App";
