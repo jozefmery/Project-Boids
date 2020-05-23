@@ -137,7 +137,11 @@ function SelectArea({ onChange, value }: { onChange: (value: number) => any, val
     );
 }
 
-const inputStyle = Style.create({}, {}, Style.textColor);
+const inputStyle = Style.create({
+
+    maxWidth: "160px"
+
+}, {}, Style.textColor);
 const inputLabelStyle = Style.create({}, {}, Style.textColor);
 const inputAdormentStyle = Style.create({}, {}, Style.textColor);
 const inputHelperStyle = Style.create({}, {}, Style.textColor);
@@ -185,10 +189,10 @@ function FoodSpawnRate({ value, onChange, error }: { value: string, onChange: In
 
     const foodSpawnRateString = useLanguageString("foodSpawnRate");
 
-    const nonNegativeNumber = useLanguageString("nonNegativeNumber");
+    const nonNegativeDecimal = useLanguageString("nonNegativeDecimal");
 
     return (
-        <Input value={value} label={foodSpawnRateString} suffix="/ s" onChange={onChange} error={error} helper={nonNegativeNumber} />
+        <Input value={value} label={foodSpawnRateString} suffix="/ s" onChange={onChange} error={error} helper={nonNegativeDecimal} />
     );
 }
 
@@ -196,10 +200,10 @@ function FoodMaxAge({ value, onChange, error }: { value: string, onChange: Input
 
     const foodMaxAgeString = useLanguageString("foodMaxAge");
 
-    const nonNegativeNumber = useLanguageString("nonNegativeNumber");
+    const nonNegativeDecimal = useLanguageString("nonNegativeDecimal");
 
     return (
-        <Input value={value} label={foodMaxAgeString} suffix="s" onChange={onChange} error={error} helper={nonNegativeNumber} />
+        <Input value={value} label={foodMaxAgeString} suffix="s" onChange={onChange} error={error} helper={nonNegativeDecimal} />
     );
 }
 
@@ -272,10 +276,12 @@ function EntityOptions({ type, state, setState }: { type: "predator" | "prey", s
     const eatingThresholdString = useLanguageString("eatingThreshold");
 
     const nonNegativeNumber = useLanguageString("nonNegativeNumber");
-    const nonNegativeFloat = useLanguageString("nonNegativeFloat");
-    const numberInRange = useLanguageString("numberInRange");
-    const numberInAngleRange = `${numberInRange}: 0-360`;
-    const numberInPercentRange = `${numberInRange}: 0-100`;
+    const nonNegativeDecimal = useLanguageString("nonNegativeDecimal");
+    const decimalInRange = useLanguageString("decimalInRange");
+    const decimalInAngleRange = `${decimalInRange}: 0-360`;
+    const decimalInPercentRange = `${decimalInRange}: 0-100`;
+    
+    const unitsString = useLanguageString("units");                                   
 
     return (
         <div className={container}>
@@ -289,82 +295,87 @@ function EntityOptions({ type, state, setState }: { type: "predator" | "prey", s
 
             <Input value={state.speed.value} 
                     label={speedString} 
-                    onChange={(value) => setState({ ...state, speed: { value, valid: positiveNumberValidator(value) } })} 
+                    onChange={(value) => setState({ ...state, speed: { value, valid: positiveFloatValidator(value) } })} 
                     error={!state.speed.valid} 
-                    helper={nonNegativeNumber} />
+                    suffix={`${unitsString} / s`}
+                    helper={nonNegativeDecimal} />
 
             <Input value={state.maxForceAngle.value} 
                     label={maxForceAngleString} 
-                    onChange={(value) => setState({ ...state, maxForceAngle: { value, valid: numberRangeValidator(value, 0, 360) } })} 
+                    onChange={(value) => setState({ ...state, maxForceAngle: { value, valid: floatRangeValidator(value, 0, 360) } })} 
                     error={!state.maxForceAngle.valid}
                     suffix="°"
-                    helper={numberInAngleRange} />
+                    helper={decimalInAngleRange} />
 
             <Input value={state.maxForceMagnitude.value} 
                     label={maxForceMagnitudeString} 
-                    onChange={(value) => setState({ ...state, maxForceMagnitude: { value, valid: positiveNumberValidator(value) } })} 
+                    onChange={(value) => setState({ ...state, maxForceMagnitude: { value, valid: positiveFloatValidator(value) } })} 
                     error={!state.maxForceMagnitude.valid}
-                    helper={nonNegativeNumber} />
+                    suffix={unitsString}
+                    helper={nonNegativeDecimal} />
 
             <Input value={state.perceptionAngle.value} 
                     label={perceptionAngleString} 
-                    onChange={(value) => setState({ ...state, perceptionAngle: { value, valid: numberRangeValidator(value, 0, 360) } })} 
+                    onChange={(value) => setState({ ...state, perceptionAngle: { value, valid: floatRangeValidator(value, 0, 360) } })} 
                     error={!state.perceptionAngle.valid}
                     suffix="°"
-                    helper={numberInAngleRange} />
+                    helper={decimalInAngleRange} />
 
             <Input value={state.perceptionRadius.value} 
                     label={perceptionRadiusString} 
-                    onChange={(value) => setState({ ...state, perceptionRadius: { value, valid: positiveNumberValidator(value) } })} 
+                    onChange={(value) => setState({ ...state, perceptionRadius: { value, valid: positiveFloatValidator(value) } })} 
                     error={!state.perceptionRadius.valid}
-                    helper={nonNegativeNumber} />
+                    suffix={unitsString}
+                    helper={nonNegativeDecimal} />
 
             <Input value={state.health.value} 
                     label={healthString} 
-                    onChange={(value) => setState({ ...state, health: { value, valid: numberRangeValidator(value, 0, 100) } })} 
+                    onChange={(value) => setState({ ...state, health: { value, valid: floatRangeValidator(value, 0, 100) } })} 
                     error={!state.health.valid}
                     suffix="%"
-                    helper={numberInPercentRange} />
+                    helper={decimalInPercentRange} />
 
             <Input value={state.healthDelta.value} 
                     label={healthDeltaString} 
-                    onChange={(value) => setState({ ...state, healthDelta: { value, valid: numberRangeValidator(value, 0, 100) } })} 
+                    onChange={(value) => setState({ ...state, healthDelta: { value, valid: floatRangeValidator(value, 0, 100) } })} 
                     error={!state.healthDelta.valid}
                     suffix="%"
-                    helper={numberInPercentRange} />
+                    helper={decimalInPercentRange} />
 
             <Input value={state.hunger.value} 
                     label={hungerString} 
-                    onChange={(value) => setState({ ...state, hunger: { value, valid: numberRangeValidator(value, 0, 100) } })} 
+                    onChange={(value) => setState({ ...state, hunger: { value, valid: floatRangeValidator(value, 0, 100) } })} 
                     error={!state.hunger.valid}
                     suffix="%"
-                    helper={numberInPercentRange} />
+                    helper={decimalInPercentRange} />
 
             <Input value={state.hungerDecay.value} 
                     label={hungerDecayString} 
-                    onChange={(value) => setState({ ...state, hungerDecay: { value, valid: numberRangeValidator(value, 0, 100) } })} 
+                    onChange={(value) => setState({ ...state, hungerDecay: { value, valid: floatRangeValidator(value, 0, 100) } })} 
                     error={!state.hungerDecay.valid}
                     suffix="%"
-                    helper={numberInPercentRange} />
+                    helper={decimalInPercentRange} />
 
             <Input value={state.eatingThreshold.value} 
                     label={eatingThresholdString} 
-                    onChange={(value) => setState({ ...state, eatingThreshold: { value, valid: numberRangeValidator(value, 0, 100) } })} 
+                    onChange={(value) => setState({ ...state, eatingThreshold: { value, valid: floatRangeValidator(value, 0, 100) } })} 
                     error={!state.eatingThreshold.valid}
                     suffix="%"
-                    helper={numberInPercentRange} />
+                    helper={decimalInPercentRange} />
 
             <Input value={state.reproductionInterval.value} 
                     label={reproductionIntervalString} 
-                    onChange={(value) => setState({ ...state, reproductionInterval: { value, valid: positiveNumberValidator(value) } })} 
+                    onChange={(value) => setState({ ...state, reproductionInterval: { value, valid: positiveFloatValidator(value) } })} 
                     error={!state.reproductionInterval.valid}
-                    helper={nonNegativeNumber} />
+                    suffix="s"
+                    helper={nonNegativeDecimal} />
 
             <Input value={state.maxAge.value} 
                     label={maxAgeString} 
-                    onChange={(value) => setState({ ...state, maxAge: { value, valid: positiveNumberValidator(value) } })} 
+                    onChange={(value) => setState({ ...state, maxAge: { value, valid: positiveFloatValidator(value) } })} 
                     error={!state.maxAge.valid}
-                    helper={nonNegativeNumber} />
+                    suffix="s"
+                    helper={nonNegativeDecimal} />
             {
             type === "prey" ?
             <>
@@ -372,19 +383,19 @@ function EntityOptions({ type, state, setState }: { type: "predator" | "prey", s
                 label={alignmentModifierString} 
                 onChange={(value) => setState({ ...state, alignmentModifier: { value, valid: positiveFloatValidator(value) } })} 
                 error={!state.alignmentModifier.valid}
-                helper={nonNegativeFloat} />
+                helper={nonNegativeDecimal} />
 
             <Input value={state.cohesionModifier.value} 
                 label={cohesionModifierString} 
                 onChange={(value) => setState({ ...state, cohesionModifier: { value, valid: positiveFloatValidator(value) } })} 
                 error={!state.cohesionModifier.valid}
-                helper={nonNegativeFloat} />
+                helper={nonNegativeDecimal} />
 
             <Input value={state.separationModifier.value} 
                 label={separationModifierString} 
                 onChange={(value) => setState({ ...state, separationModifier: { value, valid: positiveFloatValidator(value) } })} 
                 error={!state.separationModifier.valid}
-                helper={nonNegativeFloat} />
+                helper={nonNegativeDecimal} />
 
             </> : null
             }
@@ -439,25 +450,25 @@ function setupStateToContextOptions(state: SetupState): undefined | ContextOptio
         drawQuadtree: state.drawQuadTree,
         area: areas[state.area],
 
-        foodSpawn: parseInt(state.foodSpawnRate.value),
-        foodMaxAge: parseInt(state.foodMaxAge.value),
+        foodSpawn: parseFloat(state.foodSpawnRate.value),
+        foodMaxAge: parseFloat(state.foodMaxAge.value),
         initialFood: parseInt(state.initialFood.value),
 
         entities: {
 
             predator: {
 
-                speed: parseInt(state.predators.speed.value),
+                speed: parseFloat(state.predators.speed.value),
                 maxForce: {
 
-                    magnitude: parseInt(state.predators.maxForceMagnitude.value),
-                    angle: parseInt(state.predators.maxForceAngle.value)
+                    magnitude: parseFloat(state.predators.maxForceMagnitude.value),
+                    angle: parseFloat(state.predators.maxForceAngle.value)
                 },
 
                 perception: {
 
-                    radius: parseInt(state.predators.perceptionRadius.value),
-                    angle: parseInt(state.predators.perceptionAngle.value)
+                    radius: parseFloat(state.predators.perceptionRadius.value),
+                    angle: parseFloat(state.predators.perceptionAngle.value)
                 },
 
                 collisionRadius: 20,
@@ -469,32 +480,32 @@ function setupStateToContextOptions(state: SetupState): undefined | ContextOptio
                     separation: 0
                 },
 
-                health: parseInt(state.predators.health.value),
-                healthDelta: parseInt(state.predators.healthDelta.value),
+                health: parseFloat(state.predators.health.value),
+                healthDelta: parseFloat(state.predators.healthDelta.value),
 
-                hunger: parseInt(state.predators.hunger.value),
-                hungerDecay: parseInt(state.predators.hungerDecay.value),
+                hunger: parseFloat(state.predators.hunger.value),
+                hungerDecay: parseFloat(state.predators.hungerDecay.value),
 
-                reproductionInterval: parseInt(state.predators.reproductionInterval.value),
+                reproductionInterval: parseFloat(state.predators.reproductionInterval.value),
 
-                maxAge: parseInt(state.predators.maxAge.value),
+                maxAge: parseFloat(state.predators.maxAge.value),
 
-                eatingThreshold: parseInt(state.predators.eatingThreshold.value),
+                eatingThreshold: parseFloat(state.predators.eatingThreshold.value),
             },
 
             prey: {
 
-                speed: parseInt(state.preys.speed.value),
+                speed: parseFloat(state.preys.speed.value),
                 maxForce: {
 
-                    magnitude: parseInt(state.preys.maxForceMagnitude.value),
-                    angle: parseInt(state.preys.maxForceAngle.value)
+                    magnitude: parseFloat(state.preys.maxForceMagnitude.value),
+                    angle: parseFloat(state.preys.maxForceAngle.value)
                 },
 
                 perception: {
 
-                    radius: parseInt(state.preys.perceptionRadius.value),
-                    angle: parseInt(state.preys.perceptionAngle.value)
+                    radius: parseFloat(state.preys.perceptionRadius.value),
+                    angle: parseFloat(state.preys.perceptionAngle.value)
                 },
 
                 collisionRadius: 20,
@@ -506,17 +517,17 @@ function setupStateToContextOptions(state: SetupState): undefined | ContextOptio
                     separation: parseFloat(state.preys.separationModifier.value),
                 },
 
-                health: parseInt(state.preys.health.value),
-                healthDelta: parseInt(state.preys.healthDelta.value),
+                health: parseFloat(state.preys.health.value),
+                healthDelta: parseFloat(state.preys.healthDelta.value),
 
-                hunger: parseInt(state.preys.hunger.value),
-                hungerDecay: parseInt(state.preys.hungerDecay.value),
+                hunger: parseFloat(state.preys.hunger.value),
+                hungerDecay: parseFloat(state.preys.hungerDecay.value),
 
-                reproductionInterval: parseInt(state.preys.reproductionInterval.value),
+                reproductionInterval: parseFloat(state.preys.reproductionInterval.value),
 
-                maxAge: parseInt(state.preys.maxAge.value),
+                maxAge: parseFloat(state.preys.maxAge.value),
 
-                eatingThreshold: parseInt(state.preys.eatingThreshold.value),
+                eatingThreshold: parseFloat(state.preys.eatingThreshold.value),
             }
         }
     };
@@ -619,16 +630,6 @@ function numberValidator(value: string): boolean {
     return new RegExp(/^[+-]?\d+$/).test(value);
 }
 
-function positiveNumberValidator(value: string): boolean {
-
-    return new RegExp(/^\+?\d+$/).test(value);
-}
-
-function positiveFloatValidator(value: string): boolean {
-
-    return new RegExp(/^\+?\d+(\.\d+)?$/).test(value);
-}
-
 function numberRangeValidator(value: string, lower: number, upper: number): boolean {
 
     if(!numberValidator(value)) return false;
@@ -636,6 +637,30 @@ function numberRangeValidator(value: string, lower: number, upper: number): bool
     const num = parseInt(value);
 
     return num >= lower && num <= upper;
+}
+
+function positiveNumberValidator(value: string): boolean {
+
+    return numberRangeValidator(value, 0, Infinity);
+}
+
+function floatValidator(value: string): boolean {
+
+    return new RegExp(/^[+-]?\d+(\.\d+)?$/).test(value);
+}
+
+function floatRangeValidator(value: string, lower: number, upper: number): boolean {
+
+    if(!floatValidator(value)) return false;
+    
+    const num = parseFloat(value);
+
+    return num >= lower && num <= upper;
+}
+
+function positiveFloatValidator(value: string): boolean {
+
+    return floatRangeValidator(value, 0, Infinity);
 }
 
 type ValidatedEntityOptions = {
@@ -861,10 +886,10 @@ export default function SimSetup() {
             <SelectArea onChange={(value) => setArea(value)} value={area} />
 
             <FoodSpawnRate value={foodSpawnRate.value} error={!foodSpawnRate.valid} onChange={(value) => 
-                setFoodSpawnRate({ value, valid: positiveNumberValidator(value) })} />
+                setFoodSpawnRate({ value, valid: positiveFloatValidator(value) })} />
 
             <FoodMaxAge value={foodMaxAge.value} error={!foodMaxAge.valid} onChange={(value) => 
-                setFoodMaxAge({ value, valid: positiveNumberValidator(value) })} />
+                setFoodMaxAge({ value, valid: positiveFloatValidator(value) })} />
 
             <InitialFood value={initialFood.value} error={!initialFood.valid} onChange={(value) => 
                 setInitialFood({ value, valid: positiveNumberValidator(value) })} />
