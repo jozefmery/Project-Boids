@@ -220,11 +220,7 @@ function useDrawBoundary() {
 
 function useDrawEntities(state: SimState) {
 
-    const preyStyler = useCanvasStylers("prey");
-    const preyHighlightStyler = useCanvasStylers("preyHighlight");
-    const predatorStyler = useCanvasStylers("predator");
-    const predatorHighlightStyler = useCanvasStylers("predatorHighlight");
-    const foodStyler = useCanvasStylers("food");
+    const entityStyler = useCanvasStylers("entity");
     const perceptionStyler = useCanvasStylers("entityPerception");
     const percievedStyler = useCanvasStylers("entityPercived");
     const quadtreeStyler = useCanvasStylers("quadtree");
@@ -233,28 +229,14 @@ function useDrawEntities(state: SimState) {
 
         state.entities.context.current.draw(p5, {
 
-            prey: {
-
-                default: preyStyler,
-                highlight: preyHighlightStyler,
-            },
-            predator: {
-
-                default: predatorStyler,
-                highlight: predatorHighlightStyler
-            },
-            food: foodStyler,
+            entity: entityStyler,
             perception: perceptionStyler,
             percieved: percievedStyler,
             quadtree: quadtreeStyler
         });
 
     }, [state.entities, 
-        preyStyler,
-        preyHighlightStyler,
-        predatorStyler,
-        predatorHighlightStyler,
-        foodStyler,
+        entityStyler,
         perceptionStyler,
         percievedStyler,
         quadtreeStyler]);
