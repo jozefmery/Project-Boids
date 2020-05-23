@@ -14,10 +14,10 @@ import { ThunkAction, Action as ReduxAction } from "@reduxjs/toolkit";
 import { EventType } from "@dodmeister/hotkeys";
 import { Dimensions2D, Position2D } from "./utils";
 import { SimZoomTarget } from "./simulation";
-import { ColorTheme } from "../stylers";
+import { ColorTheme } from "./stylers";
 import { Languages } from "../lang/all";
 import { Action } from "../actions";
-import { EntityType } from "../entities/entity";
+import { EntityType } from "./entity";
 
 type Sequences = string | Array<string>;
 

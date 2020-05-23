@@ -11,7 +11,7 @@
 // import type information
 import React from "react";
 import { Position2D } from "./utils";
-import { Context as EntityContext } from "../entities/entity";
+import { Context as EntityContext } from "../entities";
 
 export enum SimZoomTarget {
 
