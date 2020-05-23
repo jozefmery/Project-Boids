@@ -54,7 +54,7 @@ import { LineChart,
 
 // import stylers
 import { makeStyles, Theme } from "@material-ui/core/styles";
-import { Style, ColorTheme, useCanvasStylers } from "../stylers";
+import { Style, useCanvasStylers } from "../stylers";
 
 // import utilities
 import domtoimage from "dom-to-image";
@@ -63,7 +63,8 @@ import { saveAs } from "file-saver";
 // import type information
 import { StateShape } from "../types/redux";
 import { Position2D } from "../types/utils";
-import { SelectableEntity } from "../entities/entity";
+import { SelectableEntity } from "../types/entity";
+import { ColorTheme } from "../types/stylers";
 
 function Elapsed() {
 

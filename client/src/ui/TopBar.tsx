@@ -37,13 +37,14 @@ import { useStringWithHotkeys } from "../hooks/stringWithHotkey";
 
 // import stylers
 import { makeStyles, Theme } from "@material-ui/core/styles";
-import { Style, ColorTheme } from "../stylers";
-
-// import type information
-import { StateShape } from "../types/redux";
+import { Style } from "../stylers";
 
 // import language data
 import languageData, { Languages } from "../lang/all";
+
+// import type information
+import { StateShape } from "../types/redux";
+import { ColorTheme } from "../types/stylers"
 
 /// Shared styles
 

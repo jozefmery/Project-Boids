@@ -37,11 +37,12 @@ import { useStringWithHotkeys } from "../hooks/stringWithHotkey";
 
 // import stylers
 import { makeStyles, Theme } from "@material-ui/core/styles";
-import { Style, ColorTheme } from "../stylers";
+import { Style } from "../stylers";
 
 // import type information
 import { StateShape } from "../types/redux";
 import { Function } from "../types/utils";
+import { ColorTheme } from "../types/stylers"
 
 const buttonStyle = Style.create({}, {}, Style.controlButton);
 

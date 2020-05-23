@@ -44,7 +44,7 @@ import { Style } from "../stylers";
 // import type information
 import { StateShape } from "../types/redux";
 import { Dimensions2D } from "../types/utils";
-import { ContextOptions } from "../entities/entity";
+import { ContextOptions } from "../types/entity";
 
 const tooltipStyle = Style.create({}, {}, Style.tooltip);
 
