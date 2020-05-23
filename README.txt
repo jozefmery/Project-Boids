@@ -70,3 +70,14 @@ for any other. The only requirement is that server.js and the client directory w
 client files are in the same directory. The desktop application is also placed in the build
 directory for convenience, but isn't required by the server or client. It is possible to move 
 or rename it freely.
+
+Tested desktop browsers (on Windows 10):
+
+    - Google Chrome     v83.0
+    - Opera             v68.0
+    - Mozilla Firefox   v76.0.1
+
+In general any fairly modern browser should work, which supports
+newer CSS properties such as grid. Outdated browsers such as
+Internet Explorer are not supported. Mobile browsers were not tested.
+While they might work, the application is not suited for mobile devices.
