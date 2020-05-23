@@ -10,7 +10,7 @@
 
 // import type information 
 import { StateShape } from "../types/redux";
-import { ColorTheme } from "../stylers";
+import { ColorTheme } from "../types/stylers";
 import { Languages } from "../lang/all";
 import { SimZoomTarget } from "../types/simulation";
 import { EventType } from "@dodmeister/hotkeys";

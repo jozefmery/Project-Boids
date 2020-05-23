@@ -12,7 +12,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 // import enums
-import { ColorTheme } from "../../stylers";
+import { ColorTheme } from "../../types/stylers";
 
 // import default state
 import defaultState from "../default";

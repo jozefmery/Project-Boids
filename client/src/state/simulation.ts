@@ -18,7 +18,7 @@ import { useSelector } from "react-redux";
 import lodash from "lodash";
 
 // import entities
-import { Context as EntityContext } from "../entities/entity";
+import { Context as EntityContext } from "../entities";
 
 // import type information
 import { Position2D } from "../types/utils";
