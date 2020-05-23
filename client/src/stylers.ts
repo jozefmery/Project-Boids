@@ -25,79 +25,14 @@ import { StyleRules } from "@material-ui/styles/withStyles";
 
 // import type information
 import { StateShape } from "./types/redux";
-
-/**
- * 
- * Enum representing the possible global application themes.
- */
-export enum ColorTheme {
-
-    LIGHT = "light",
-    DARK = "dark"
-}
+import { ColorTheme, SimStylers, SimStylerList } from "./types/stylers";
+import { Entity } from "./entities";
 
 /**
  * 
  * Array of Theme enum values.
  */
 export const themeList = Object.values(ColorTheme);
-
-/**
- * 
- * Extended Material UI theme with a custom variable
- * representing the global theme.
- */
-declare module '@material-ui/core/styles/createMuiTheme' {
-    interface Theme {
-
-        theme: ColorTheme;
-    }
-    // allow configuration using `createMuiTheme`
-    interface ThemeOptions {
-        
-        theme?: ColorTheme;
-    }
-}
-
-/**
- * 
- * List of properties every styler requires.
- */
-export type SimStylerList =    
-                        "background"
-                    |   "area"
-                    |   "grid"
-                    |   "gridHighlight" 
-                    |   "boundingBox"
-                    |   "prey"
-                    |   "preyHighlight"
-                    |   "predator"
-                    |   "predatorHighlight"
-                    |   "food"
-                    |   "entityPerception"
-                    |   "entityPercived"
-                    |   "quadtree"
-                    |   "forceBackground"
-                    |   "forceCircle"
-                    |   "forceArrow";
-
-/**
- * 
- * Plain object type which contains every styler function from styler list.
- */
-type SimStyler = {
-
-    [styler in SimStylerList]: (p5: P5) => void;
-}
-
-/**
- * 
- * Plain object type which contains a Styler object for every theme.
- */
-type SimStylers = {
-
-    [theme in ColorTheme]: SimStyler;
-}
 
 /**
  * 
@@ -130,38 +65,33 @@ export const simStylers: SimStylers = {
             p5.strokeWeight(2);
         },
 
-        prey: (p5) => {
+        entity: (p5, instance: Entity, highlighted: boolean) => {
 
-            p5.fill("#00DA09");
-            p5.stroke(0);
-            p5.strokeWeight(2);
-        },
+            switch(instance.type()) {
 
-        preyHighlight: (p5) => {
+                case "food":
 
-            p5.fill("#FFC927");
-            p5.stroke(0);
-            p5.strokeWeight(2);
-        },
+                    const age = instance.age();
+                    const maxAge = instance.options().maxAge;
 
-        predator: (p5) => {
+                    p5.stroke(255, 128, 0, 255 - p5.map(age, 0, maxAge, 0, 255));
+                    p5.strokeWeight(10);
+                    break;
+                
+                case "predator":
 
-            p5.fill("red");
-            p5.stroke(0);
-            p5.strokeWeight(2);
-        },
+                    p5.fill(highlighted ? "#FFC927" : "red");
+                    p5.stroke(0);
+                    p5.strokeWeight(2);
+                    break;
 
-        predatorHighlight: (p5) => {
+                case "prey": 
 
-            p5.fill("#FFC927");
-            p5.stroke(0);
-            p5.strokeWeight(2);
-        },
-
-        food: (p5) => {
-
-            p5.stroke("#FF8000");
-            p5.strokeWeight(10);
+                    p5.fill(highlighted ? "#FFC927" : "#00DA09");
+                    p5.stroke(0);
+                    p5.strokeWeight(2);
+                    break;
+            }
         },
 
         entityPerception: (p5) => {
@@ -227,39 +157,34 @@ export const simStylers: SimStylers = {
             p5.stroke(30);
             p5.strokeWeight(3);
         },
-        
-        prey: (p5) => {
 
-            p5.fill("#00DA09");
-            p5.stroke(0);
-            p5.strokeWeight(2);
-        },
+        entity: (p5, instance: Entity, highlighted: boolean) => {
 
-        preyHighlight: (p5) => {
+            switch(instance.type()) {
 
-            p5.fill("#FFC927");
-            p5.stroke(0);
-            p5.strokeWeight(2);
-        },
+                case "food":
+                    
+                    const age = instance.age();
+                    const maxAge = instance.options().maxAge;
 
-        predator: (p5) => {
+                    p5.stroke(255, 128, 0, 255 - p5.map(age, 0, maxAge, 0, 255));
+                    p5.strokeWeight(10);
+                    break;
+                
+                case "predator":
 
-            p5.fill("red");
-            p5.stroke(0);
-            p5.strokeWeight(2);
-        },
+                    p5.fill(highlighted ? "#FFC927" : "red");
+                    p5.stroke(0);
+                    p5.strokeWeight(2);
+                    break;
 
-        predatorHighlight: (p5) => {
+                case "prey": 
 
-            p5.fill("#FFC927");
-            p5.stroke(0);
-            p5.strokeWeight(2);
-        },
-
-        food: (p5) => {
-
-            p5.stroke("#FF8000");
-            p5.strokeWeight(10);
+                    p5.fill(highlighted ? "#FFC927" : "#00DA09");
+                    p5.stroke(0);
+                    p5.strokeWeight(2);
+                    break;
+            }
         },
 
         entityPerception: (p5) => {
@@ -306,9 +231,9 @@ export function useCanvasStylers(styler: SimStylerList) {
 
     const theme = useSelector((state: StateShape) => state.global.theme);
 
-    return useCallback((p5: P5) => {
+    return useCallback((p5: P5, ...props: Array<any>) => {
 
-        simStylers[theme][styler](p5);
+        simStylers[theme][styler](p5, ...props);
 
     }, [theme, styler]);
 }
