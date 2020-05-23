@@ -1,5 +1,5 @@
 /**
- * File: entities/entity.ts
+ * File: entities/index.ts
  * 
  * Author: Jozef Méry <xmeryj00@stud.fit.vutbr.cz>
  * Date: 24.4.2020
@@ -18,8 +18,14 @@ import P5 from "p5";
 
 // import type information
 import { Dimensions2D, Class, RemoveUndefinedDeep } from "../types/utils";
-
-class Vector extends P5.Vector {};
+import { Vector, 
+        EntityOptions, 
+        EntityCtorOptions,
+        EntityType,
+        EntityForces,
+        EntityStylers,
+        SelectableEntity,
+        ContextOptions } from "../types/entity";
 
 function createVector(v1: number | Vector = 0, v2: number = 0, v3: number = 0): Vector {
 
@@ -37,94 +43,12 @@ function createVector(v1: number | Vector = 0, v2: number = 0, v3: number = 0): 
     return vector;
 }
 
-type EntityOptions = {
-
-    speed?: number;
-    maxForce?: {
-
-        magnitude?: number;
-        angle?: number;
-    };
-
-    perception?: {
-
-        radius?: number;
-        angle?: number;
-    };
-
-    collisionRadius?: number;
-
-    flockingModifier?: {
-
-        alignment?: number;
-        cohesion?: number;
-        separation?: number;
-    }
-
-    health?: number;
-    healthDelta?: number;
-    
-    hunger?: number;
-    hungerDecay?: number;
-
-    reproductionInterval?: number;
-
-    maxAge?: number;
-
-    eatingThreshold?: number;
-};
-
-type EntityCtorOptions = {
-
-    options: RemoveUndefinedDeep<EntityOptions>;
-    forces: EntityForces;
-}
-
-type Styler = (p5: P5) => void;
-
-type EntityStyler = {
-
-    entity: Styler;
-    highlight: Styler;
-    perception: Styler;
-    percieved: Styler;
-}
-
-type EntityStylers = {
-
-    prey: {
-
-        default: Styler;
-        highlight: Styler;
-    };
-    predator: {
-
-        default: Styler;
-        highlight: Styler;
-    };
-    food: Styler;
-    perception: Styler;
-    percieved: Styler;
-    quadtree: Styler;
-};
-
-type Vicinity = Array<{ instance: Entity, dist: number }>;
-
-type EntityForces = {
-
-    position: Vector;
-    velocity: Vector;
-    acceleration: Vector;
-};
-
-export type EntityType = "predator" | "prey" | "food";
-
-export type SelectableEntity = "predator" | "prey";
-
 function vary(value: number, variance: number, lower: number = 0, upper: number = Infinity): number {
 
     return lodash.clamp(value + (variance * (Math.random() - 0.5)), lower, upper);
 }
+
+type Vicinity = Array<{ instance: Entity, dist: number }>;
 
 export class Entity {
 
@@ -422,21 +346,14 @@ export class Entity {
         return vicinity;
     }
 
-    protected drawEntity(p5: P5, stylers: EntityStyler, highlighted: boolean): Entity {
+    protected drawEntity(p5: P5, stylers: EntityStylers, highlighted: boolean): Entity {
 
         // shorthands
         const { position, velocity } = this.forces();
 
         p5.push();
         
-        if(highlighted) {
-
-            stylers.highlight(p5);
-        
-        } else {
-
-            stylers.entity(p5);
-        }
+        stylers.entity(p5, this, highlighted);
 
         p5.translate(position.x, position.y);
         p5.rotate(velocity.heading());
@@ -448,7 +365,7 @@ export class Entity {
         return this;
     }
 
-    protected drawPerception(p5: P5, stylers: EntityStyler, highlighted: boolean): Entity {
+    protected drawPerception(p5: P5, stylers: EntityStylers, highlighted: boolean): Entity {
         
         if(!highlighted) return this;
 
@@ -472,7 +389,7 @@ export class Entity {
         return this;
     }
 
-    protected drawPercieved(p5: P5, stylers: EntityStyler, highlighted: boolean): Entity {      
+    protected drawPercieved(p5: P5, stylers: EntityStylers, highlighted: boolean): Entity {      
 
         if(!highlighted) return this;
 
@@ -726,7 +643,7 @@ export class Entity {
         return this;
     }
 
-    public draw(p5: P5, stylers: EntityStyler, highlighted: boolean = false): Entity {
+    public draw(p5: P5, stylers: EntityStylers, highlighted: boolean = false): Entity {
 
         return this;
     }
@@ -917,7 +834,7 @@ class Prey extends Entity {
         return this;
     }
 
-    public draw(p5: P5, stylers: EntityStyler, highlighted: boolean = false): Prey {
+    public draw(p5: P5, stylers: EntityStylers, highlighted: boolean = false): Prey {
 
         this.drawPerception(p5, stylers, highlighted);
         this.drawEntity(p5, stylers, highlighted);
@@ -986,7 +903,7 @@ class Predator extends Entity {
         return this;
     }
 
-    public draw(p5: P5, stylers: EntityStyler, highlighted: boolean = false): Predator {
+    public draw(p5: P5, stylers: EntityStylers, highlighted: boolean = false): Predator {
 
         this.drawPerception(p5, stylers, highlighted);
         this.drawEntity(p5, stylers, highlighted);
@@ -1007,11 +924,11 @@ class Food extends Entity {
 
     /// Protected methods
 
-    protected drawEntity(p5: P5, stylers: EntityStyler): Food {
+    protected drawEntity(p5: P5, stylers: EntityStylers): Food {
 
         const { position } = this.forces();
 
-        stylers.entity(p5);
+        stylers.entity(p5, this, false);
         p5.point(position.x, position.y);
 
         return this;
@@ -1026,28 +943,10 @@ class Food extends Entity {
         return this;
     }
 
-    public draw(p5: P5, stylers: EntityStyler, _: boolean = false): Food {
+    public draw(p5: P5, stylers: EntityStylers, _: boolean = false): Food {
 
         return this.drawEntity(p5, stylers);
     }
-}
-
-type EntityGeneration = {
-
-    [type in SelectableEntity]: RemoveUndefinedDeep<EntityOptions>;
-};
-
-export type ContextOptions = {
-
-    onBoundaryHit: "wrap" | "kill";
-    drawQuadtree: boolean;
-    area: Dimensions2D;
-
-    entities: EntityGeneration;
-
-    foodSpawn: number;
-    foodMaxAge: number;
-    initialFood: number;
 }
 
 export class Context {
@@ -1240,36 +1139,6 @@ export class Context {
         return this;
     }
 
-    protected getEntityStylers(stylers: EntityStylers): { [type in EntityType]: EntityStyler } {
-
-        return {
-
-            predator: {
-
-                entity: stylers.predator.default,
-                highlight: stylers.predator.highlight,
-                perception: stylers.perception,
-                percieved: stylers.percieved
-            },
-
-            prey: {
-
-                entity: stylers.prey.default,
-                highlight: stylers.prey.highlight,
-                perception: stylers.perception,
-                percieved: stylers.percieved
-            },
-
-            food: {
-
-                entity: stylers.food,
-                highlight: () => undefined,
-                perception: () => undefined,
-                percieved: () => undefined,
-            },
-        }
-    }
-
     protected addFood(count: number): Context {
 
         const { width, height } = this.options_.area;
@@ -1415,9 +1284,7 @@ export class Context {
         stylers.quadtree(p5);
         this.drawQuadtree(p5);
 
-        const entityStylers = this.getEntityStylers(stylers);
-
-        this.forEach(entity => entity.draw(p5, entityStylers[entity.type()], entity === this.selectedEntity_));
+        this.forEach(entity => entity.draw(p5, stylers, entity === this.selectedEntity_));
 
         return this;
     }
