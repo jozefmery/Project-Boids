@@ -444,6 +444,8 @@ export class Entity {
 
             this.reproduction_ = 0;
 
+            const modifier = this.options_.varianceModifier;
+
             context.addEntity(this.type_ as SelectableEntity, {
 
                 forces: {
@@ -455,17 +457,17 @@ export class Entity {
 
                 options: {
 
-                    speed: vary(this.options_.speed, 5, 10),
+                    speed: vary(this.options_.speed, 5 * modifier, 10),
                     maxForce: {
 
-                        magnitude: vary(this.options_.maxForce.magnitude, 5),
-                        angle: vary(this.options_.maxForce.angle, 5, 0, 360)
+                        magnitude: vary(this.options_.maxForce.magnitude, 5 * modifier, 0),
+                        angle: vary(this.options_.maxForce.angle, 5 * modifier, 0, 360)
                     },
 
                     perception: {
 
-                        radius: vary(this.options_.perception.radius, 5, this.options_.collisionRadius + 5),
-                        angle: vary(this.options_.perception.angle, 5, 0, 360),
+                        radius: vary(this.options_.perception.radius, 5 * modifier, this.options_.collisionRadius + 5),
+                        angle: vary(this.options_.perception.angle, 5 * modifier, 0, 360),
                     },
 
                     collisionRadius: this.options_.collisionRadius,
@@ -477,17 +479,19 @@ export class Entity {
                         separation: this.options_.flockingModifier.separation,
                     },
 
-                    hungerDecay: vary(this.options_.hungerDecay, 3, 1, 100),
-                    healthDelta: vary(this.options_.healthDelta, 3, 1, 100),
+                    hungerDecay: vary(this.options_.hungerDecay, 3 * modifier, 1, 100),
+                    healthDelta: vary(this.options_.healthDelta, 3 * modifier, 1, 100),
 
-                    health: 100,
-                    hunger: 75,
+                    health: 70 + (Math.random() * 30),
+                    hunger: 50 + (Math.random() * 50),
 
-                    reproductionInterval: vary(this.options_.reproductionInterval, 3, 5),
+                    reproductionInterval: vary(this.options_.reproductionInterval, 3 * modifier, 5),
 
-                    maxAge: vary(this.options_.maxAge, 5),
+                    maxAge: vary(this.options_.maxAge, 5 * modifier, 5),
 
-                    eatingThreshold: this.options_.eatingThreshold
+                    eatingThreshold: this.options_.eatingThreshold,
+
+                    varianceModifier: this.options_.varianceModifier
                 }
             });
         }
@@ -1012,7 +1016,9 @@ export class Context {
 
                     maxAge: 0,
 
-                    eatingThreshold: 0
+                    eatingThreshold: 0,
+
+                    varianceModifier: 0
                 },
                     
 
@@ -1050,7 +1056,9 @@ export class Context {
 
                     maxAge: 0,
                     
-                    eatingThreshold: 0
+                    eatingThreshold: 0,
+
+                    varianceModifier: 0
                 }
             },
 
@@ -1188,7 +1196,9 @@ export class Context {
 
                     maxAge: this.options_.foodMaxAge,
 
-                    eatingThreshold: 0
+                    eatingThreshold: 0,
+
+                    varianceModifier: 0
                 }
             }));
         }
