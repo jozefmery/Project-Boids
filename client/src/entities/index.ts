@@ -444,7 +444,7 @@ export class Entity {
 
             this.reproduction_ = 0;
 
-            const modifier = this.options_.varianceModifier;
+            const modifier = this.options_.mutationModifier;
 
             context.addEntity(this.type_ as SelectableEntity, {
 
@@ -491,7 +491,7 @@ export class Entity {
 
                     eatingThreshold: this.options_.eatingThreshold,
 
-                    varianceModifier: this.options_.varianceModifier
+                    mutationModifier: this.options_.mutationModifier
                 }
             });
         }
@@ -1018,7 +1018,7 @@ export class Context {
 
                     eatingThreshold: 0,
 
-                    varianceModifier: 0
+                    mutationModifier: 0
                 },
                     
 
@@ -1058,7 +1058,7 @@ export class Context {
                     
                     eatingThreshold: 0,
 
-                    varianceModifier: 0
+                    mutationModifier: 0
                 }
             },
 
@@ -1198,7 +1198,7 @@ export class Context {
 
                     eatingThreshold: 0,
 
-                    varianceModifier: 0
+                    mutationModifier: 0
                 }
             }));
         }

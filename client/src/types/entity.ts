@@ -52,7 +52,7 @@ export type EntityOptions = {
 
     eatingThreshold?: number;
 
-    varianceModifier?: number;
+    mutationModifier?: number;
 };
 
 export type EntityCtorOptions = {

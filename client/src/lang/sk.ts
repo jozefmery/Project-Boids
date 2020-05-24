@@ -85,7 +85,7 @@ const data: LanguageDefinition = {
     lastChange: "Posledná zmena",
     reproduction: "Reprodukcia",
     units: "jednotiek",
-    varianceModifier: "Modifikátor odchýlky"
+    mutationModifier: "Modifikátor mutácie"
 };
 
 export default data;

@@ -274,7 +274,7 @@ function EntityOptions({ type, state, setState }: { type: "predator" | "prey", s
     const reproductionIntervalString = useLanguageString("reproductionInterval");
     const maxAgeString = useLanguageString("maxAge");
     const eatingThresholdString = useLanguageString("eatingThreshold");
-    const varianceModifierString = useLanguageString("varianceModifier");
+    const mutationModifierString = useLanguageString("mutationModifier");
 
     const nonNegativeNumber = useLanguageString("nonNegativeNumber");
     const nonNegativeDecimal = useLanguageString("nonNegativeDecimal");
@@ -378,10 +378,10 @@ function EntityOptions({ type, state, setState }: { type: "predator" | "prey", s
                     suffix="s"
                     helper={nonNegativeDecimal} />
 
-            <Input value={state.varianceModifier.value} 
-                    label={varianceModifierString} 
-                    onChange={(value) => setState({ ...state, varianceModifier: { value, valid: positiveFloatValidator(value) } })} 
-                    error={!state.varianceModifier.valid}
+            <Input value={state.mutationModifier.value} 
+                    label={mutationModifierString} 
+                    onChange={(value) => setState({ ...state, mutationModifier: { value, valid: positiveFloatValidator(value) } })} 
+                    error={!state.mutationModifier.valid}
                     helper={nonNegativeDecimal} />
             {
             type === "prey" ?
@@ -499,7 +499,7 @@ function setupStateToContextOptions(state: SetupState): undefined | ContextOptio
 
                 eatingThreshold: parseFloat(state.predators.eatingThreshold.value),
 
-                varianceModifier: parseFloat(state.predators.varianceModifier.value)
+                mutationModifier: parseFloat(state.predators.mutationModifier.value)
             },
 
             prey: {
@@ -538,7 +538,7 @@ function setupStateToContextOptions(state: SetupState): undefined | ContextOptio
 
                 eatingThreshold: parseFloat(state.preys.eatingThreshold.value),
 
-                varianceModifier: parseFloat(state.preys.varianceModifier.value)
+                mutationModifier: parseFloat(state.preys.mutationModifier.value)
             }
         }
     };
@@ -692,7 +692,7 @@ type ValidatedEntityOptions = {
             |   "reproductionInterval"
             |   "maxAge"
             |   "eatingThreshold"
-            |   "varianceModifier"]: InputWithValidation; 
+            |   "mutationModifier"]: InputWithValidation; 
 };
 
 type SetupState = {
@@ -802,7 +802,7 @@ export default function SimSetup() {
                 value: "75",
                 valid: true
             },
-            varianceModifier: {
+            mutationModifier: {
 
                 value: "1",
                 valid: true
@@ -892,7 +892,7 @@ export default function SimSetup() {
                 value: "75",
                 valid: true
             },
-            varianceModifier: {
+            mutationModifier: {
 
                 value: "1",
                 valid: true
