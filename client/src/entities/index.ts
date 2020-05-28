@@ -43,9 +43,9 @@ function createVector(v1: number | Vector = 0, v2: number = 0, v3: number = 0): 
     return vector;
 }
 
-function vary(value: number, variance: number, lower: number = 0, upper: number = Infinity): number {
+function mutate(value: number, variance: number, lower: number = 0, upper: number = Infinity): number {
 
-    return lodash.clamp(value + (variance * (Math.random() - 0.5)), lower, upper);
+    return lodash.clamp(value + (variance * ((Math.random() * 2.0) - 1.0)), lower, upper);
 }
 
 type Vicinity = Array<{ instance: Entity, dist: number }>;
@@ -457,17 +457,17 @@ export class Entity {
 
                 options: {
 
-                    speed: vary(this.options_.speed, 5 * modifier, 10),
+                    speed: mutate(this.options_.speed, 5 * modifier, 10),
                     maxForce: {
 
-                        magnitude: vary(this.options_.maxForce.magnitude, 5 * modifier, 0),
-                        angle: vary(this.options_.maxForce.angle, 5 * modifier, 0, 360)
+                        magnitude: mutate(this.options_.maxForce.magnitude, 5 * modifier, 0),
+                        angle: mutate(this.options_.maxForce.angle, 5 * modifier, 0, 360)
                     },
 
                     perception: {
 
-                        radius: vary(this.options_.perception.radius, 5 * modifier, this.options_.collisionRadius + 5),
-                        angle: vary(this.options_.perception.angle, 5 * modifier, 0, 360),
+                        radius: mutate(this.options_.perception.radius, 5 * modifier, this.options_.collisionRadius + 5),
+                        angle: mutate(this.options_.perception.angle, 5 * modifier, 0, 360),
                     },
 
                     collisionRadius: this.options_.collisionRadius,
@@ -479,15 +479,15 @@ export class Entity {
                         separation: this.options_.flockingModifier.separation,
                     },
 
-                    hungerDecay: vary(this.options_.hungerDecay, 3 * modifier, 1, 100),
-                    healthDelta: vary(this.options_.healthDelta, 3 * modifier, 1, 100),
+                    hungerDecay: mutate(this.options_.hungerDecay, 3 * modifier, 1, 100),
+                    healthDelta: mutate(this.options_.healthDelta, 3 * modifier, 1, 100),
 
                     health: 70 + (Math.random() * 30),
                     hunger: 50 + (Math.random() * 50),
 
-                    reproductionInterval: vary(this.options_.reproductionInterval, 3 * modifier, 5),
+                    reproductionInterval: mutate(this.options_.reproductionInterval, 3 * modifier, 5),
 
-                    maxAge: vary(this.options_.maxAge, 5 * modifier, 5),
+                    maxAge: mutate(this.options_.maxAge, 5 * modifier, 5),
 
                     eatingThreshold: this.options_.eatingThreshold,
 
