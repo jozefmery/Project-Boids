@@ -579,9 +579,8 @@ function Confirm({ state }: { state: SetupState }) {
                 const preyCount = parseInt(state.preys.initialCount.value);
 
                 simState.time.elapsed.current = 0;
-                statsContext.entities.array.current = [];
-                statsContext.entities.predators.current = predatorCount;
-                statsContext.entities.preys.current = preyCount;
+                
+                statsContext.entities.clearStats();
                 
                 entityContext.clearSelectedEntity();
                 entityContext.init(predatorCount, preyCount, contextOptions);                
@@ -844,12 +843,12 @@ export default function SimSetup() {
             },
             alignmentModifier: {
 
-                value: "1.0",
+                value: "1",
                 valid: true
             },
             cohesionModifier: {
 
-                value: "1.0",
+                value: "1",
                 valid: true
             },
             separationModifier: {
