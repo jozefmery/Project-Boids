@@ -72,6 +72,8 @@ import { SelectableEntity } from "../types/entity";
 import { ColorTheme } from "../types/stylers";
 import { StatTypes, statsTypeList } from "../types/stats";
 
+const numberFormatter = new Intl.NumberFormat("en-US", { style: "decimal", minimumFractionDigits: 0, maximumFractionDigits: 2 });
+
 function Elapsed() {
 
     useForceUpdate(100);
@@ -194,7 +196,7 @@ function SelectedEntityHealth({ health }: { health: number }) {
                     classes={{ tooltip: tooltipClass }}>
             <div className={container}>
                 <FavoriteIcon />
-                <div>{Math.round(health)} / 100</div>
+                <div>{numberFormatter.format(health)} / 100</div>
             </div>
         </Tooltip>);
 }
@@ -213,7 +215,7 @@ function SelectedEntityHunger({ hunger }: { hunger: number }) {
                     classes={{ tooltip: tooltipClass }}>
             <div className={container}>
                 <FoodIcon />
-                <div>{Math.round(hunger)} / 100</div>
+                <div>{numberFormatter.format(hunger)} / 100</div>
             </div>
         </Tooltip>);
 }
@@ -232,7 +234,26 @@ function SelectedEntityAge({ age, maxAge }: { age: number, maxAge: number }) {
                     classes={{ tooltip: tooltipClass }}>
             <div className={container}>
                 <HourglassFullIcon />
-                <div>{Math.round(age)} / {Math.round(maxAge)}</div>
+                <div>{numberFormatter.format(age)} / {Math.round(maxAge)}</div>
+            </div>
+        </Tooltip>);
+}
+
+function SelectedEntityGeneration({ generation }: { generation: number }) {
+
+    const { container } = useHorizontalFlexBox();
+    const { tooltip: tooltipClass } = useTooltipStyles();
+
+    const generationString = useLanguageString("generation");
+
+    return (
+        <Tooltip title={generationString} 
+                    placement="top" 
+                    TransitionComponent={Zoom}
+                    classes={{ tooltip: tooltipClass }}>
+            <div className={container}>
+                <AccountTreeIcon />
+                <div>{generation}</div>
             </div>
         </Tooltip>);
 }
@@ -251,7 +272,7 @@ function SelectedEntityReproduction({ progress, readyAt }: { progress: number, r
                     classes={{ tooltip: tooltipClass }}>
             <div className={container}>
                 <PlusOneIcon />
-                <div>{Math.round(progress)} / {Math.round(readyAt)}</div>
+                <div>{numberFormatter.format(progress)} / {Math.round(readyAt)}</div>
             </div>
         </Tooltip>);
 }
@@ -271,7 +292,7 @@ function SelectedEntityPerception({ radius, angle }: { radius: number, angle: nu
                     classes={{ tooltip: tooltipClass }}>
             <div className={container}>
                 <VisibilityIcon />
-                <div>{`${angle}° & ${radius}`}</div>
+                <div>{`${numberFormatter.format(angle)}° & ${numberFormatter.format(radius)}`}</div>
             </div>
         </Tooltip>);
 }
@@ -398,8 +419,9 @@ function SelectedEntity() {
             <SelectedEntityPerception angle={selectedEntity.options().perception.angle} radius={selectedEntity.options().perception.radius} />
             <SelectedEntityHealth health={selectedEntity.health()} />
             <SelectedEntityHunger hunger={selectedEntity.hunger()} />
-            <SelectedEntityReproduction progress={selectedEntity.reproduction()} readyAt={selectedEntity.options().reproductionInterval} />
             <SelectedEntityAge age={selectedEntity.age()} maxAge={selectedEntity.options().maxAge} />
+            <SelectedEntityReproduction progress={selectedEntity.reproduction()} readyAt={selectedEntity.options().reproductionInterval} />
+            <SelectedEntityGeneration generation={selectedEntity.options().generation}/>
             <SelectedEntityForces velocity={selectedEntity.velocity()}
                 maxVelocity={selectedEntity.options().speed}
                 acceleration={selectedEntity.acceleration()}
@@ -461,8 +483,6 @@ const useSelectStyles = makeStyles(({ theme }) => ({
     menu: selectMenu.compose(theme),
     item: selectMenuItem.compose(theme)
 }));
-
-const numberFormatter = new Intl.NumberFormat("en-US", { style: "decimal", minimumFractionDigits: 0, maximumFractionDigits: 2 });
 
 function EntityStats() {
 
@@ -545,7 +565,7 @@ function EntityStats() {
                 <LineChart width={zoomed ? 700 : 350} height={zoomed ? 500 : 250} data={entityStats[selectedStat]}>
                     <CartesianGrid strokeDasharray="2 2" stroke={stylers.grid} />
                     <XAxis stroke={stylers.grid} dataKey="stamp" interval="preserveEnd" minTickGap={20} unit="s" />
-                    <YAxis stroke={stylers.grid} />
+                    <YAxis stroke={stylers.grid} domain={[(dataMin) => Math.max(0, dataMin - 10), "auto"]} />
                     <Line type="monotone" dataKey="preys" stroke={stylers.preys} strokeWidth={3} dot={false} isAnimationActive={false} />
                     <Line type="monotone" dataKey="predators" stroke={stylers.predators} strokeWidth={3} dot={false} isAnimationActive={false} />
                 </LineChart>
@@ -642,7 +662,7 @@ function FPS() {
                 <LineChart width={zoomed ? 700 : 350} height={zoomed ? 500 : 250} data={array}>
                     <CartesianGrid strokeDasharray="2 2" stroke={stylers.grid} />
                     <XAxis tick={false} stroke={stylers.grid} unit="s" />
-                    <YAxis stroke={stylers.grid} />
+                    <YAxis stroke={stylers.grid} domain={[(dataMin) => Math.max(0, dataMin - 10), "auto"]} />
                     <Line type="monotone" dataKey="fps" stroke={stylers.line} strokeWidth={3} dot={false} isAnimationActive={false} />
                     <ReferenceLine strokeDasharray="10 10" stroke={stylers.average} y={average} strokeWidth={3} />
                 </LineChart>
