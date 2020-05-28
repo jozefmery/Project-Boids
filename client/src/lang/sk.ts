@@ -85,7 +85,21 @@ const data: LanguageDefinition = {
     lastChange: "Posledná zmena",
     reproduction: "Reprodukcia",
     units: "jednotiek",
-    mutationModifier: "Modifikátor mutácie"
+    mutationModifier: "Modifikátor mutácie",
+    count: "Počet",
+    averageAge: "Priemerný vek",
+    averageMaxAge: "Priemerný maximálny vek",
+    averageSpeed: "Priemerná rýchlosť",
+    averageMaxForceMagnitude: "Priemerné max. zrýchlenie",
+    averageMaxForceAngle: "Priemerný max. uhol zrýchlenia",
+    averagePerceptionRadius: "Priemerný okruh vnímania",
+    averagePerceptionAngle: "Priemerný uhol vnímania",
+    averageHunger: "Priemerný hlad",
+    averageHungerDecay: "Priemerná zmena hladu",
+    averageHealth: "Priemerné zdravie",
+    averageHealthDelta: "Priemerná zmena zdravia",
+    averageReproductionInterval: "Priemerný interval reprodukcie",
+    displayedProperty: "Zobrazená vlastnosť"
 };
 
 export default data;

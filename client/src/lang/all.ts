@@ -91,6 +91,20 @@ export type LanguageDefinition = {
     reproduction: string;
     units: string;
     mutationModifier: string;
+    count: string;
+    averageAge: string;
+    averageMaxAge: string;
+    averageSpeed: string;
+    averageMaxForceMagnitude: string;
+    averageMaxForceAngle: string;
+    averagePerceptionRadius: string;
+    averagePerceptionAngle: string;
+    averageHunger: string;
+    averageHungerDecay: string;
+    averageHealth: string;
+    averageHealthDelta: string;
+    averageReproductionInterval: string;
+    displayedProperty: string;
 };
 
 /**

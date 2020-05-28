@@ -85,7 +85,21 @@ const data: LanguageDefinition = {
     lastChange: "Last change",
     reproduction: "Reproduction",
     units: "units",
-    mutationModifier: "Mutation modifier"
+    mutationModifier: "Mutation modifier",
+    count: "Count",
+    averageAge: "Average age",
+    averageMaxAge: "Average maximum age",
+    averageSpeed: "Average speed",
+    averageMaxForceMagnitude: "Average max. force magnitude",
+    averageMaxForceAngle: "Average max. force angle",
+    averagePerceptionRadius: "Average perception radius",
+    averagePerceptionAngle: "Average perception angle",
+    averageHunger: "Average hunger",
+    averageHungerDecay: "Average hunger decay",
+    averageHealth: "Average health",
+    averageHealthDelta: "Average health delta",
+    averageReproductionInterval: "Average reproduction interval",
+    displayedProperty: "Displayed property"
 };
 
 export default data;
