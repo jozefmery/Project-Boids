@@ -43,6 +43,11 @@ import FoodIcon from '@material-ui/icons/Fastfood';
 import HourglassFullIcon from '@material-ui/icons/HourglassFull';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import PlusOneIcon from '@material-ui/icons/PlusOne';
+import FormControl from "@material-ui/core/FormControl";
+import InputLabel from "@material-ui/core/InputLabel";
+import Select from "@material-ui/core/Select";
+import MenuItem from "@material-ui/core/MenuItem";
+import AccountTreeIcon from '@material-ui/icons/AccountTree';
 
 // import charts
 import { LineChart, 
@@ -65,6 +70,7 @@ import { StateShape } from "../types/redux";
 import { Position2D } from "../types/utils";
 import { SelectableEntity } from "../types/entity";
 import { ColorTheme } from "../types/stylers";
+import { StatTypes, statsTypeList } from "../types/stats";
 
 function Elapsed() {
 
@@ -369,7 +375,7 @@ function ClearSelectedEntity({ clear }: { clear: () => any }) {
 
 function SelectedEntity() {
 
-    useForceUpdate(1000);
+    useForceUpdate(200);
 
     const { container } = useVerticalFlexBox();
 
@@ -426,15 +432,66 @@ function useEntityChartStylers() {
     }[theme];
 }
 
+const formControlStyles = Style.create({}, {}, Style.textColor);
+
+const inputLabelStyles = Style.create({
+
+    minWidth: "200px"
+
+}, {}, Style.textColor);
+
+const selectStyles = Style.create({
+
+    minWidth: "200px"
+
+}, {}, Style.textColor);
+
+const selectIconStyles = Style.create({}, {}, Style.textColor);
+
+const selectMenu: Style = Style.create({}, {}, Style.menu);
+
+const selectMenuItem: Style = Style.create({}, {}, Style.menuItem);
+
+const useSelectStyles = makeStyles(({ theme }) => ({
+
+    formControl: formControlStyles.compose(theme),
+    label: inputLabelStyles.compose(theme),
+    select: selectStyles.compose(theme),
+    selectIcon: selectIconStyles.compose(theme),
+    menu: selectMenu.compose(theme),
+    item: selectMenuItem.compose(theme)
+}));
+
+const numberFormatter = new Intl.NumberFormat("en-US", { style: "decimal", minimumFractionDigits: 0, maximumFractionDigits: 2 });
+
 function EntityStats() {
 
-    useForceUpdate(1000);
+    const classes = useSelectStyles();
 
     const zoomInString = useLanguageString("zoomIn");
     const zoomOutString = useLanguageString("zoomOut");
     const saveAsImg = useLanguageString("saveAsImg");
     const predatorsString = useLanguageString("predators");
     const preysString = useLanguageString("preys");
+
+    const displayedPropertyString = useLanguageString("displayedProperty");
+
+    const statTypeStrings: { [stat in StatTypes]: string; } = {
+
+        count: useLanguageString("count"),
+        averageAge: useLanguageString("averageAge"),
+        averageMaxAge: useLanguageString("averageMaxAge"),
+        averageSpeed: useLanguageString("averageSpeed"),
+        averageMaxForceMagnitude: useLanguageString("averageMaxForceMagnitude"),
+        averageMaxForceAngle: useLanguageString("averageMaxForceAngle"),
+        averagePerceptionRadius: useLanguageString("averagePerceptionRadius"),
+        averagePerceptionAngle: useLanguageString("averagePerceptionAngle"),
+        averageHunger: useLanguageString("averageHunger"),
+        averageHungerDecay: useLanguageString("averageHungerDecay"),
+        averageHealth: useLanguageString("averageHealth"),
+        averageHealthDelta: useLanguageString("averageHealthDelta"),
+        averageReproductionInterval: useLanguageString("averageReproductionInterval")
+    };
     
     const { button : buttonClass} = useButtonStyles();
     const { tooltip : tooltipClass } = useTooltipStyles();
@@ -443,29 +500,51 @@ function EntityStats() {
     const canvasRef = useRef(null);
     const [chartId, setChartId] = useState(0);
 
+    const [selectedStat, setSelectedStat] = useState<StatTypes>("count");
+
     const stylers = useEntityChartStylers();
 
     const { container: vFlex } = useVerticalFlexBox();
     const { container: hFlex } = useHorizontalFlexBox(); 
 
-    const entityStats = useContext(StatsStateContext).entities;
+    const entityStats = useContext(StatsStateContext).entities.stats;
 
-    const predators = entityStats.predators.current;
-    const preys = entityStats.preys.current;
-    const array = entityStats.array.current;
+    let predatorValue = 0;
+    let preyValue = 0;
+
+    if(entityStats[selectedStat].length > 0) {
+
+        const last = entityStats[selectedStat][entityStats[selectedStat].length - 1];
+
+        predatorValue = last.predators;
+        preyValue = last.preys;
+    }
 
     return (
         <div className={vFlex}>
             <div ref={canvasRef} className={vFlex}>
+            <FormControl className={classes.formControl}>
+                <InputLabel classes={{ root: classes.label }}>{displayedPropertyString}</InputLabel>
+                <Select value={selectedStat} onChange={(event) => setSelectedStat(event.target.value as StatTypes)}
+                        MenuProps={{ classes: { paper: classes.menu }}}
+                        classes={{ root: classes.select, icon: classes.selectIcon }}>
+
+                    {
+                        statsTypeList.map((type) => 
+                            <MenuItem value={type} classes={{ root: classes.item }}>{statTypeStrings[type]}</MenuItem>)
+                    }
+                    
+                </Select>
+            </FormControl>
                 <div style={{ color: stylers.predators }}>
-                    {`${predatorsString}: ${predators}`}
+                    {`${predatorsString}: ${numberFormatter.format(predatorValue)}`}
                 </div>
-                <div  style={{ color: stylers.preys }}>
-                    {`${preysString}: ${preys}`}
+                <div style={{ color: stylers.preys }}>
+                    {`${preysString}: ${numberFormatter.format(preyValue)}`}
                 </div>
-                <LineChart width={zoomed ? 700 : 350} height={zoomed ? 500 : 250} data={[...array]}>
+                <LineChart width={zoomed ? 700 : 350} height={zoomed ? 500 : 250} data={entityStats[selectedStat]}>
                     <CartesianGrid strokeDasharray="2 2" stroke={stylers.grid} />
-                    <XAxis stroke={stylers.grid} dataKey="stamp" interval="preserveEnd" minTickGap={20} />
+                    <XAxis stroke={stylers.grid} dataKey="stamp" interval="preserveEnd" minTickGap={20} unit="s" />
                     <YAxis stroke={stylers.grid} />
                     <Line type="monotone" dataKey="preys" stroke={stylers.preys} strokeWidth={3} dot={false} isAnimationActive={false} />
                     <Line type="monotone" dataKey="predators" stroke={stylers.predators} strokeWidth={3} dot={false} isAnimationActive={false} />
@@ -527,8 +606,6 @@ function useFPSChartStylers() {
 
 function FPS() {
 
-    useForceUpdate(500);
-
     const zoomInString = useLanguageString("zoomIn");
     const zoomOutString = useLanguageString("zoomOut");
     const saveAsImg = useLanguageString("saveAsImg");
@@ -549,8 +626,8 @@ function FPS() {
 
     const fpsStats = useContext(StatsStateContext).fps;
 
-    const fps = fpsStats.current.current;
-    const array = fpsStats.array.current;
+    const fps = fpsStats.current;
+    const array = fpsStats.array;
     const average = array.reduce((total, current) => total + current.fps, 0) / array.length;
 
     return (
@@ -562,9 +639,9 @@ function FPS() {
                 <div style={{ color: stylers.average }}>
                     {`${averageString}: ${average.toFixed(2)}`}
                 </div>
-                <LineChart width={zoomed ? 700 : 350} height={zoomed ? 500 : 250} data={[...array]}>
+                <LineChart width={zoomed ? 700 : 350} height={zoomed ? 500 : 250} data={array}>
                     <CartesianGrid strokeDasharray="2 2" stroke={stylers.grid} />
-                    <XAxis tick={false} stroke={stylers.grid} />
+                    <XAxis tick={false} stroke={stylers.grid} unit="s" />
                     <YAxis stroke={stylers.grid} />
                     <Line type="monotone" dataKey="fps" stroke={stylers.line} strokeWidth={3} dot={false} isAnimationActive={false} />
                     <ReferenceLine strokeDasharray="10 10" stroke={stylers.average} y={average} strokeWidth={3} />

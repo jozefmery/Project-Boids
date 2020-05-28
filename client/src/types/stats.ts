@@ -8,21 +8,44 @@
  * 
  */
 
-// import type information
-import React from "react";
+export type FpsStats = {
+
+    array: Array<{ fps: number }>;
+    current: number;
+}
+
+export const statsTypeList = [
+
+    "count",
+    "averageAge",
+    "averageMaxAge",
+    "averageSpeed",
+    "averageMaxForceMagnitude",
+    "averageMaxForceAngle",
+    "averagePerceptionRadius",
+    "averagePerceptionAngle",
+    "averageHunger",
+    "averageHungerDecay",
+    "averageHealth",
+    "averageHealthDelta",
+    "averageReproductionInterval"
+    
+] as const;
+
+export type StatTypes = typeof statsTypeList[number];
+
+export type EntityStats = {
+
+    stats: {
+
+        [stat in StatTypes]: Array<{ predators: number, preys: number, stamp: number }>;
+    };
+
+    clearStats: () => any;
+};
 
 export type StatsState = {
     
-    fps: {
-        array: React.MutableRefObject<Array<{ fps: number }>>;
-        current: React.MutableRefObject<number>;
-    };
-
-    entities: {
-
-        predators: React.MutableRefObject<number>;
-        preys: React.MutableRefObject<number>;
-
-        array: React.MutableRefObject<Array<{ predators: number, preys: number, stamp: number }>>;
-    };
+    fps: FpsStats;
+    entities: EntityStats;
 };
