@@ -53,6 +53,8 @@ export type EntityOptions = {
     eatingThreshold?: number;
 
     mutationModifier?: number;
+
+    generation?: number;
 };
 
 export type EntityCtorOptions = {

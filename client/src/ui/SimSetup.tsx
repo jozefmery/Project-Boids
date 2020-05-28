@@ -499,7 +499,9 @@ function setupStateToContextOptions(state: SetupState): undefined | ContextOptio
 
                 eatingThreshold: parseFloat(state.predators.eatingThreshold.value),
 
-                mutationModifier: parseFloat(state.predators.mutationModifier.value)
+                mutationModifier: parseFloat(state.predators.mutationModifier.value),
+
+                generation: 1
             },
 
             prey: {
@@ -538,7 +540,9 @@ function setupStateToContextOptions(state: SetupState): undefined | ContextOptio
 
                 eatingThreshold: parseFloat(state.preys.eatingThreshold.value),
 
-                mutationModifier: parseFloat(state.preys.mutationModifier.value)
+                mutationModifier: parseFloat(state.preys.mutationModifier.value),
+
+                generation: 1
             }
         }
     };

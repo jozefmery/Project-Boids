@@ -105,6 +105,7 @@ export type LanguageDefinition = {
     averageHealthDelta: string;
     averageReproductionInterval: string;
     displayedProperty: string;
+    generation: string;
 };
 
 /**

@@ -491,7 +491,9 @@ export class Entity {
 
                     eatingThreshold: this.options_.eatingThreshold,
 
-                    mutationModifier: this.options_.mutationModifier
+                    mutationModifier: this.options_.mutationModifier,
+
+                    generation: this.options_.generation + 1
                 }
             });
         }
@@ -1018,7 +1020,9 @@ export class Context {
 
                     eatingThreshold: 0,
 
-                    mutationModifier: 0
+                    mutationModifier: 0,
+
+                    generation: 0
                 },
                     
 
@@ -1058,7 +1062,9 @@ export class Context {
                     
                     eatingThreshold: 0,
 
-                    mutationModifier: 0
+                    mutationModifier: 0,
+
+                    generation: 0
                 }
             },
 
@@ -1198,7 +1204,9 @@ export class Context {
 
                     eatingThreshold: 0,
 
-                    mutationModifier: 0
+                    mutationModifier: 0,
+
+                    generation: 0
                 }
             }));
         }
