@@ -37,6 +37,9 @@ import InputLabel from "@material-ui/core/InputLabel";
 import TextField from "@material-ui/core/TextField";
 import InputAdornment from '@material-ui/core/InputAdornment';
 
+// import templates
+import { templates } from "../templates";
+
 // import stylers
 import { makeStyles, Theme } from "@material-ui/core/styles";
 import { Style } from "../stylers";
@@ -45,6 +48,7 @@ import { Style } from "../stylers";
 import { StateShape } from "../types/redux";
 import { Dimensions2D } from "../types/utils";
 import { ContextOptions } from "../types/entity";
+import { SetupState, ValidatedEntityOptions, InputWithValidation } from "../types/setup";
 
 const tooltipStyle = Style.create({}, {}, Style.tooltip);
 
@@ -66,21 +70,6 @@ const useCheckBoxStyles = makeStyles(({ theme }) => ({
 
     checkbox: checkBoxStyles.compose(theme),
 }));
-
-function DrawQuadTree({ onChange, checked }: { onChange: (checked: boolean) => any, checked: boolean }) {
-
-    const { checkbox } = useCheckBoxStyles();
-
-    const drawTreeString = useLanguageString("drawQuadtree");
-
-    return (
-        <div>
-            {drawTreeString}: <Checkbox classes={{ root: checkbox }} 
-                                        color="default"
-                                        onChange={(_, checked) => onChange(checked)}
-                                        checked={checked} />
-        </div>);
-}
 
 const formControlStyles = Style.create({
 
@@ -107,6 +96,42 @@ const useSelectStyles = makeStyles(({ theme }) => ({
     menu: selectMenu.compose(theme),
     item: selectMenuItem.compose(theme)
 }));
+
+function TemplateSelector({ selected, onSelect }: { selected: number, onSelect: (value: number) => any }) {
+
+    const classes = useSelectStyles();
+
+    const templatesString = useLanguageString("templates");
+
+    return (
+        <div>
+            <FormControl className={classes.formControl}>
+            <InputLabel classes={{ root: classes.label }}>{templatesString}</InputLabel>
+                <Select value={selected}
+                        MenuProps={{ classes: { paper: classes.menu }}}
+                        classes={{ root: classes.select, icon: classes.selectIcon }}>
+                    {/* TODO */}
+                    <MenuItem value={0} onClick={() => onSelect(0)} classes={{ root: classes.item }}>TODO</MenuItem>
+                </Select>
+            </FormControl>
+        </div>
+    );
+}
+
+function DrawQuadTree({ onChange, checked }: { onChange: (checked: boolean) => any, checked: boolean }) {
+
+    const { checkbox } = useCheckBoxStyles();
+
+    const drawTreeString = useLanguageString("drawQuadtree");
+
+    return (
+        <div>
+            {drawTreeString}: <Checkbox classes={{ root: checkbox }} 
+                                        color="default"
+                                        onChange={(_, checked) => onChange(checked)}
+                                        checked={checked} />
+        </div>);
+}
 
 function SelectArea({ onChange, value }: { onChange: (value: number) => any, value: number }) {
 
@@ -633,12 +658,6 @@ const usePanelStyles = makeStyles(({ theme }) => ({
 
 }));
 
-type InputWithValidation = {
-
-    valid: boolean;
-    value: string;
-};
-
 function numberValidator(value: string): boolean {
 
     return new RegExp(/^[+-]?\d+$/).test(value);
@@ -677,236 +696,46 @@ function positiveFloatValidator(value: string): boolean {
     return floatRangeValidator(value, 0, Infinity);
 }
 
-type ValidatedEntityOptions = {
-
-    [key in     "initialCount"  
-            |   "speed"
-            |   "maxForceAngle"
-            |   "maxForceMagnitude"
-            |   "perceptionRadius"
-            |   "perceptionAngle"
-            |   "alignmentModifier"
-            |   "cohesionModifier"
-            |   "separationModifier"
-            |   "hungerDecay"
-            |   "healthDelta"
-            |   "health"
-            |   "hunger"
-            |   "reproductionInterval"
-            |   "maxAge"
-            |   "eatingThreshold"
-            |   "mutationModifier"]: InputWithValidation; 
-};
-
-type SetupState = {
-
-    drawQuadTree: boolean;
-    area: number;
-    foodSpawnRate: InputWithValidation;
-    foodMaxAge: InputWithValidation;
-    initialFood: InputWithValidation;
-
-    predators: ValidatedEntityOptions;
-    preys: ValidatedEntityOptions;
-}
-
 export default function SimSetup() {
 
     const isOpen = useSelector((state: StateShape) => state.global.sidePanel) === "setup";
 
     const { panel } = usePanelStyles(isOpen);
 
-    const [drawQuadTree, setDrawQuadTree] = useState(false);
-    const [area, setArea] = useState(2);
+    const [template, setTemplate] = useState(0);
 
-    const [foodSpawnRate, setFoodSpawnRate] = useState<InputWithValidation>({ value: "5", valid: true });
-    const [foodMaxAge, setFoodMaxAge] = useState<InputWithValidation>({ value: "60", valid: true });
-    const [initialFood, setInitialFood] = useState<InputWithValidation>({ value: "100", valid: true });
+    const [drawQuadTree, setDrawQuadTree] = useState(templates[template].drawQuadTree);
+    const [area, setArea] = useState(templates[template].area);
 
-    const [predatorState, setPredatorState] = useState<ValidatedEntityOptions>(
-        {
-            initialCount: {
+    const [foodSpawnRate, setFoodSpawnRate] = useState<InputWithValidation>(templates[template].foodSpawnRate);
+    const [foodMaxAge, setFoodMaxAge] = useState<InputWithValidation>(templates[template].foodMaxAge);
+    const [initialFood, setInitialFood] = useState<InputWithValidation>(templates[template].initialFood);
 
-                value: "0",
-                valid: true
-            },
-            speed: {
+    const [predatorState, setPredatorState] = useState<ValidatedEntityOptions>(templates[template].predators);
 
-                value: "120",
-                valid: true
-            },
-            maxForceAngle: {
+    const [preyState, setPreyState] = useState<ValidatedEntityOptions>(templates[template].preys);
 
-                value: "270",
-                valid: true
-            },
-            maxForceMagnitude: {
+    const onTemplateSelect = (selected: number) => {
 
-                value: "25",
-                valid: true
-            },
-            perceptionRadius: {
+        setTemplate(selected);
 
-                value: "300",
-                valid: true
-            },
-            perceptionAngle: {
+        const current = templates[selected];
 
-                value: "200",
-                valid: true
-            },
-            alignmentModifier: {
+        setDrawQuadTree(current.drawQuadTree);
+        setArea(current.area);
+        setFoodSpawnRate(current.foodSpawnRate);
+        setFoodMaxAge(current.foodMaxAge);
+        setInitialFood(current.initialFood);
 
-                value: "0",
-                valid: true
-            },
-            cohesionModifier: {
-
-                value: "0",
-                valid: true
-            },
-            separationModifier: {
-
-                value: "0",
-                valid: true
-            },
-            hungerDecay: {
-
-                value: "5",
-                valid: true
-            },
-            healthDelta: {
-
-                value: "5",
-                valid: true
-            },
-            health: {
-
-                value: "100",
-                valid: true
-            },
-            hunger: {
-
-                value: "100",
-                valid: true
-            },
-            reproductionInterval: {
-
-                value: "30",
-                valid: true
-            },
-            maxAge: {
-
-                value: "300",
-                valid: true
-            },
-            eatingThreshold: {
-
-                value: "75",
-                valid: true
-            },
-            mutationModifier: {
-
-                value: "1",
-                valid: true
-            }
-        }
-    );
-
-    const [preyState, setPreyState] = useState<ValidatedEntityOptions>(
-        {   
-            initialCount: {
-
-                value: "0",
-                valid: true
-            },
-            speed: {
-
-                value: "100",
-                valid: true
-            },
-            maxForceAngle: {
-
-                value: "270",
-                valid: true
-            },
-            maxForceMagnitude: {
-
-                value: "20",
-                valid: true
-            },
-            perceptionRadius: {
-
-                value: "450",
-                valid: true
-            },
-            perceptionAngle: {
-
-                value: "270",
-                valid: true
-            },
-            alignmentModifier: {
-
-                value: "1",
-                valid: true
-            },
-            cohesionModifier: {
-
-                value: "1",
-                valid: true
-            },
-            separationModifier: {
-
-                value: "1.5",
-                valid: true
-            },
-            hungerDecay: {
-
-                value: "5",
-                valid: true
-            },
-            healthDelta: {
-
-                value: "10",
-                valid: true
-            },
-            health: {
-
-                value: "100",
-                valid: true
-            },
-            hunger: {
-
-                value: "100",
-                valid: true
-            },
-            reproductionInterval: {
-
-                value: "30",
-                valid: true
-            },
-            maxAge: {
-
-                value: "200",
-                valid: true
-            },
-            eatingThreshold: {
-
-                value: "75",
-                valid: true
-            },
-            mutationModifier: {
-
-                value: "1",
-                valid: true
-            }
-        }
-    );
+        setPredatorState(current.predators);
+        setPreyState(current.preys);
+    };
 
     return (
 
         <div className={panel}>
             
+            <TemplateSelector selected={template} onSelect={onTemplateSelect} />
             <DrawQuadTree onChange={(checked) => setDrawQuadTree(checked)} checked={drawQuadTree} />
             <SelectArea onChange={(value) => setArea(value)} value={area} />
 
