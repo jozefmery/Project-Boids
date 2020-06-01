@@ -126,11 +126,11 @@ function SelectArea({ onChange, value }: { onChange: (value: number) => any, val
                 <Select value={value} onChange={(event) => onChange(event.target.value as number)}
                         MenuProps={{ classes: { paper: classes.menu }}}
                         classes={{ root: classes.select, icon: classes.selectIcon }}>
-                    <MenuItem value={0} classes={{ root: classes.item }}>{verySmallString} 500 x 500</MenuItem>
-                    <MenuItem value={1} classes={{ root: classes.item }}>{smallString} 2000 x 2000</MenuItem>
-                    <MenuItem value={2} classes={{ root: classes.item }}>{mediumString} 5000 x 5000</MenuItem>
-                    <MenuItem value={3} classes={{ root: classes.item }}>{largeString} 10000 x 10000</MenuItem>
-                    <MenuItem value={4} classes={{ root: classes.item }}>{veryLargeString} 20000 x 20000</MenuItem>
+                    <MenuItem value={0} classes={{ root: classes.item }}>{`${verySmallString} ${areas[0].width} x ${areas[0].height}`}</MenuItem>
+                    <MenuItem value={1} classes={{ root: classes.item }}>{`${smallString} ${areas[1].width} x ${areas[1].height}`}</MenuItem>
+                    <MenuItem value={2} classes={{ root: classes.item }}>{`${mediumString} ${areas[2].width} x ${areas[2].height}`}</MenuItem>
+                    <MenuItem value={3} classes={{ root: classes.item }}>{`${largeString} ${areas[3].width} x ${areas[3].height}`}</MenuItem>
+                    <MenuItem value={4} classes={{ root: classes.item }}>{`${veryLargeString} ${areas[4].width} x ${areas[4].height}`}</MenuItem>
                 </Select>
             </FormControl>
         </div>
