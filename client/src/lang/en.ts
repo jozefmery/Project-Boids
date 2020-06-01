@@ -100,7 +100,8 @@ const data: LanguageDefinition = {
     averageHealthDelta: "Average health delta",
     averageReproductionInterval: "Average reproduction interval",
     displayedProperty: "Displayed property",
-    generation: "Generation"
+    generation: "Generation",
+    templates: "Templates"
 };
 
 export default data;

@@ -100,7 +100,8 @@ const data: LanguageDefinition = {
     averageHealthDelta: "Priemerná zmena zdravia",
     averageReproductionInterval: "Priemerný interval reprodukcie",
     displayedProperty: "Zobrazená vlastnosť",
-    generation: "Generácia"
+    generation: "Generácia",
+    templates: "Šablony"
 };
 
 export default data;

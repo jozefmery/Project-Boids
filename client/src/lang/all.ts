@@ -106,6 +106,7 @@ export type LanguageDefinition = {
     averageReproductionInterval: string;
     displayedProperty: string;
     generation: string;
+    templates: string;
 };
 
 /**
