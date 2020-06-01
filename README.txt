@@ -81,3 +81,7 @@ In general any fairly modern browser should work, which supports
 newer CSS properties such as grid. Outdated browsers such as
 Internet Explorer are not supported. Mobile browsers were not tested.
 While they might work, the application is not suited for mobile devices.
+
+At the time of writing the application is available here:
+
+http://www.stud.fit.vutbr.cz/~xmeryj00/
