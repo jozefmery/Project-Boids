@@ -551,7 +551,7 @@ function EntityStats() {
 
                     {
                         statsTypeList.map((type) => 
-                            <MenuItem value={type} classes={{ root: classes.item }}>{statTypeStrings[type]}</MenuItem>)
+                            <MenuItem key={type} value={type} classes={{ root: classes.item }}>{statTypeStrings[type]}</MenuItem>)
                     }
                     
                 </Select>
