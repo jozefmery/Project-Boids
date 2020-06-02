@@ -64,6 +64,7 @@ import { Style, useCanvasStylers } from "../stylers";
 // import utilities
 import domtoimage from "dom-to-image";
 import { saveAs } from "file-saver";
+import classNames from "classnames";
 
 // import type information
 import { StateShape } from "../types/redux";
@@ -484,6 +485,11 @@ const useSelectStyles = makeStyles(({ theme }) => ({
     item: selectMenuItem.compose(theme)
 }));
 
+const useChartBgStyles = makeStyles(({ theme }) => ({
+
+    chartBg: expansionPanelBg.compose(theme)
+}));
+
 function EntityStats() {
 
     const classes = useSelectStyles();
@@ -540,9 +546,11 @@ function EntityStats() {
         preyValue = last.preys;
     }
 
+    const { chartBg } = useChartBgStyles();
+
     return (
         <div className={vFlex}>
-            <div ref={canvasRef} className={vFlex}>
+            <div ref={canvasRef} className={classNames(vFlex, chartBg)}>
             <FormControl className={classes.formControl}>
                 <InputLabel classes={{ root: classes.label }}>{displayedPropertyString}</InputLabel>
                 <Select value={selectedStat} onChange={(event) => setSelectedStat(event.target.value as StatTypes)}
@@ -649,10 +657,12 @@ function FPS() {
     const fps = fpsStats.current;
     const array = fpsStats.array;
     const average = array.reduce((total, current) => total + current.fps, 0) / array.length;
+    
+    const { chartBg } = useChartBgStyles();
 
     return (
         <div className={vFlex}>
-            <div ref={canvasRef} className={vFlex}>
+            <div ref={canvasRef} className={classNames(vFlex, chartBg)}>
                 <div style={{ color: stylers.line }}>
                     {`${currentString}: ${fps.toFixed(2)}`}
                 </div>
@@ -724,6 +734,20 @@ const panelStyle = Style.create({
 
 }, {}, [Style.panel, Style.textColor]);
 
+const expansionPanelBg = Style.create({},
+    
+{
+    [ColorTheme.DARK]: {
+
+        backgroundColor: "#353535",
+    },
+
+    [ColorTheme.LIGHT]: {
+
+        backgroundColor: "white",
+    }
+});
+
 const expansionPanelStyle = Style.create({
 
     borderWidth: "1px",
@@ -733,17 +757,15 @@ const expansionPanelStyle = Style.create({
 
     [ColorTheme.DARK]: {
 
-        backgroundColor: "#353535",
         borderColor: "#B9B9B9"
     },
 
     [ColorTheme.LIGHT]: {
 
-        backgroundColor: "white",
         borderColor: "black"
     }
 
-}, Style.textColor);
+}, [Style.textColor, expansionPanelBg]);
 
 const expandIconStyle = Style.create({}, {}, [Style.textColor]);
 
