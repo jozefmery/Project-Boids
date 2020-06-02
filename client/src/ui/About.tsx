@@ -74,6 +74,6 @@ export default function() {
     return (
         <div className={panel}>
             <div>{`${authorString}: Jozef Méry`}</div>
-            <div>{`${lastChangeString}: 18.05.2020`}</div>
+            <div>{`${lastChangeString}: 04.06.2020`}</div>
         </div>);
 }
