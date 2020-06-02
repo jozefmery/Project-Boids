@@ -9,7 +9,7 @@ Prerequisites:
 The following command line commands assume the working directory to
 be the root directory of the application (or this README).
 
-Install required remote packages:
+Install required remote/local packages:
 
     npm run install:all
 
@@ -18,7 +18,7 @@ Building the client only:
     cd client
     npm run build
 
-Now it is possible to use the client by opening the index.html inside the build directory.
+Now it is possible to use the client by opening the index.html inside the build/ directory.
 
 Building the client and desktop application (using electron):
 
