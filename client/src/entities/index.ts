@@ -438,7 +438,9 @@ export class Entity {
 
         if(!this.hasReproductionAge()) return this;
 
-        this.reproduction_ = Math.min(this.reproduction_ + (timeDelta / 1000), this.options_.reproductionInterval);
+        const delta = (timeDelta / 1000) * (1 + (this.options_.hunger / 50));
+
+        this.reproduction_ = Math.min(this.reproduction_ + delta, this.options_.reproductionInterval);
 
         if(this.canReproduce()) {
 
@@ -457,7 +459,7 @@ export class Entity {
 
                 options: {
 
-                    speed: mutate(this.options_.speed, 5 * modifier, 10),
+                    speed: mutate(this.options_.speed, 5 * modifier, 0),
                     maxForce: {
 
                         magnitude: mutate(this.options_.maxForce.magnitude, 5 * modifier, 0),
@@ -466,7 +468,7 @@ export class Entity {
 
                     perception: {
 
-                        radius: mutate(this.options_.perception.radius, 5 * modifier, this.options_.collisionRadius + 5),
+                        radius: mutate(this.options_.perception.radius, 5 * modifier, 0),
                         angle: mutate(this.options_.perception.angle, 5 * modifier, 0, 360),
                     },
 
@@ -479,15 +481,15 @@ export class Entity {
                         separation: this.options_.flockingModifier.separation,
                     },
 
-                    hungerDecay: mutate(this.options_.hungerDecay, 3 * modifier, 1, 100),
-                    healthDelta: mutate(this.options_.healthDelta, 3 * modifier, 1, 100),
+                    hungerDecay: mutate(this.options_.hungerDecay, 3 * modifier, 0, 100),
+                    healthDelta: mutate(this.options_.healthDelta, 3 * modifier, 0, 100),
 
                     health: 70 + (Math.random() * 30),
                     hunger: 50 + (Math.random() * 50),
 
-                    reproductionInterval: mutate(this.options_.reproductionInterval, 3 * modifier, 5),
+                    reproductionInterval: mutate(this.options_.reproductionInterval, 3 * modifier, 0),
 
-                    maxAge: mutate(this.options_.maxAge, 5 * modifier, 5),
+                    maxAge: mutate(this.options_.maxAge, 5 * modifier, 0),
 
                     eatingThreshold: this.options_.eatingThreshold,
 
