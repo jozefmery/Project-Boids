@@ -73,7 +73,7 @@ const data: LanguageDefinition = {
     separationModifier: "Modifikátor oddelenia",
     hungerDecay: "Úbytok hladu",
     healthDelta: "Zmena zdravia",
-    reproductionInterval: "Interval reprodukcie",
+    reproductionInterval: "Max. interval reprodukcie",
     maxAge: "Maximálny vek",
     eatingThreshold: "Prah jedenia",
     decimalInRange: "Desatinné číslo z rozsahu",
@@ -98,7 +98,7 @@ const data: LanguageDefinition = {
     averageHungerDecay: "Priemerná zmena hladu",
     averageHealth: "Priemerné zdravie",
     averageHealthDelta: "Priemerná zmena zdravia",
-    averageReproductionInterval: "Priemerný interval reprodukcie",
+    averageReproductionInterval: "Priemerný max. interval reprodukcie",
     displayedProperty: "Zobrazená vlastnosť",
     generation: "Generácia",
     templates: "Šablony"

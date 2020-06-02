@@ -73,7 +73,7 @@ const data: LanguageDefinition = {
     separationModifier: "Separation modifier",
     hungerDecay: "Hunger decay",
     healthDelta: "Health delta",
-    reproductionInterval: "Reproduction interval",
+    reproductionInterval: "Max. reproduction interval",
     maxAge: "Maximum age",
     eatingThreshold: "Eating threshold",
     decimalInRange: "Decimal number in range",
@@ -98,7 +98,7 @@ const data: LanguageDefinition = {
     averageHungerDecay: "Average hunger decay",
     averageHealth: "Average health",
     averageHealthDelta: "Average health delta",
-    averageReproductionInterval: "Average reproduction interval",
+    averageReproductionInterval: "Average max. reproduction interval",
     displayedProperty: "Displayed property",
     generation: "Generation",
     templates: "Templates"
