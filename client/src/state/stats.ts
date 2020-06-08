@@ -153,7 +153,7 @@ function useEntities(simState: SimState, pollingRate: number): EntityStats {
             averageReproductionInterval: []
         };
 
-        const maxSamples = 500;
+        const maxSamples = 1000;
 
         if(newStats.count.length > maxSamples) {
 
