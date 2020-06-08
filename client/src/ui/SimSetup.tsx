@@ -252,6 +252,32 @@ function InitialFood({ value, onChange, error }: { value: string, onChange: Inpu
     );
 }
 
+function RegenerateEntities({ onChange, checked }: { onChange: (checked: boolean) => any, checked: boolean }) {
+
+    const { checkbox } = useCheckBoxStyles();
+
+    const regenerateEntitiesString = useLanguageString("regenerateEntities");
+
+    return (
+        <div>
+            {regenerateEntitiesString}: <Checkbox classes={{ root: checkbox }} 
+                                        color="default"
+                                        onChange={(_, checked) => onChange(checked)}
+                                        checked={checked} />
+        </div>);
+}
+
+function RegenerationInterval({ value, onChange, error }: { value: string, onChange: InputOnChange, error: boolean, }) {
+
+    const regenerationIntervalString = useLanguageString("entityRegenInterval");
+
+    const nonNegativeDecimal = useLanguageString("nonNegativeDecimal");
+
+    return (
+        <Input value={value} label={regenerationIntervalString} suffix="s" onChange={onChange} error={error} helper={nonNegativeDecimal} />
+    );
+}
+
 const horizontalFlexBox = Style.create({
 
     "& > *:not(:last-child)": {
@@ -292,6 +318,7 @@ function EntityOptions({ type, state, setState }: { type: "predator" | "prey", s
     const { container } = useEntityOptionsStyles(); 
 
     const initialCountString = useLanguageString("initialCount");
+    const minimalCountString = useLanguageString("minEntityCount");
     const typeString = useLanguageString(type);
     const speedString = useLanguageString("speed");
     const maxForceAngleString = useLanguageString("maxForceAngle");
@@ -321,6 +348,12 @@ function EntityOptions({ type, state, setState }: { type: "predator" | "prey", s
     return (
         <div className={container}>
             <div>{typeString}</div>
+
+            <Input value={state.minCount.value} 
+                    label={minimalCountString} 
+                    onChange={(value) => setState({ ...state, minCount: { value, valid: positiveNumberValidator(value) } })} 
+                    error={!state.minCount.valid} 
+                    helper={nonNegativeNumber} />
 
             <Input value={state.initialCount.value} 
                     label={initialCountString} 
@@ -466,6 +499,7 @@ function setupStateToContextOptions(state: SetupState): undefined | ContextOptio
     valid = state.foodSpawnRate.valid && valid;
     valid = state.foodMaxAge.valid && valid;
     valid = state.initialFood.valid && valid;
+    valid = state.regenerationInterval.valid && valid;
 
     if(!valid) return undefined;
 
@@ -486,14 +520,22 @@ function setupStateToContextOptions(state: SetupState): undefined | ContextOptio
     }
 
     return {
-
-        onBoundaryHit: "wrap",
+        
         drawQuadtree: state.drawQuadTree,
         area: areas[state.area],
 
         foodSpawn: parseFloat(state.foodSpawnRate.value),
         foodMaxAge: parseFloat(state.foodMaxAge.value),
         initialFood: parseInt(state.initialFood.value),
+
+        regenerate: state.regenerateEntities,
+        regenerationInterval: parseFloat(state.regenerationInterval.value),
+
+        minEntities: {
+
+            predator: parseInt(state.predators.minCount.value),
+            prey: parseInt(state.preys.minCount.value)
+        },
 
         entities: {
 
@@ -720,6 +762,10 @@ export default function SimSetup() {
     const [foodMaxAge, setFoodMaxAge] = useState<InputWithValidation>(templates[template].foodMaxAge);
     const [initialFood, setInitialFood] = useState<InputWithValidation>(templates[template].initialFood);
 
+    const [regenerateEntities, setRegenerateEntities] = useState(templates[template].regenerateEntities);
+
+    const [regenerationInterval, setRegenerationInterval] = useState(templates[template].regenerationInterval);
+
     const [predatorState, setPredatorState] = useState<ValidatedEntityOptions>(templates[template].predators);
 
     const [preyState, setPreyState] = useState<ValidatedEntityOptions>(templates[template].preys);
@@ -735,6 +781,8 @@ export default function SimSetup() {
         setFoodSpawnRate(current.foodSpawnRate);
         setFoodMaxAge(current.foodMaxAge);
         setInitialFood(current.initialFood);
+        setRegenerateEntities(current.regenerateEntities);
+        setRegenerationInterval(current.regenerationInterval);
 
         setPredatorState(current.predators);
         setPreyState(current.preys);
@@ -757,6 +805,11 @@ export default function SimSetup() {
             <InitialFood value={initialFood.value} error={!initialFood.valid} onChange={(value) => 
                 setInitialFood({ value, valid: positiveNumberValidator(value) })} />
 
+            <RegenerateEntities onChange={(checked) => setRegenerateEntities(checked)} checked={regenerateEntities} />
+
+            <RegenerationInterval value={regenerationInterval.value} error={!regenerationInterval.valid} onChange={(value) => 
+                setRegenerationInterval({ value, valid: positiveFloatValidator(value) })}/>
+
             <Entities predatorState={predatorState} setPredatorState={setPredatorState} preyState={preyState} setPreyState={setPreyState} />
             
             <Confirm state={{
@@ -766,6 +819,8 @@ export default function SimSetup() {
                 foodSpawnRate,
                 foodMaxAge,
                 initialFood,
+                regenerateEntities,
+                regenerationInterval,
                 predators: predatorState,
                 preys: preyState
             }} /> 

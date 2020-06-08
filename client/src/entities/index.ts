@@ -163,23 +163,11 @@ export class Entity {
 
     protected collide(context: Context): Entity {
 
-        const { onBoundaryHit } = context.options();
         const area = context.area();
 
         if(this.isOutsideBoundary(area)) {
 
-            switch(onBoundaryHit) {
-
-                case "kill": 
-
-                    this.kill();
-                    break;
-
-                case "wrap":
-
-                    this.wrap(area);
-                    break;
-            }
+            this.wrap(area);
         }
 
         return this;
@@ -974,13 +962,14 @@ export class Context {
 
     protected foodSpawnProgress: number;
 
+    protected regenProgress: number;
+
     /// Contructor function
 
     constructor() {
         
         this.options_ = {
 
-            onBoundaryHit: "wrap",
             drawQuadtree: false,
             area: { width: 0, height: 0 },
 
@@ -1072,7 +1061,17 @@ export class Context {
 
             foodSpawn: 0,
             foodMaxAge: 0,
-            initialFood: 0
+            initialFood: 0,
+
+            regenerate: false,
+
+            regenerationInterval: 0,
+
+            minEntities: {
+
+                predator: 0,
+                prey: 0
+            }
         };
 
         this.entities_ = this.createQuadTree();
@@ -1087,6 +1086,8 @@ export class Context {
         };
 
         this.foodSpawnProgress = 0;
+
+        this.regenProgress = 0;
     }
 
     /// Protected static methods
@@ -1232,6 +1233,31 @@ export class Context {
         return this;
     }
 
+    protected regenerateEntities(timeDelta: number): Context {
+
+        if(!this.options_.regenerate) return this;
+
+        this.regenProgress += timeDelta / 1000;
+
+        if(this.regenProgress >= this.options_.regenerationInterval) {
+
+            this.regenProgress = 0;
+
+            const entities: Array<SelectableEntity> = ["predator", "prey"];
+
+            for(const type of entities) {
+
+                const missing = this.options_.minEntities[type] - this.counts_[type];
+
+                if(missing <= 0) continue;
+
+                this.addEntities(type, 1);
+            }
+        }
+
+        return this;
+    }
+
     /// Public methods
 
     public addEntity(type: SelectableEntity, options: EntityCtorOptions): Context {
@@ -1295,6 +1321,8 @@ export class Context {
         });
 
         this.entities_ = newTree;
+
+        this.regenerateEntities(timeDelta);
 
         return this;
     }

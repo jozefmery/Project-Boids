@@ -16,7 +16,8 @@ export type InputWithValidation = {
 
 export type ValidatedEntityOptions = {
 
-    [key in     "initialCount"  
+    [key in     "initialCount"
+            |   "minCount"
             |   "speed"
             |   "maxForceAngle"
             |   "maxForceMagnitude"
@@ -42,6 +43,9 @@ export type SetupState = {
     foodSpawnRate: InputWithValidation;
     foodMaxAge: InputWithValidation;
     initialFood: InputWithValidation;
+
+    regenerateEntities: boolean;
+    regenerationInterval: InputWithValidation;
 
     predators: ValidatedEntityOptions;
     preys: ValidatedEntityOptions;

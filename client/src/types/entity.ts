@@ -89,7 +89,6 @@ export type EntityGeneration = {
 
 export type ContextOptions = {
 
-    onBoundaryHit: "wrap" | "kill";
     drawQuadtree: boolean;
     area: Dimensions2D;
 
@@ -98,4 +97,14 @@ export type ContextOptions = {
     foodSpawn: number;
     foodMaxAge: number;
     initialFood: number;
+
+    regenerate: boolean;
+
+    regenerationInterval: number;
+
+    minEntities: {
+
+        predator: number;
+        prey: number;
+    }
 }
