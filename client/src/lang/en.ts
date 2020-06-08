@@ -104,7 +104,9 @@ const data: LanguageDefinition = {
     templates: "Templates",
     regenerateEntities: "Regenerate entities",
     entityRegenInterval: "Entity regen. interval",
-    minEntityCount: "Minimal count"
+    minEntityCount: "Minimal count",
+    increaseTicks: "Increase shown ticks",
+    decreaseTicks: "Decrease shown ticks"
 };
 
 export default data;

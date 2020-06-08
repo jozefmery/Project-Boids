@@ -104,7 +104,9 @@ const data: LanguageDefinition = {
     templates: "Šablóny",
     regenerateEntities: "Regenerovať bytosti",
     entityRegenInterval: "Interval regen. bytostí",
-    minEntityCount: "Minimálny počet"
+    minEntityCount: "Minimálny počet",
+    increaseTicks: "Zvýšiť zobrazené množstvo stôp",
+    decreaseTicks: "Znížiť zobrazené množstvo stôp"
 };
 
 export default data;

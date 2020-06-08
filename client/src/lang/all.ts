@@ -110,6 +110,8 @@ export type LanguageDefinition = {
     regenerateEntities: string;
     entityRegenInterval: string;
     minEntityCount: string;
+    increaseTicks: string;
+    decreaseTicks: string;
 };
 
 /**
