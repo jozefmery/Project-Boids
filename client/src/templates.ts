@@ -31,9 +31,22 @@ export const templates: Array<SetupState> = [
             valid: true,
             value: "10"
         },
+
+        regenerateEntities: true,
+        regenerationInterval: {
+
+            valid: true,
+            value: "5"
+        },
+
         predators: {
             
             initialCount: {
+
+                value: "0",
+                valid: true
+            },
+            minCount: {
 
                 value: "0",
                 valid: true
@@ -124,6 +137,11 @@ export const templates: Array<SetupState> = [
         preys: {
 
             initialCount: {
+
+                value: "0",
+                valid: true
+            },
+            minCount: {
 
                 value: "0",
                 valid: true
