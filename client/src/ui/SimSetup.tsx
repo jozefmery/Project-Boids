@@ -103,6 +103,13 @@ function TemplateSelector({ selected, onSelect }: { selected: number, onSelect: 
 
     const templatesString = useLanguageString("templates");
 
+    const templateNames = [
+
+        "1",
+        "2",
+        "3"
+    ];
+
     return (
         <div>
             <FormControl className={classes.formControl}>
@@ -110,8 +117,10 @@ function TemplateSelector({ selected, onSelect }: { selected: number, onSelect: 
                 <Select value={selected}
                         MenuProps={{ classes: { paper: classes.menu }}}
                         classes={{ root: classes.select, icon: classes.selectIcon }}>
-                    {/* TODO */}
-                    <MenuItem value={0} onClick={() => onSelect(0)} classes={{ root: classes.item }}>TODO</MenuItem>
+                        {
+                            templates.map((_, idx) => 
+                        <MenuItem key={idx} value={idx} onClick={() => onSelect(idx)} classes={{ root: classes.item }}>{templateNames[idx]}</MenuItem>)
+                        }
                 </Select>
             </FormControl>
         </div>
