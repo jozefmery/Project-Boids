@@ -48,6 +48,8 @@ import InputLabel from "@material-ui/core/InputLabel";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 import AccountTreeIcon from '@material-ui/icons/AccountTree';
+import IncreaseIcon from '@material-ui/icons/Add';
+import DecreaseIcon from '@material-ui/icons/Remove';
 
 // import charts
 import { LineChart, 
@@ -500,6 +502,9 @@ function EntityStats() {
     const predatorsString = useLanguageString("predators");
     const preysString = useLanguageString("preys");
 
+    const increaseTicksString = useLanguageString("increaseTicks");
+    const decreaseTicksString = useLanguageString("decreaseTicks");
+
     const displayedPropertyString = useLanguageString("displayedProperty");
 
     const statTypeStrings: { [stat in StatTypes]: string; } = {
@@ -525,6 +530,7 @@ function EntityStats() {
     const [zoomed, setZoomed] = useState(false);
     const canvasRef = useRef(null);
     const [chartId, setChartId] = useState(0);
+    const [ticks, setTicks] = useState(1000);
 
     const [selectedStat, setSelectedStat] = useState<StatTypes>("count");
 
@@ -570,7 +576,8 @@ function EntityStats() {
                 <div style={{ color: stylers.preys }}>
                     {`${preysString}: ${numberFormatter.format(preyValue)}`}
                 </div>
-                <LineChart width={zoomed ? 700 : 350} height={zoomed ? 500 : 250} data={entityStats[selectedStat]}>
+                <LineChart width={zoomed ? 700 : 350} height={zoomed ? 500 : 250} 
+                    data={entityStats[selectedStat].slice(Math.max(0, entityStats[selectedStat].length - ticks))}>
                     <CartesianGrid strokeDasharray="2 2" stroke={stylers.grid} />
                     <XAxis stroke={stylers.grid} dataKey="stamp" interval="preserveEnd" minTickGap={20} unit="s" />
                     <YAxis stroke={stylers.grid} domain={[(dataMin) => Math.max(0, dataMin - 10), "auto"]} />
@@ -605,6 +612,25 @@ function EntityStats() {
                         <SaveIcon />
                     </Button>
                 </Tooltip>
+                <Tooltip title={increaseTicksString} 
+                        placement="top" 
+                        TransitionComponent={Zoom}
+                        classes={{ tooltip: tooltipClass }}>
+                    <Button onClick={() => setTicks(last => Math.min(last + 100, 1000))} className={buttonClass}>
+                        {<IncreaseIcon />}
+                    </Button>
+                </Tooltip>
+                <Tooltip title={decreaseTicksString} 
+                        placement="top" 
+                        TransitionComponent={Zoom}
+                        classes={{ tooltip: tooltipClass }}>
+                    <Button onClick={() => setTicks(last => Math.max(last - 100, 100))} className={buttonClass}>
+                        {<DecreaseIcon />}
+                    </Button>
+                </Tooltip>
+                <div>
+                    {ticks}
+                </div>
             </div>
         </div>);
 }
