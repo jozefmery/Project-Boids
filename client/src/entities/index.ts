@@ -459,43 +459,43 @@ export class Entity {
 
                 options: {
 
-                    speed: mutate(this.options_.speed, 5 * modifier, 0),
+                    speed: mutate(this.options_.speed, modifier, 0),
                     maxForce: {
 
-                        magnitude: mutate(this.options_.maxForce.magnitude, 5 * modifier, 0),
-                        angle: mutate(this.options_.maxForce.angle, 5 * modifier, 0, 360)
+                        magnitude: mutate(this.options_.maxForce.magnitude, modifier, 0),
+                        angle: mutate(this.options_.maxForce.angle, modifier, 0, 360)
                     },
 
                     perception: {
 
-                        radius: mutate(this.options_.perception.radius, 5 * modifier, 0),
-                        angle: mutate(this.options_.perception.angle, 5 * modifier, 0, 360),
+                        radius: mutate(this.options_.perception.radius, modifier, 0),
+                        angle: mutate(this.options_.perception.angle, modifier, 0, 360),
                     },
-
-                    collisionRadius: this.options_.collisionRadius,
 
                     flockingModifier: {
 
-                        alignment: this.options_.flockingModifier.alignment,
-                        cohesion: this.options_.flockingModifier.cohesion,
-                        separation: this.options_.flockingModifier.separation,
+                        alignment: mutate(this.options_.flockingModifier.alignment, modifier, 0),
+                        cohesion: mutate(this.options_.flockingModifier.cohesion, modifier, 0),
+                        separation: mutate(this.options_.flockingModifier.separation, modifier, 0),
                     },
 
-                    hungerDecay: mutate(this.options_.hungerDecay, 3 * modifier, 0, 100),
-                    healthDelta: mutate(this.options_.healthDelta, 3 * modifier, 0, 100),
+                    hungerDecay: mutate(this.options_.hungerDecay, modifier, 0, 100),
+                    healthDelta: mutate(this.options_.healthDelta, modifier, 0, 100),
 
                     health: 70 + (Math.random() * 30),
                     hunger: 50 + (Math.random() * 50),
 
-                    reproductionInterval: mutate(this.options_.reproductionInterval, 3 * modifier, 0),
+                    reproductionInterval: mutate(this.options_.reproductionInterval, modifier, 0),
 
-                    maxAge: mutate(this.options_.maxAge, 5 * modifier, 0),
+                    maxAge: mutate(this.options_.maxAge, modifier, 0),
 
-                    eatingThreshold: this.options_.eatingThreshold,
+                    eatingThreshold: mutate(this.options_.eatingThreshold, modifier, 0, 100),
 
                     mutationModifier: this.options_.mutationModifier,
 
-                    generation: this.options_.generation + 1
+                    generation: this.options_.generation + 1,
+
+                    collisionRadius: this.options_.collisionRadius,
                 }
             });
         }
