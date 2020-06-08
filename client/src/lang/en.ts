@@ -101,7 +101,10 @@ const data: LanguageDefinition = {
     averageReproductionInterval: "Average max. reproduction interval",
     displayedProperty: "Displayed property",
     generation: "Generation",
-    templates: "Templates"
+    templates: "Templates",
+    regenerateEntities: "Regenerate entities",
+    entityRegenInterval: "Entity regen. interval",
+    minEntityCount: "Minimal count"
 };
 
 export default data;

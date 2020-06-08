@@ -101,7 +101,10 @@ const data: LanguageDefinition = {
     averageReproductionInterval: "Priemerný max. interval reprodukcie",
     displayedProperty: "Zobrazená vlastnosť",
     generation: "Generácia",
-    templates: "Šablony"
+    templates: "Šablóny",
+    regenerateEntities: "Regenerovať bytosti",
+    entityRegenInterval: "Interval regen. bytostí",
+    minEntityCount: "Minimálny počet"
 };
 
 export default data;

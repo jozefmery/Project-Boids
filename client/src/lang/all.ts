@@ -107,6 +107,9 @@ export type LanguageDefinition = {
     displayedProperty: string;
     generation: string;
     templates: string;
+    regenerateEntities: string;
+    entityRegenInterval: string;
+    minEntityCount: string;
 };
 
 /**
