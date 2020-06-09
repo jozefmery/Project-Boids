@@ -114,7 +114,7 @@ const defaultState: StateShape =  {
         },
         centerCameraToArea: {
 
-            sequences: "alt+c"
+            sequences: "c"
         },
         setCameraMoveUp: {
 
