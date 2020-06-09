@@ -191,7 +191,7 @@ export class Entity {
             speedAdjustment.mult(factor);
         }
         
-        acceleration.add(speedAdjustment);
+        this.accelerate(speedAdjustment);
 
         return this;
     }
@@ -521,7 +521,7 @@ export class Entity {
 
         if(closest) {
             
-            this.steerTo(closest.instance.position(), this.options_.hunger < 10 ? 3.0 : 1.0);
+            this.steerTo(closest.instance.position(), 2 - (this.options_.hunger / 100));
         }
 
         return this;
@@ -540,14 +540,24 @@ export class Entity {
     protected steer(direction: Vector, multiplier: number = 1.0): Entity {
 
         // shorthands
-        const { velocity, acceleration } = this.draft().forces_;
+        const { velocity } = this.draft().forces_;
 
         const steering = createVector(direction).setMag(this.options_.speed);
         steering.sub(velocity);
         steering.limit(this.options_.maxForce.magnitude);
         steering.mult(multiplier);
 
-        acceleration.add(steering);
+        this.accelerate(steering);
+
+        return this;
+    }
+
+    protected accelerate(acceleration: Vector): Entity {
+
+        // shorthands
+        const { acceleration: current } = this.draft().forces_;
+
+        current.add(acceleration);
 
         return this;
     }
@@ -733,9 +743,9 @@ class Prey extends Entity {
 
     protected flock(): Prey {
 
+        this.separate();
         this.align();
         this.cohere();
-        this.separate();
 
         return this;
     }
