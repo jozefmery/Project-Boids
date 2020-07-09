@@ -196,7 +196,7 @@ export class Entity {
         return this;
     }
 
-    protected limitAcceleration(): Entity {
+    protected limitAccelerationAngle(): Entity {
 
         // shorthands
         const { velocity, acceleration } = this.draft().forces_;
@@ -230,12 +230,12 @@ export class Entity {
         // shorthands
         const { position, velocity, acceleration } = this.draft().forces_;
 
-        this.limitAcceleration();
+        this.limitAccelerationAngle();
         
         this.adjustSpeed();
 
         velocity.add(Vector.mult(acceleration, timeDelta / 1000));
-        velocity.limit(this.options_.speed + 10);
+        velocity.limit(this.options_.speed * 1.1);
         position.add(Vector.mult(velocity, timeDelta / 1000));
 
         return this;
@@ -411,7 +411,7 @@ export class Entity {
 
     protected hasReproductionAge(): boolean {
 
-        return this.age_ > this.options_.maxAge / 4 && this.age_ < this.options_.maxAge * (3 / 4);
+        return this.age_ >= this.options_.maxAge / 4 && this.age_ <= this.options_.maxAge * (3 / 4);
     }
 
     protected canReproduce(): boolean {
@@ -759,9 +759,13 @@ class Prey extends Entity {
         const foodVicinity = this.getVicinityType("food");
         const preyVicinity = this.getVicinityType("prey");
 
-        foodVicinity.forEach(({ instance: food, dist }) => {
+        for(const pair in foodVicinity) {
 
-            if(food.isAlive() && dist < this.options_.collisionRadius + food.options().collisionRadius) {
+            const { instance: food, dist } = foodVicinity[pair];
+
+            if(food.isAlive() && dist <= this.options_.collisionRadius + food.options().collisionRadius) {
+
+                if(this.options_.hunger > this.options_.eatingThreshold) return this;
 
                 food.kill();
 
@@ -779,7 +783,7 @@ class Prey extends Entity {
                     this.feed(100);
                 } 
             }
-        });
+        }
 
         return this;
     }
@@ -865,19 +869,21 @@ class Predator extends Entity {
 
         super.collide(context);
 
-        if(this.options_.hunger > this.options_.eatingThreshold) return this;
-
         const preyVicinity = this.getVicinityType("prey");
 
-        preyVicinity.forEach(({ instance: prey, dist }) => {
+        for(const pair in preyVicinity) {
 
-            if(prey.isAlive() && dist < this.options_.collisionRadius + prey.options().collisionRadius) {
+            if(this.options_.hunger > this.options_.eatingThreshold) return this;
+
+            const { instance: prey, dist } = preyVicinity[pair];
+
+            if(prey.isAlive() && dist <= this.options_.collisionRadius + prey.options().collisionRadius) {
 
                 prey.kill();
 
                 this.feed(100);
             }
-        });
+        }
 
         return this;
     }
