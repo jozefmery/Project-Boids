@@ -775,7 +775,7 @@ class Prey extends Entity {
                     
                     for(const prey of preyVicinity) {
                         
-                        prey.instance.feed((50 / preyVicinity.length));
+                        prey.instance.feed(50 / preyVicinity.length);
                     }
                 
                 } else {
@@ -1300,9 +1300,13 @@ export class Context {
 
             if(node.length === undefined) {
 
-                const entity = (node as QuadtreeLeaf<Entity>).data;
+                let leafNode = node as QuadtreeLeaf<Entity>;
 
-                callback(entity);
+                do {
+                    
+                    callback(leafNode.data);
+                    
+                } while(leafNode = leafNode.next as QuadtreeLeaf<Entity>); 
             }
         });
 
