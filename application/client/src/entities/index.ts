@@ -470,7 +470,7 @@ export class Entity {
                     hungerDecay: mutate(this.options_.hungerDecay, modifier, 0, 100),
                     healthDelta: mutate(this.options_.healthDelta, modifier, 0, 100),
 
-                    health: 70 + (Math.random() * 30),
+                    health: 50 + (Math.random() * 50),
                     hunger: 50 + (Math.random() * 50),
 
                     reproductionInterval: mutate(this.options_.reproductionInterval, modifier, 0),
@@ -1235,6 +1235,8 @@ export class Context {
 
     protected spawnFoodInInterval(timeDelta: number): Context {
 
+        if(this.options_.foodSpawn <= 0) return this;
+
         this.foodSpawnProgress += timeDelta;
 
         const interval = 1000 / this.options_.foodSpawn;
@@ -1255,9 +1257,9 @@ export class Context {
 
         this.regenProgress += timeDelta / 1000;
 
-        if(this.regenProgress >= this.options_.regenerationInterval) {
+        while(this.regenProgress >= this.options_.regenerationInterval) {
 
-            this.regenProgress = 0;
+            this.regenProgress -= this.options_.regenerationInterval;
 
             const entities: Array<SelectableEntity> = ["predator", "prey"];
 
@@ -1306,7 +1308,7 @@ export class Context {
                     
                     callback(leafNode.data);
                     
-                } while(leafNode = leafNode.next as QuadtreeLeaf<Entity>); 
+                } while((leafNode = leafNode.next as QuadtreeLeaf<Entity>)); 
             }
         });
 
