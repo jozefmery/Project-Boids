@@ -1,0 +1,33 @@
+{
+    "name": "@dodmeister/quadtree",
+    "version": "1.0.7",
+    "description": "Two-dimensional recursive spatial subdivision.",
+    "author": "Mike Bostock",
+    "license": "MIT",
+    "main": "lib/index.js",
+    "types": "lib",
+    "files": [
+        "lib"
+    ],
+    "scripts": {
+        "build": "npm run build:js",
+        "build:no-test": "npm run build:types && npm run build:js",
+        "build:types": "tsc --emitDeclarationOnly",
+        "build:js": "babel src -d lib --extensions \".js\" --source-maps inline",
+        "build:watch": "concurrently \"npm run build:types -- --watch\" \"npm run build:js -- --watch\"",
+        "test": "jest --passWithNoTests",
+        "test:watch": "jest --watch"
+    },
+    "devDependencies": {
+        "@babel/cli": "^7.8.4",
+        "@babel/core": "^7.9.0",
+        "@babel/plugin-proposal-class-properties": "^7.8.3",
+        "@babel/preset-env": "^7.9.5",
+        "@babel/preset-typescript": "^7.9.0",
+        "@types/jest": "^25.2.1",
+        "concurrently": "^5.2.0",
+        "jest": "^25.4.0",
+        "ts-jest": "^25.4.0",
+        "typescript": "^3.8.3"
+    }
+}

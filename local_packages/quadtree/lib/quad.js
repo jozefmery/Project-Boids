@@ -1,0 +1,15 @@
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = _default;
+
+function _default(node, x0, y0, x1, y1) {
+  this.node = node;
+  this.x0 = x0;
+  this.y0 = y0;
+  this.x1 = x1;
+  this.y1 = y1;
+}
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uL3NyYy9xdWFkLmpzIl0sIm5hbWVzIjpbIm5vZGUiLCJ4MCIsInkwIiwieDEiLCJ5MSJdLCJtYXBwaW5ncyI6Ijs7Ozs7OztBQUFlLGtCQUFTQSxJQUFULEVBQWVDLEVBQWYsRUFBbUJDLEVBQW5CLEVBQXVCQyxFQUF2QixFQUEyQkMsRUFBM0IsRUFBK0I7QUFDNUMsT0FBS0osSUFBTCxHQUFZQSxJQUFaO0FBQ0EsT0FBS0MsRUFBTCxHQUFVQSxFQUFWO0FBQ0EsT0FBS0MsRUFBTCxHQUFVQSxFQUFWO0FBQ0EsT0FBS0MsRUFBTCxHQUFVQSxFQUFWO0FBQ0EsT0FBS0MsRUFBTCxHQUFVQSxFQUFWO0FBQ0QiLCJzb3VyY2VzQ29udGVudCI6WyJleHBvcnQgZGVmYXVsdCBmdW5jdGlvbihub2RlLCB4MCwgeTAsIHgxLCB5MSkge1xuICB0aGlzLm5vZGUgPSBub2RlO1xuICB0aGlzLngwID0geDA7XG4gIHRoaXMueTAgPSB5MDtcbiAgdGhpcy54MSA9IHgxO1xuICB0aGlzLnkxID0geTE7XG59XG4iXX0=
