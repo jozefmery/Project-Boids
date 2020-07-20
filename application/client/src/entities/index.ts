@@ -726,7 +726,7 @@ class Prey extends Entity {
 
         if(percieved.length) {
 
-            this.steer(separation.div(percieved.length), this.options_.flockingModifier.separation);
+            this.steer(separation.div(percieved.length), this.options_.flockingModifier.separation * 1.5);
         }
 
         return this;
