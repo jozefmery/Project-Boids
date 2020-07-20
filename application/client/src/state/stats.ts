@@ -81,9 +81,13 @@ const averageCalculators: {
     averagePerceptionAngle: (arr) => arr.reduce((total, entity) => total += entity.options().perception.angle, 0) / arr.length,
     averageHunger: (arr) => arr.reduce((total, entity) => total += entity.hunger(), 0) / arr.length,
     averageHungerDecay: (arr) => arr.reduce((total, entity) => total += entity.options().hungerDecay, 0) / arr.length,
+    averageEatingThreshold: (arr) => arr.reduce((total, entity) => total += entity.options().eatingThreshold, 0) / arr.length,
     averageHealth: (arr) => arr.reduce((total, entity) => total += entity.options().health, 0) / arr.length,
     averageHealthDelta: (arr) => arr.reduce((total, entity) => total += entity.options().healthDelta, 0) / arr.length,
     averageReproductionInterval: (arr) => arr.reduce((total, entity) => total += entity.options().reproductionInterval, 0) / arr.length,
+    averageAlignmentModifier: (arr) => arr.reduce((total, entity) => total += entity.options().flockingModifier.alignment, 0) / arr.length,
+    averageCohesionModifier: (arr) => arr.reduce((total, entity) => total += entity.options().flockingModifier.cohesion, 0) / arr.length,
+    averageSeparationModifier: (arr) => arr.reduce((total, entity) => total += entity.options().flockingModifier.separation, 0) / arr.length
 };
 
 function useEntities(simState: SimState, pollingRate: number): EntityStats {
@@ -101,9 +105,13 @@ function useEntities(simState: SimState, pollingRate: number): EntityStats {
         averagePerceptionAngle: [],
         averageHunger: [],
         averageHungerDecay: [],
+        averageEatingThreshold: [],
         averageHealth: [],
         averageHealthDelta: [],
         averageReproductionInterval: [],
+        averageAlignmentModifier: [],
+        averageCohesionModifier: [],
+        averageSeparationModifier: []
     });
     
     const update = useCallback(() => setStats(previous => {
@@ -148,9 +156,13 @@ function useEntities(simState: SimState, pollingRate: number): EntityStats {
             averagePerceptionAngle: [],
             averageHunger: [],
             averageHungerDecay: [],
+            averageEatingThreshold: [],
             averageHealth: [],
             averageHealthDelta: [],
-            averageReproductionInterval: []
+            averageReproductionInterval: [],
+            averageAlignmentModifier: [],
+            averageCohesionModifier: [],
+            averageSeparationModifier: []
         };
 
         const maxSamples = 1000;
@@ -209,9 +221,13 @@ function useEntities(simState: SimState, pollingRate: number): EntityStats {
             averagePerceptionAngle: [],
             averageHunger: [],
             averageHungerDecay: [],
+            averageEatingThreshold: [],
             averageHealth: [],
             averageHealthDelta: [],
-            averageReproductionInterval: []
+            averageReproductionInterval: [],
+            averageAlignmentModifier: [],
+            averageCohesionModifier: [],
+            averageSeparationModifier: []
 
         });
     };

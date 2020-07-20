@@ -26,9 +26,13 @@ export const statsTypeList = [
     "averagePerceptionAngle",
     "averageHunger",
     "averageHungerDecay",
+    "averageEatingThreshold",
     "averageHealth",
     "averageHealthDelta",
-    "averageReproductionInterval"
+    "averageReproductionInterval",
+    "averageAlignmentModifier",
+    "averageCohesionModifier",
+    "averageSeparationModifier"
     
 ] as const;
 
