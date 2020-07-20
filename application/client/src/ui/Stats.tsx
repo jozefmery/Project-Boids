@@ -519,9 +519,13 @@ function EntityStats() {
         averagePerceptionAngle: useLanguageString("averagePerceptionAngle"),
         averageHunger: useLanguageString("averageHunger"),
         averageHungerDecay: useLanguageString("averageHungerDecay"),
+        averageEatingThreshold: useLanguageString("averageEatingThreshold"),
         averageHealth: useLanguageString("averageHealth"),
         averageHealthDelta: useLanguageString("averageHealthDelta"),
-        averageReproductionInterval: useLanguageString("averageReproductionInterval")
+        averageReproductionInterval: useLanguageString("averageReproductionInterval"),
+        averageAlignmentModifier: useLanguageString("averageAlignmentModifier"),
+        averageCohesionModifier: useLanguageString("averageCohesionModifier"),
+        averageSeparationModifier: useLanguageString("averageSeparationModifier"),
     };
     
     const { button : buttonClass} = useButtonStyles();
