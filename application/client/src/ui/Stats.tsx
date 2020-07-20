@@ -49,6 +49,7 @@ import MenuItem from "@material-ui/core/MenuItem";
 import AccountTreeIcon from '@material-ui/icons/AccountTree';
 import IncreaseIcon from '@material-ui/icons/Add';
 import DecreaseIcon from '@material-ui/icons/Remove';
+import Checkbox from "@material-ui/core/Checkbox";  
 
 // import charts
 import { LineChart, 
@@ -471,6 +472,13 @@ const useChartBgStyles = makeStyles(({ theme }) => ({
     chartBg: expansionPanelBg.compose(theme)
 }));
 
+const checkBoxStyles = Style.create({}, {}, [Style.textColor]);
+
+const useCheckBoxStyles = makeStyles(({ theme }) => ({
+
+    checkbox: checkBoxStyles.compose(theme),
+}));
+
 function EntityStats() {
 
     const classes = useSelectStyles();
@@ -537,6 +545,11 @@ function EntityStats() {
 
     const { chartBg } = useChartBgStyles();
 
+    const { checkbox } = useCheckBoxStyles();
+
+    const [drawPredators, setDrawPredators] = useState(true);
+    const [drawPreys, setDrawPreys] = useState(true);
+
     return (
         <div className={vFlex}>
             <div ref={canvasRef} className={classNames(vFlex, chartBg)}>
@@ -554,9 +567,18 @@ function EntityStats() {
                 </Select>
             </FormControl>
                 <div style={{ color: stylers.predators }}>
+                    <Checkbox classes={{ root: checkbox }} 
+                                        color="default"
+                                        onChange={(_, checked) => setDrawPredators(checked)}
+                                        checked={drawPredators} />
+
                     {`${predatorsString}: ${numberFormatter.format(predatorValue)}`}
                 </div>
                 <div style={{ color: stylers.preys }}>
+                    <Checkbox classes={{ root: checkbox }} 
+                                        color="default"
+                                        onChange={(_, checked) => setDrawPreys(checked)}
+                                        checked={drawPreys} />
                     {`${preysString}: ${numberFormatter.format(preyValue)}`}
                 </div>
                 <LineChart width={zoomed ? 700 : 350} height={zoomed ? 500 : 250} 
@@ -564,8 +586,16 @@ function EntityStats() {
                     <CartesianGrid strokeDasharray="2 2" stroke={stylers.grid} />
                     <XAxis stroke={stylers.grid} dataKey="stamp" interval="preserveEnd" minTickGap={20} unit="s" />
                     <YAxis stroke={stylers.grid} domain={[(dataMin) => Math.max(0, dataMin - 10), "auto"]} />
-                    <Line type="monotone" dataKey="preys" stroke={stylers.preys} strokeWidth={3} dot={false} isAnimationActive={false} />
-                    <Line type="monotone" dataKey="predators" stroke={stylers.predators} strokeWidth={3} dot={false} isAnimationActive={false} />
+                    {
+                        drawPreys ? 
+                            <Line type="monotone" dataKey="preys" stroke={stylers.preys} strokeWidth={3} dot={false} isAnimationActive={false} />
+                            : null
+                    }
+                    {
+                        drawPredators ? 
+                            <Line type="monotone" dataKey="predators" stroke={stylers.predators} strokeWidth={3} dot={false} isAnimationActive={false} />
+                        : null    
+                    }
                 </LineChart>
             </div>
             <div className={hFlex}>
