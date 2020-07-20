@@ -790,13 +790,20 @@ export default function SimSetup() {
         setPreyState(current.preys);
     };
 
+    const dispatch = useDispatch();
+
     return (
 
         <div className={panel}>
             
             <TemplateSelector selected={template} onSelect={onTemplateSelect} />
             <DrawQuadTree onChange={(checked) => setDrawQuadTree(checked)} checked={drawQuadTree} />
-            <SelectArea onChange={(value) => setArea(value)} value={area} />
+            <SelectArea onChange={(value) => {
+                
+                setArea(value);
+                dispatch(setSimArea(areas[value]));
+
+            }} value={area} />
 
             <FoodSpawnRate value={foodSpawnRate.value} error={!foodSpawnRate.valid} onChange={(value) => 
                 setFoodSpawnRate({ value, valid: positiveFloatValidator(value) })} />
