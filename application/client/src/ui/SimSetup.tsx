@@ -645,7 +645,7 @@ function Confirm({ state }: { state: SetupState }) {
     const { tooltip: tooltipClass } = useTooltipStyles();
     const { button: buttonClass } = useButtonStyles();
 
-    const confirmString = useLanguageString("confirm");
+    const confirmString = useLanguageString("startNewSimulation");
 
     return <Tooltip title={confirmString} 
                     placement="top" 
