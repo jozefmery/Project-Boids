@@ -15,28 +15,28 @@ export const templates: Array<SetupState> = [
 
     {
         drawQuadTree: false,
-        area: 0,
+        area: 1,
         foodSpawnRate: {
 
             valid: true,
-            value: "1"
+            value: "0"
         },
         foodMaxAge: {
 
             valid: true,
-            value: "30"
+            value: "0"
         },
         initialFood: {
 
             valid: true,
-            value: "10"
+            value: "0"
         },
 
-        regenerateEntities: true,
+        regenerateEntities: false,
         regenerationInterval: {
 
             valid: true,
-            value: "5"
+            value: "0"
         },
 
         predators: {
@@ -53,27 +53,27 @@ export const templates: Array<SetupState> = [
             },
             speed: {
 
-                value: "120",
+                value: "0",
                 valid: true
             },
             maxForceAngle: {
 
-                value: "270",
+                value: "0",
                 valid: true
             },
             maxForceMagnitude: {
 
-                value: "25",
+                value: "0",
                 valid: true
             },
             perceptionRadius: {
 
-                value: "300",
+                value: "0",
                 valid: true
             },
             perceptionAngle: {
 
-                value: "200",
+                value: "0",
                 valid: true
             },
             alignmentModifier: {
@@ -93,42 +93,42 @@ export const templates: Array<SetupState> = [
             },
             hungerDecay: {
 
-                value: "5",
+                value: "0",
                 valid: true
             },
             healthDelta: {
 
-                value: "5",
+                value: "0",
                 valid: true
             },
             health: {
 
-                value: "100",
+                value: "0",
                 valid: true
             },
             hunger: {
 
-                value: "100",
+                value: "0",
                 valid: true
             },
             reproductionInterval: {
 
-                value: "30",
+                value: "0",
                 valid: true
             },
             maxAge: {
 
-                value: "300",
+                value: "0",
                 valid: true
             },
             eatingThreshold: {
 
-                value: "75",
+                value: "0",
                 valid: true
             },
             mutationModifier: {
 
-                value: "1",
+                value: "0",
                 valid: true
             }
 
@@ -138,7 +138,7 @@ export const templates: Array<SetupState> = [
 
             initialCount: {
 
-                value: "0",
+                value: "10",
                 valid: true
             },
             minCount: {
@@ -163,7 +163,7 @@ export const templates: Array<SetupState> = [
             },
             perceptionRadius: {
 
-                value: "450",
+                value: "200",
                 valid: true
             },
             perceptionAngle: {
@@ -183,17 +183,17 @@ export const templates: Array<SetupState> = [
             },
             separationModifier: {
 
-                value: "1.5",
+                value: "1",
                 valid: true
             },
             hungerDecay: {
 
-                value: "5",
+                value: "0",
                 valid: true
             },
             healthDelta: {
 
-                value: "10",
+                value: "0",
                 valid: true
             },
             health: {
@@ -213,17 +213,17 @@ export const templates: Array<SetupState> = [
             },
             maxAge: {
 
-                value: "200",
+                value: "150",
                 valid: true
             },
             eatingThreshold: {
 
-                value: "75",
+                value: "100",
                 valid: true
             },
             mutationModifier: {
 
-                value: "1",
+                value: "0",
                 valid: true
             }
         }
