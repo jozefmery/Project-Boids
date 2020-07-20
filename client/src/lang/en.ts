@@ -105,8 +105,13 @@ const data: LanguageDefinition = {
     regenerateEntities: "Regenerate entities",
     entityRegenInterval: "Entity regen. interval",
     minEntityCount: "Minimal count",
-    increaseTicks: "Increase shown ticks",
-    decreaseTicks: "Decrease shown ticks"
+    increaseTicks: "Increase shown samples",
+    decreaseTicks: "Decrease shown samples",
+    scenarioNeedForPredation: "The need for predation",
+    scenarioControlWithFood: "Controlling prey population with food",
+    scenarioAbsenceOfFlocking: "Absence of flocking",
+    scenarioPresenceOfFlocking: "Presence of flocking",
+    scenarioMutation: "Mutating towards ideal properties"
 };
 
 export default data;

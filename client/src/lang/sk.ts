@@ -105,8 +105,13 @@ const data: LanguageDefinition = {
     regenerateEntities: "Regenerovať bytosti",
     entityRegenInterval: "Interval regen. bytostí",
     minEntityCount: "Minimálny počet",
-    increaseTicks: "Zvýšiť zobrazené množstvo stôp",
-    decreaseTicks: "Znížiť zobrazené množstvo stôp"
+    increaseTicks: "Zvýšiť zobrazené množstvo vzoriek",
+    decreaseTicks: "Znížiť zobrazené množstvo vzoriek",
+    scenarioNeedForPredation: "Potreba lovenia",
+    scenarioControlWithFood: "Ovládanie populácie koriste jedlom",
+    scenarioAbsenceOfFlocking: "Neprítomnosť zhlukovania",
+    scenarioPresenceOfFlocking: "Prítomnosť zhlukovania",
+    scenarioMutation: "Mutácia k ideálnym vlastnostiam"
 };
 
 export default data;
