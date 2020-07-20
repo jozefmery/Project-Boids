@@ -112,6 +112,11 @@ export type LanguageDefinition = {
     minEntityCount: string;
     increaseTicks: string;
     decreaseTicks: string;
+    scenarioNeedForPredation: string;
+    scenarioControlWithFood: string;
+    scenarioAbsenceOfFlocking: string;
+    scenarioPresenceOfFlocking: string;
+    scenarioMutation: string;
 };
 
 /**
