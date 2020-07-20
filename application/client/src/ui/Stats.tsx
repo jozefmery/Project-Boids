@@ -35,7 +35,6 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import PlaceIcon from '@material-ui/icons/Place';
 import FavoriteIcon from '@material-ui/icons/Favorite';
-import FingerprintIcon from '@material-ui/icons/Fingerprint';
 import ZoomInIcon from '@material-ui/icons/ZoomIn';
 import ZoomOutIcon from '@material-ui/icons/ZoomOut';
 import SaveIcon from '@material-ui/icons/SaveAlt';
@@ -145,25 +144,6 @@ function SelectedEntityType({ type }: { type: SelectableEntity }) {
                     {typeString}
                 </div>
             </Tooltip>);
-}
-
-function SelectedEntityID({ id }: { id: string }) {
-
-    const { container } = useHorizontalFlexBox();
-    const { tooltip: tooltipClass } = useTooltipStyles();
-
-    const idString = useLanguageString("id");
-
-    return (
-        <Tooltip title={idString} 
-                    placement="top" 
-                    TransitionComponent={Zoom}
-                    classes={{ tooltip: tooltipClass }}>
-            <div className={container}>
-                <FingerprintIcon />
-                <div>{id}</div>
-            </div>
-        </Tooltip>);
 }
 
 function SelectedEntityPosition({ position }: { position: Position2D }) {
@@ -417,7 +397,6 @@ function SelectedEntity() {
     return (
         <div className={container}>
             <SelectedEntityType type={selectedEntity.type() as SelectableEntity} />
-            <SelectedEntityID id={selectedEntity.id()} />
             <SelectedEntityPosition position={selectedEntity.position()} />
             <SelectedEntityPerception angle={selectedEntity.options().perception.angle} radius={selectedEntity.options().perception.radius} />
             <SelectedEntityHealth health={selectedEntity.health()} />

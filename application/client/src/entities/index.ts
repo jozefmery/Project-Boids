@@ -10,7 +10,6 @@
 
 // import utilities
 import lodash from "lodash";
-import uniqid from "uniqid";
 import { quadtree, Quadtree, QuadtreeLeaf } from "@dodmeister/quadtree";
 
 // import p5
@@ -55,8 +54,6 @@ export class Entity {
     /// Protected members
 
     protected readonly type_: EntityType;
- 
-    protected readonly id_: string;
 
     protected options_: RemoveUndefinedDeep<EntityOptions>;
 
@@ -92,7 +89,6 @@ export class Entity {
     protected constructor(options: EntityCtorOptions, type: EntityType, food: EntityType) {
 
         this.type_ = type;
-        this.id_ = uniqid();
 
         this.options_ = lodash.cloneDeep(options.options);
 
@@ -600,11 +596,6 @@ export class Entity {
     public type(): EntityType {
 
         return this.type_;
-    }
-
-    public id(): string {
-
-        return this.id_;
     }
 
     public options(): Readonly<RemoveUndefinedDeep<EntityOptions>> {
