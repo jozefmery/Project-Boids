@@ -105,9 +105,11 @@ function TemplateSelector({ selected, onSelect }: { selected: number, onSelect: 
 
     const templateNames = [
 
-        "1",
-        "2",
-        "3"
+        useLanguageString("scenarioNeedForPredation"),
+        useLanguageString("scenarioControlWithFood"),
+        useLanguageString("scenarioAbsenceOfFlocking"),
+        useLanguageString("scenarioPresenceOfFlocking"),
+        useLanguageString("scenarioMutation"),
     ];
 
     return (
@@ -119,7 +121,7 @@ function TemplateSelector({ selected, onSelect }: { selected: number, onSelect: 
                         classes={{ root: classes.select, icon: classes.selectIcon }}>
                         {
                             templates.map((_, idx) => 
-                        <MenuItem key={idx} value={idx} onClick={() => onSelect(idx)} classes={{ root: classes.item }}>{templateNames[idx]}</MenuItem>)
+                        <MenuItem key={idx} value={idx} onClick={() => onSelect(idx)} classes={{ root: classes.item }}>{`${idx + 1}. ${templateNames[idx]}`}</MenuItem>)
                         }
                 </Select>
             </FormControl>
@@ -625,9 +627,9 @@ function setupStateToContextOptions(state: SetupState): undefined | ContextOptio
 }
 
 const areas: Array<Dimensions2D> = [
-    { width: 500, height: 500 },
-    { width: 2000, height: 2000 },
-    { width: 5000, height: 5000 },
+    { width: 1000,  height: 1000 },
+    { width: 2000,  height: 2000 },
+    { width: 5000,  height: 5000 },
     { width: 10000, height: 10000 },
     { width: 20000, height: 20000 },
 ];
