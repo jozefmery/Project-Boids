@@ -56,7 +56,7 @@ export type LanguageDefinition = {
     age: string;
     openSimSetup: string;
     closeSimSetup: string;
-    confirm: string;
+    startNewSimulation: string;
     drawQuadtree: string;
     area: string;
     verySmall: string;
@@ -101,9 +101,13 @@ export type LanguageDefinition = {
     averagePerceptionAngle: string;
     averageHunger: string;
     averageHungerDecay: string;
+    averageEatingThreshold: string;
     averageHealth: string;
     averageHealthDelta: string;
     averageReproductionInterval: string;
+    averageAlignmentModifier: string;
+    averageCohesionModifier: string;
+    averageSeparationModifier: string;
     displayedProperty: string;
     generation: string;
     templates: string;
