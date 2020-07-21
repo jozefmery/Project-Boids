@@ -235,12 +235,12 @@ const controlWithFood = {
     foodSpawnRate: {
 
         valid: true,
-        value: "2"
+        value: "3"
     },
     foodMaxAge: {
 
         valid: true,
-        value: "30"
+        value: "60"
     },
     initialFood: {
 
@@ -369,12 +369,12 @@ const controlWithFood = {
         },
         maxForceAngle: {
 
-            value: "270",
+            value: "300",
             valid: true
         },
         maxForceMagnitude: {
 
-            value: "20",
+            value: "30",
             valid: true
         },
         perceptionRadius: {
@@ -452,17 +452,17 @@ const absenceOfFlocking = {
     foodSpawnRate: {
 
         valid: true,
-        value: "3"
+        value: "5"
     },
     foodMaxAge: {
 
         valid: true,
-        value: "30"
+        value: "60"
     },
     initialFood: {
 
         valid: true,
-        value: "100"
+        value: "400"
     },
 
     regenerateEntities: true,
@@ -476,7 +476,7 @@ const absenceOfFlocking = {
         
         initialCount: {
 
-            value: "0",
+            value: "5",
             valid: true
         },
         minCount: {
@@ -491,7 +491,7 @@ const absenceOfFlocking = {
         },
         maxForceAngle: {
 
-            value: "270",
+            value: "275",
             valid: true
         },
         maxForceMagnitude: {
@@ -501,7 +501,7 @@ const absenceOfFlocking = {
         },
         perceptionRadius: {
 
-            value: "200",
+            value: "300",
             valid: true
         },
         perceptionAngle: {
@@ -546,12 +546,12 @@ const absenceOfFlocking = {
         },
         reproductionInterval: {
 
-            value: "40",
+            value: "35",
             valid: true
         },
         maxAge: {
 
-            value: "300",
+            value: "200",
             valid: true
         },
         eatingThreshold: {
@@ -586,12 +586,12 @@ const absenceOfFlocking = {
         },
         maxForceAngle: {
 
-            value: "270",
+            value: "300",
             valid: true
         },
         maxForceMagnitude: {
 
-            value: "30",
+            value: "40",
             valid: true
         },
         perceptionRadius: {
@@ -641,7 +641,7 @@ const absenceOfFlocking = {
         },
         reproductionInterval: {
 
-            value: "30",
+            value: "25",
             valid: true
         },
         maxAge: {
@@ -669,17 +669,17 @@ const presenceOfFlocking = {
     foodSpawnRate: {
 
         valid: true,
-        value: "3"
+        value: "5"
     },
     foodMaxAge: {
 
         valid: true,
-        value: "30"
+        value: "60"
     },
     initialFood: {
 
         valid: true,
-        value: "100"
+        value: "400"
     },
 
     regenerateEntities: true,
@@ -693,7 +693,7 @@ const presenceOfFlocking = {
         
         initialCount: {
 
-            value: "0",
+            value: "5",
             valid: true
         },
         minCount: {
@@ -708,7 +708,7 @@ const presenceOfFlocking = {
         },
         maxForceAngle: {
 
-            value: "270",
+            value: "275",
             valid: true
         },
         maxForceMagnitude: {
@@ -718,7 +718,7 @@ const presenceOfFlocking = {
         },
         perceptionRadius: {
 
-            value: "200",
+            value: "300",
             valid: true
         },
         perceptionAngle: {
@@ -763,12 +763,12 @@ const presenceOfFlocking = {
         },
         reproductionInterval: {
 
-            value: "40",
+            value: "35",
             valid: true
         },
         maxAge: {
 
-            value: "300",
+            value: "200",
             valid: true
         },
         eatingThreshold: {
@@ -803,12 +803,12 @@ const presenceOfFlocking = {
         },
         maxForceAngle: {
 
-            value: "270",
+            value: "300",
             valid: true
         },
         maxForceMagnitude: {
 
-            value: "30",
+            value: "40",
             valid: true
         },
         perceptionRadius: {
@@ -858,7 +858,7 @@ const presenceOfFlocking = {
         },
         reproductionInterval: {
 
-            value: "30",
+            value: "25",
             valid: true
         },
         maxAge: {
@@ -886,17 +886,17 @@ const mutation = {
     foodSpawnRate: {
 
         valid: true,
-        value: "3"
+        value: "5"
     },
     foodMaxAge: {
 
         valid: true,
-        value: "30"
+        value: "60"
     },
     initialFood: {
 
         valid: true,
-        value: "100"
+        value: "400"
     },
 
     regenerateEntities: true,
@@ -910,12 +910,12 @@ const mutation = {
         
         initialCount: {
 
-            value: "3",
+            value: "5",
             valid: true
         },
         minCount: {
 
-            value: "5",
+            value: "3",
             valid: true
         },
         speed: {
@@ -925,7 +925,7 @@ const mutation = {
         },
         maxForceAngle: {
 
-            value: "270",
+            value: "275",
             valid: true
         },
         maxForceMagnitude: {
@@ -935,7 +935,7 @@ const mutation = {
         },
         perceptionRadius: {
 
-            value: "200",
+            value: "300",
             valid: true
         },
         perceptionAngle: {
@@ -980,12 +980,12 @@ const mutation = {
         },
         reproductionInterval: {
 
-            value: "40",
+            value: "35",
             valid: true
         },
         maxAge: {
 
-            value: "300",
+            value: "200",
             valid: true
         },
         eatingThreshold: {
@@ -995,7 +995,7 @@ const mutation = {
         },
         mutationModifier: {
 
-            value: "1",
+            value: "5",
             valid: true
         }
 
@@ -1020,12 +1020,12 @@ const mutation = {
         },
         maxForceAngle: {
 
-            value: "270",
+            value: "300",
             valid: true
         },
         maxForceMagnitude: {
 
-            value: "30",
+            value: "40",
             valid: true
         },
         perceptionRadius: {
@@ -1075,7 +1075,7 @@ const mutation = {
         },
         reproductionInterval: {
 
-            value: "30",
+            value: "25",
             valid: true
         },
         maxAge: {
@@ -1090,7 +1090,7 @@ const mutation = {
         },
         mutationModifier: {
 
-            value: "1",
+            value: "5",
             valid: true
         }
     }
