@@ -337,7 +337,7 @@ function EntityOptions({ type, state, setState }: { type: "predator" | "prey", s
     const reproductionIntervalString = useLanguageString("reproductionInterval");
     const maxAgeString = useLanguageString("maxAge");
     const eatingThresholdString = useLanguageString("eatingThreshold");
-    const mutationModifierString = useLanguageString("mutationModifier");
+    const mutationModifierString = useLanguageString("mutationPercentage");
 
     const nonNegativeNumber = useLanguageString("nonNegativeNumber");
     const nonNegativeDecimal = useLanguageString("nonNegativeDecimal");
@@ -451,6 +451,7 @@ function EntityOptions({ type, state, setState }: { type: "predator" | "prey", s
                     label={mutationModifierString} 
                     onChange={(value) => setState({ ...state, mutationModifier: { value, valid: positiveFloatValidator(value) } })} 
                     error={!state.mutationModifier.valid}
+                    suffix="%"
                     helper={nonNegativeDecimal} />
             {
             type === "prey" ?
@@ -790,20 +791,13 @@ export default function SimSetup() {
         setPreyState(current.preys);
     };
 
-    const dispatch = useDispatch();
-
     return (
 
         <div className={panel}>
             
             <TemplateSelector selected={template} onSelect={onTemplateSelect} />
             <DrawQuadTree onChange={(checked) => setDrawQuadTree(checked)} checked={drawQuadTree} />
-            <SelectArea onChange={(value) => {
-                
-                setArea(value);
-                dispatch(setSimArea(areas[value]));
-
-            }} value={area} />
+            <SelectArea onChange={(value) => setArea(value)} value={area} />
 
             <FoodSpawnRate value={foodSpawnRate.value} error={!foodSpawnRate.valid} onChange={(value) => 
                 setFoodSpawnRate({ value, valid: positiveFloatValidator(value) })} />
