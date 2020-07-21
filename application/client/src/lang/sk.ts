@@ -85,7 +85,7 @@ const data: LanguageDefinition = {
     lastChange: "Posledná zmena",
     reproduction: "Reprodukcia",
     units: "jednotiek",
-    mutationModifier: "Modifikátor mutácie",
+    mutationPercentage: "Percentá mutácie",
     count: "Počet",
     averageAge: "Priemerný vek",
     averageMaxAge: "Priemerný maximálny vek",

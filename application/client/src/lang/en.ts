@@ -85,7 +85,7 @@ const data: LanguageDefinition = {
     lastChange: "Last change",
     reproduction: "Reproduction",
     units: "units",
-    mutationModifier: "Mutation modifier",
+    mutationPercentage: "Mutation percentage",
     count: "Count",
     averageAge: "Average age",
     averageMaxAge: "Average maximum age",

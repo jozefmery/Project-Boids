@@ -90,7 +90,7 @@ export type LanguageDefinition = {
     lastChange: string;
     reproduction: string;
     units: string;
-    mutationModifier: string;
+    mutationPercentage: string;
     count: string;
     averageAge: string;
     averageMaxAge: string;
