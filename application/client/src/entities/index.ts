@@ -42,9 +42,11 @@ function createVector(v1: number | Vector = 0, v2: number = 0, v3: number = 0): 
     return vector;
 }
 
-function mutate(value: number, variance: number, lower: number = 0, upper: number = Infinity): number {
+function mutate(value: number, modifier: number, lower: number = 0, upper: number = Infinity): number {
 
-    return lodash.clamp(value + (variance * ((Math.random() * 2.0) - 1.0)), lower, upper);
+    const mult = 1 + (modifier * ((Math.random() * 2.0) - 1.0));
+
+    return lodash.clamp(value * mult, lower, upper);
 }
 
 type Vicinity = Array<{ instance: Entity, dist: number }>;
@@ -430,7 +432,7 @@ export class Entity {
 
             this.reproduction_ = 0;
 
-            const modifier = this.options_.mutationModifier;
+            const modifier = this.options_.mutationModifier * 0.01;
 
             context.addEntity(this.type_ as SelectableEntity, {
 
@@ -463,15 +465,15 @@ export class Entity {
                         separation: mutate(this.options_.flockingModifier.separation, modifier, 0),
                     },
 
-                    hungerDecay: mutate(this.options_.hungerDecay, modifier, 0, 100),
-                    healthDelta: mutate(this.options_.healthDelta, modifier, 0, 100),
+                    hungerDecay: mutate(this.options_.hungerDecay, modifier, 1, 100),
+                    healthDelta: mutate(this.options_.healthDelta, modifier, 1, 100),
 
-                    health: 50 + (Math.random() * 50),
-                    hunger: 50 + (Math.random() * 50),
+                    health: 100,
+                    hunger: 100,
 
                     reproductionInterval: mutate(this.options_.reproductionInterval, modifier, 0),
 
-                    maxAge: mutate(this.options_.maxAge, modifier, 0),
+                    maxAge: mutate(this.options_.maxAge, modifier, 1),
 
                     eatingThreshold: mutate(this.options_.eatingThreshold, modifier, 0, 100),
 
@@ -726,7 +728,7 @@ class Prey extends Entity {
 
         if(percieved.length) {
 
-            this.steer(separation.div(percieved.length), this.options_.flockingModifier.separation * 1.5);
+            this.steer(separation.div(percieved.length), this.options_.flockingModifier.separation * 1.3);
         }
 
         return this;
