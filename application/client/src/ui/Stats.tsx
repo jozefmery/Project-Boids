@@ -50,6 +50,7 @@ import AccountTreeIcon from '@material-ui/icons/AccountTree';
 import IncreaseIcon from '@material-ui/icons/Add';
 import DecreaseIcon from '@material-ui/icons/Remove';
 import Checkbox from "@material-ui/core/Checkbox";  
+import GroupWorkIcon from '@material-ui/icons/GroupWork';
 
 // import charts
 import { LineChart, 
@@ -281,6 +282,30 @@ function SelectedEntityPerception({ radius, angle }: { radius: number, angle: nu
         </Tooltip>);
 }
 
+function SelectedEntityFlocking({ alignment, cohesion, separation }: 
+    { alignment: number, cohesion: number, separation: number }) {
+
+    const { container } = useHorizontalFlexBox();
+    const { tooltip: tooltipClass } = useTooltipStyles();
+
+    const alignmentString = useLanguageString("alignmentModifier");
+    const cohesionString = useLanguageString("cohesionModifier");
+    const separationString = useLanguageString("separationModifier");
+
+    return (
+        <Tooltip title={`${alignmentString}, ${cohesionString}, ${separationString}`} 
+                    placement="top" 
+                    TransitionComponent={Zoom}
+                    classes={{ tooltip: tooltipClass }}>
+            <div className={container}>
+                <GroupWorkIcon />
+                <div>{`${numberFormatter.format(alignment)}, 
+                       ${numberFormatter.format(cohesion)},
+                       ${numberFormatter.format(separation)}`}</div>
+            </div>
+        </Tooltip>);
+}
+
 function SelectedEntityForce({ force, maxForce, tooltip }: 
                             { force: Position2D, maxForce: number, tooltip: string }) {
 
@@ -404,6 +429,11 @@ function SelectedEntity() {
             <SelectedEntityHunger hunger={selectedEntity.hunger()} />
             <SelectedEntityAge age={selectedEntity.age()} maxAge={selectedEntity.options().maxAge} />
             <SelectedEntityReproduction progress={selectedEntity.reproduction()} readyAt={selectedEntity.options().reproductionInterval} />
+            {selectedEntity.type() === "prey" ? 
+                <SelectedEntityFlocking alignment={selectedEntity.options().flockingModifier.alignment} 
+                                        cohesion={selectedEntity.options().flockingModifier.cohesion} 
+                                        separation={selectedEntity.options().flockingModifier.separation} /> 
+            : null}
             <SelectedEntityGeneration generation={selectedEntity.options().generation}/>
             <SelectedEntityForces velocity={selectedEntity.velocity()}
                 maxVelocity={selectedEntity.options().speed}
