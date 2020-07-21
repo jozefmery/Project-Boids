@@ -71,7 +71,7 @@ const data: LanguageDefinition = {
     alignmentModifier: "Modifikátor vyrovnania",
     cohesionModifier: "Modifikátor súdržnosti",
     separationModifier: "Modifikátor oddeľovania",
-    hungerDecay: "Úbytok hladu",
+    hungerDecay: "Zmena hladu",
     healthDelta: "Zmena zdravia",
     reproductionInterval: "Max. interval reprodukcie",
     maxAge: "Maximálny vek",
