@@ -28,16 +28,10 @@ import { StateShape } from "./types/redux";
 import { ColorTheme, SimStylers, SimStylerList } from "./types/stylers";
 import { Entity } from "./entities";
 
-/**
- * 
- * Array of Theme enum values.
- */
+// array of ColorTheme enum values.
 export const themeList = Object.values(ColorTheme);
 
-/**
- * 
- * Styler implementations for every theme.
- */
+// styler implementations for every theme.
 export const simStylers: SimStylers = {
 
     [ColorTheme.DARK]: {
