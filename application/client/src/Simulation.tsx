@@ -12,23 +12,23 @@
 import React, { useContext, useCallback } from "react";
 
 // import state
-import { SimStateContext } from "../AppState";
+import { SimStateContext } from "./AppState";
  
 // import p5
-import P5Sketch, { P5 } from "./P5Sketch";
+import P5Sketch, { P5 } from "./ui/P5Sketch";
 
 // import redux utilities and slices
 import { useSelector, useDispatch } from "react-redux";
-import { moveCamera, centerCameraToArea, changeCameraScale } from "../state/slices/sim";
-import { setDimensions } from "../state/slices/global";
+import { moveCamera, centerCameraToArea, changeCameraScale } from "./state/slices/sim";
+import { setDimensions } from "./state/slices/global";
 
 // import stylers
 import { makeStyles, Theme } from "@material-ui/core/styles";
-import { useCanvasStylers, Style } from "../stylers";
+import { useCanvasStylers, Style } from "./stylers";
 
 // import type information
-import { StateShape } from "../types/redux";
-import { SimState } from "../types/simulation";
+import { StateShape } from "./types/redux";
+import { SimState } from "./types/simulation";
 
 type GridLineOptions = {
 
