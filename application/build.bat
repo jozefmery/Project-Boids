@@ -6,9 +6,6 @@ REM Date: 19.05.2020
 REM create directory if it doesn't exist
 if not exist build md build
 
-REM copy server
-copy .\server.js .\build\server.js
-
 REM build client and desktop application
 cd client
 call npm run build:both

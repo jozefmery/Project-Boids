@@ -6,9 +6,6 @@
 # create directory if it doesn't exist
 mkdir build -p
 
-# copy server
-cp ./server.js ./build/server.js
-
 # build client
 cd client
 npm run build:both
