@@ -16,7 +16,7 @@ import React, { useEffect } from "react";
 import "typeface-roboto";
 
 // import custom components
-import Simulation from "./ui/Simulation";
+import Simulation from "./Simulation";
 import Controls from "./ui/Controls";
 import TopBar from "./ui/TopBar";
 import Stats from "./ui/Stats";
