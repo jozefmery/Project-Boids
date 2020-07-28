@@ -177,6 +177,7 @@ export class Entity {
         const { acceleration, velocity } = this.draft().forces_;
 
         // accelerate forward 
+        // create copy
         const speedAdjustment = createVector(velocity);
 
         speedAdjustment.setMag(this.options_.speed - velocity.mag());
@@ -184,6 +185,7 @@ export class Entity {
         // safety check
         if(acceleration.magSq() && speedAdjustment.magSq()) {
 
+            // calc factor based on angle between acceleration and velocity
             const factor = 1 - (Math.abs(speedAdjustment.angleBetween(acceleration)) / Math.PI);
 
             speedAdjustment.mult(factor);
@@ -232,6 +234,7 @@ export class Entity {
         
         this.adjustSpeed();
 
+        // basic physics model
         velocity.add(Vector.mult(acceleration, timeDelta / 1000));
         velocity.limit(this.options_.speed * 1.1);
         position.add(Vector.mult(velocity, timeDelta / 1000));
